@@ -19,7 +19,8 @@ tokio = { version = "1", features = ["sync", "rt"] }
 #     "max-pure",
 #     "http-client-reqwest",
 # ] }
-git2 = "0.19.0"
+# git2 = "0.19.0"
+auth-git2 = "0.5.4"
 
 # Uncomment below to target the web.
 # tokio_with_wasm = { version = "0.6.0", features = ["sync", "rt"] }

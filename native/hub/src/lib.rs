@@ -3,7 +3,8 @@
 
 mod common;
 mod messages;
-use git2::Repository;
+use auth_git2::GitAuthenticator;
+// use git2::Repository;
 use messages::basic::SmallText;
 use rinf::debug_print;
 use std::path::Path;
@@ -30,14 +31,19 @@ async fn main() {
 
             let dir_path = Path::new(&dir_path);
             let url = "https://github.com/psomani16k/Diraudio";
-            let repo = match Repository::clone(url, dir_path) {
-                Ok(repo) => {
-                    debug_print!("{:?}", repo.path().to_str());
-                }
-                Err(e) => {
-                    debug_print!("failed to clone: {}", e);
-                }
-            };
+            // let repo = match Repository::clone(url, dir_path) {
+            //     Ok(repo) => {
+            //         debug_print!("{:?}", repo.path().to_str());
+            //     }
+            //     Err(e) => {
+            //         debug_print!("failed to clone: {}", e);
+            //     }
+            // };
+            let url = "https://github.com/de-vri-es/auth-git2-rs";
+
+
+            let auth = GitAuthenticator::default();
+            let mut repo = auth.clone_repo(url, dir_path);
         }
     }
 }
