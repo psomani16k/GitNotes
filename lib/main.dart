@@ -44,8 +44,9 @@ class _MyHomePageState extends State<MyHomePage> {
     // String? dir = await FilePicker.platform.getDirectoryPath();
     var permission = await  Permission.manageExternalStorage.request();
     var perm = await Permission.storage.request();
-    Directory? dir = await getApplicationSupportDirectory();
-    dir = Directory("${dir!.path}/notes");
+    Directory? dir = await getApplicationDocumentsDirectory();
+    
+    dir = Directory(dir.path);
     SmallText test = SmallText(text: dir.path);
     test.sendSignalToRust();
   }

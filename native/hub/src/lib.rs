@@ -30,6 +30,7 @@ async fn main() {
             debug_print!("{dir_path}");
 
             let dir_path = Path::new(&dir_path);
+            
             let url = "https://github.com/psomani16k/Diraudio";
             // let repo = match Repository::clone(url, dir_path) {
             //     Ok(repo) => {
@@ -44,6 +45,14 @@ async fn main() {
 
             let auth = GitAuthenticator::default();
             let mut repo = auth.clone_repo(url, dir_path);
+            match repo {
+                Ok(rep) => {
+                    debug_print!("{:?}", rep.path());
+                },
+                Err(err) => {
+                    debug_print!("{err}");
+                },
+            }
         }
     }
 }
