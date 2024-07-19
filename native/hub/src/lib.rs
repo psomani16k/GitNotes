@@ -3,8 +3,11 @@
 
 mod common;
 mod messages;
-use auth_git2::GitAuthenticator;
-// use git2::Repository;
+use gix::{
+    clone::{self, fetch},
+    refs::file::transaction::prepare,
+};
+// use gitoxide_core::repository;
 use messages::basic::SmallText;
 use rinf::debug_print;
 use std::path::Path;
@@ -30,7 +33,7 @@ async fn main() {
             debug_print!("{dir_path}");
 
             let dir_path = Path::new(&dir_path);
-            
+
             let url = "https://github.com/psomani16k/Diraudio";
             // let repo = match Repository::clone(url, dir_path) {
             //     Ok(repo) => {
@@ -42,17 +45,17 @@ async fn main() {
             // };
             let url = "https://github.com/de-vri-es/auth-git2-rs";
 
+            // Perform the clone operation
+            let mut repo = gix::prepare_clone(url, dir_path).unwrap();
 
-            let auth = GitAuthenticator::default();
-            let mut repo = auth.clone_repo(url, dir_path);
-            match repo {
-                Ok(rep) => {
-                    debug_print!("{:?}", rep.path());
-                },
-                Err(err) => {
-                    debug_print!("{err}");
-                },
-            }
+            // Optionally, perform additional operations with the cloned repository
+            let mut prepare_checkout = repo
+                .fetch_only(gix::progress::Discard, &gix::interrupt::IS_INTERRUPTED)
+                .unwrap();
+            let prepare_checkout = prepare_checkout.0;
+            let mainRepo = prepare_checkout.main_repo().unwrap();
+            let workTree = mainRepo.work_dir().unwrap();
+            debug_print!("{:?}", workTree);
         }
     }
 }

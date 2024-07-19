@@ -42,11 +42,10 @@ class _MyHomePageState extends State<MyHomePage> {
 
   void _incrementCounter() async {
     // String? dir = await FilePicker.platform.getDirectoryPath();
-    var permission = await  Permission.manageExternalStorage.request();
+    var permission = await Permission.manageExternalStorage.request();
     var perm = await Permission.storage.request();
-    Directory? dir = await getApplicationDocumentsDirectory();
-    
-    dir = Directory(dir.path);
+    Directory? dir = await getDownloadsDirectory();
+    dir = Directory("${dir!.path}/notes");
     SmallText test = SmallText(text: dir.path);
     test.sendSignalToRust();
   }
