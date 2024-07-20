@@ -12,13 +12,13 @@ edition = "2021"
 crate-type = ["lib", "cdylib", "staticlib"]
 
 [dependencies]
+gix = { version = "0.63.0", default-features = true, features = [
+    "worktree-mutation",
+    "blocking-http-transport-reqwest-rust-tls",
+] }
 rinf = "6.14.2"
 prost = "0.13.1"
 tokio = { version = "1", features = ["sync", "rt"] }
-gix = { version = "0.63.0", default-features = true, features = [
-    "async-network-client",
-    
-] }
 
 # Uncomment below to target the web.
 # tokio_with_wasm = { version = "0.6.0", features = ["sync", "rt"] }
@@ -26,4 +26,3 @@ gix = { version = "0.63.0", default-features = true, features = [
 
 [dev-dependencies]
 cc = "1.1.5"
-

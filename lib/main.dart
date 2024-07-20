@@ -4,6 +4,7 @@ import 'package:gitnotes/messages/basic.pb.dart';
 
 import 'package:path_provider/path_provider.dart';
 import 'package:permission_handler/permission_handler.dart';
+import 'package:file_picker/file_picker.dart';
 import 'package:rinf/rinf.dart';
 import './messages/generated.dart';
 
@@ -44,9 +45,8 @@ class _MyHomePageState extends State<MyHomePage> {
     // String? dir = await FilePicker.platform.getDirectoryPath();
     var permission = await Permission.manageExternalStorage.request();
     var perm = await Permission.storage.request();
-    Directory? dir = await getDownloadsDirectory();
-    dir = Directory("${dir!.path}/notes");
-    SmallText test = SmallText(text: dir.path);
+    String? dir = await FilePicker.platform.getDirectoryPath();
+    SmallText test = SmallText(text: dir);
     test.sendSignalToRust();
   }
 
