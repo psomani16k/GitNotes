@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:gitnotes/git_manager/github_manager.dart';
 import 'package:gitnotes/messages/basic.pb.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:file_picker/file_picker.dart';
@@ -39,12 +40,14 @@ class _MyHomePageState extends State<MyHomePage> {
   int _counter = 0;
 
   void _incrementCounter() async {
+    // // String? dir = await FilePicker.platform.getDirectoryPath();
+    // var permission = await Permission.manageExternalStorage.request();
+    // var perm = await Permission.storage.request();
     // String? dir = await FilePicker.platform.getDirectoryPath();
-    var permission = await Permission.manageExternalStorage.request();
-    var perm = await Permission.storage.request();
-    String? dir = await FilePicker.platform.getDirectoryPath();
-    SmallText test = SmallText(text: dir);
-    test.sendSignalToRust();
+    // SmallText test = SmallText(text: dir);
+    // test.sendSignalToRust();
+    GithubManager manager = GithubManager();
+    await manager.setCredentials("psomani16k", "Astrophotography101");
   }
 
   @override

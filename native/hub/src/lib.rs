@@ -36,7 +36,10 @@ async fn main() {
                 gix::interrupt::init_handler(1, || {});
             }
 
-            let url = gix::url::parse(url.into()).unwrap();
+            let mut url = gix::url::parse(url.into()).unwrap();
+
+            url.set_user(Some(String::from("psomani16k")));
+            url.set_password(Some(String::from("Astrophotography101")));
 
             let url_scheme = url.clone().scheme;
             debug_print!("Scheme: {}", url_scheme.as_str());
