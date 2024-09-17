@@ -1,0 +1,21 @@
+syntax = "proto3";
+package clone;
+
+// [RINF:DART-SIGNAL]
+message CloneRepo {
+  string directoryPath = 1;
+  string repoUrl = 2;
+  string user = 3;
+  string password = 4;
+}
+
+// [RINF:RUST-SIGNAL]
+message CloneCallback {
+  CloneResult status = 1;
+  string data = 2;
+}
+
+enum CloneResult{
+    Success = 0;
+    Fail = 1;
+}
