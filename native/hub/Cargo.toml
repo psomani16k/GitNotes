@@ -12,6 +12,12 @@ edition = "2021"
 crate-type = ["lib", "cdylib", "staticlib"]
 
 [dependencies]
+
+git2 = { version = "0.13.22", features = [
+    "vendored-libgit2",
+    "vendored-openssl",
+] }
+
 rinf = "6.15.0"
 prost = "0.12.6"
 tokio = { version = "1", features = ["sync", "rt"] }

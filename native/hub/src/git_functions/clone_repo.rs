@@ -1,6 +1,6 @@
 pub mod clone_repo {
 
-    // use git2::Cred;
+    use git2::Cred;
 
     use crate::git_functions::errors::git_errors::GitError;
 
@@ -12,9 +12,9 @@ pub mod clone_repo {
         password: Option<String>,
         user: Option<String>,
     ) -> Result<String, GitError> {
-        // let user = user.unwrap();
-        // let password = password.unwrap();
-        // let cred = Cred::userpass_plaintext(&user, &password);
+        let user = user.unwrap();
+        let password = password.unwrap();
+        let cred = Cred::userpass_plaintext(&user, &password);
         return Ok("()".to_owned());
     }
 }
