@@ -8,7 +8,7 @@ pub mod clone_repo {
 
     /// Attempts to clone the repo form the url provided with the credentials provided.
     /// Creates a new directory in the path provided named UserName_RepoName where the clone takes place.
-    /// Returns the directory path if clone succeeds or a [GitError] if fails.
+    /// Returns the directory name if clone succeeds or a [GitError] if fails.
     pub fn clone_repo_with_password(
         url: String,
         dir_path: String,
@@ -31,20 +31,26 @@ pub mod clone_repo {
         // creating a new directory in the provided directory with name as {user_name}_{repo_name}
         let new_dir = match get_directory_name_from_url(&url) {
             Ok(dir) => dir,
-            Err(err) => return Err(GitError::new(err)),
+            Err(err) => {
+                return Err(GitError::new(err));
+            }
         };
         let dir_path = format!("{}/{}", dir_path, new_dir);
 
         // attempting to clone the repository
         let mut repo_builder = RepoBuilder::new();
         repo_builder.fetch_options(fetch_options);
-         match repo_builder.clone(&url, Path::new(&dir_path)) {
+        match repo_builder.clone(&url, Path::new(&dir_path)) {
             Ok(repo) => repo,
-            Err(err) => return Err(GitError::new(err.message().to_string())),
+            Err(err) => {
+                let path = Path::new(&dir_path);
+                let _ = std::fs::remove_dir_all(path);
+                return Err(GitError::new(err.message().to_string()));
+            }
         };
 
         // returning the path to the cloned repository
-        return Ok(dir_path);
+        return Ok(new_dir);
     }
 
     fn get_directory_name_from_url(url: &str) -> Result<String, String> {
