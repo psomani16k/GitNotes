@@ -1,33 +1,37 @@
-//! This `hub` crate is the
-//! entry point of the Rust logic.
-
 mod common;
+mod git_functions;
 mod messages;
 
-use crate::common::*;
-use tokio; // Comment this line to target the web.
-// use tokio_with_wasm::alias as tokio; // Uncomment this line to target the web.
-
+use git_functions::clone_repo::clone_repo::clone_repo_with_password;
+use messages::clone::{CloneCallback, CloneRepo, CloneResult};
+use tokio;
 rinf::write_interface!();
 
-// Use `tokio::spawn` to run concurrent tasks.
-// Always use non-blocking async functions
-// such as `tokio::fs::File::open`.
-// If you really need to use blocking code,
-// use `tokio::task::spawn_blocking`.
 async fn main() {
-    tokio::spawn(communicate());
+    tokio::spawn(clone_handler());
 }
 
-async fn communicate() -> Result<()> {
-    use messages::basic::*;
-    // Send signals to Dart like below.
-    SmallNumber { number: 7 }.send_signal_to_dart();
-    // Get receivers that listen to Dart signals like below.
-    let mut receiver = SmallText::get_dart_signal_receiver()?;
-    while let Some(dart_signal) = receiver.recv().await {
-        let message: SmallText = dart_signal.message;
-        rinf::debug_print!("{message:?}");
+async fn clone_handler() {
+    let mut reciever = CloneRepo::get_dart_signal_receiver().unwrap();
+    while let Some(dart_signal) = reciever.recv().await {
+        let message = dart_signal.message;
+        let url = message.repo_url;
+        let dir_path = message.directory_path;
+        let user = message.user;
+        let password = match message.password.as_str() {
+            "" => None,
+            pass => Some(pass.to_string()),
+        };
+        let clone_result = match clone_repo_with_password(url, dir_path, password, user) {
+            Ok(dir_path) => CloneCallback {
+                status: CloneResult::Success.into(),
+                data: dir_path,
+            },
+            Err(err) => CloneCallback {
+                status: CloneResult::Fail.into(),
+                data: err.to_string(),
+            },
+        };
+        clone_result.send_signal_to_dart();
     }
-    Ok(())
 }
