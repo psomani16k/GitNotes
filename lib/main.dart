@@ -1,12 +1,14 @@
 import 'package:flutter/material.dart';
+import 'package:git_notes/helpers/git/git_repo.dart';
 import 'package:git_notes/ui/HomeScreen/screen/home_screen.dart';
 import 'package:rinf/rinf.dart';
 import './messages/generated.dart';
 import 'package:dynamic_color/dynamic_color.dart';
-// import 'package:gitnotes/ui/HomeScreen/screen/home_screen.dart';
 
 void main(List<String> args) async {
+  WidgetsFlutterBinding.ensureInitialized();
   await initializeRust(assignRustSignal);
+  GitRepo.init();
   runApp(const EntryPoint());
 }
 

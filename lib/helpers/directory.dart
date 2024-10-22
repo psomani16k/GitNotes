@@ -7,15 +7,10 @@ class DirectoryHelper {
   // singleton: private constructor and static instance
   static DirectoryHelper? _instance;
 
-  DirectoryHelper._(this._homeDir)
-      : _appDataDir = Directory("${_homeDir.path}/.GitNotes"),
-        _notesDir = Directory("${_homeDir.path}/Notes");
+  DirectoryHelper._(this._homeDir);
 
   /// Returns an instance of the [DirectoryHelper],
-  /// It creates the following directories in the directory selected by the user:
-  ///   /GitNotes
-  ///   /GitNotes/.GitNotes
-  ///   /GitNotes/Notes
+  /// It creates a folder named GitNotes where everything will be stored.
   static Future<DirectoryHelper> getInstance() async {
     if (_instance == null) {
       await Permission.manageExternalStorage.request();
@@ -38,27 +33,10 @@ class DirectoryHelper {
     return _instance!;
   }
 
-  Directory _homeDir;
-  Directory _appDataDir;
-  final Directory _notesDir;
+  final Directory _homeDir;
 
-  /// Returns the directory location of the /GitNotes/Notes directory
-  /// It contains the main notes content
-  Directory getNotesDirectory() {
-    return _notesDir;
-  }
-
-  /// Prepares the /GitNotes directory for a clone
-  /// Wipes all the data clean, any unsaved data will be lost.
-  /// The repo will be cloned into /GitNotes
-  Future<String> prepareForClone() async {
-    await _homeDir.delete(recursive: true);
-    await _homeDir.create(recursive: true);
-    return _homeDir.path;
-  }
-
-  /// Returns the /GitNotes/.git directory.
-  Directory getGitDirectory() {
-    return Directory("$_homeDir/.git");
+  /// Returns the home directory for the app
+  Directory getHomeDirectory() {
+    return _homeDir;
   }
 }
