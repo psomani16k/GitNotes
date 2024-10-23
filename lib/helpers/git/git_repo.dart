@@ -77,4 +77,8 @@ class GitRepo {
   Directory? getDirectory() {
     return _directory == null ? null : Directory(_directory!);
   }
+
+  String getRepoName() {
+    return "$_userName/$repoId";
+  }
 }

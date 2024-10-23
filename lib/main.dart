@@ -27,6 +27,7 @@ class _EntryPointState extends State<EntryPoint> {
     return DynamicColorBuilder(
       builder: (lightDynamic, darkDynamic) {
         return MaterialApp(
+          debugShowCheckedModeBanner: false,
           theme: ThemeData(colorScheme: lightDynamic),
           darkTheme: ThemeData(colorScheme: darkDynamic),
           home: const HomeScreen(),
