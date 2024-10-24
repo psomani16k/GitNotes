@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:io';
 import 'package:git_notes/helpers/directory.dart';
+import 'package:git_notes/helpers/git/repo_storage.dart';
 import 'package:git_notes/messages/clone.pb.dart';
 import 'package:rinf/rinf.dart';
 
@@ -19,7 +20,7 @@ class GitRepo {
 
   GitRepo(this._url, this._userName);
 
-  static GitRepo fromMap(Map<String, String> map) {
+  static GitRepo fromJson(Map<String, String> map) {
     GitRepo repo = GitRepo(map["url"]!, map["username"]!);
     repo._password = map["password"];
     repo._directory = map["directory"];
@@ -31,7 +32,7 @@ class GitRepo {
     _userName = userName;
   }
 
-  void setPassword(String password) {
+  void setPassword(String? password) {
     _password = password;
   }
 
@@ -39,11 +40,13 @@ class GitRepo {
     _url = url;
   }
 
-  void saveToStorage() async {}
+  Future<void> _saveToStorage() async {
+    await RepoStorage.getInstance().storeRepo(this);
+  }
 
   /// Returns a [Map] with all the date of the repo
   /// Keys: url, username, directory, password
-  Map<String, String?> toMap() {
+  Map toJson() {
     return {
       "url": _url,
       "username": _userName,
@@ -55,7 +58,7 @@ class GitRepo {
 
   /// Performs a "git clone" with on the url using the provided username and password
   /// Returns [CloneCallback] with the status of the cloning process
-  Future<CloneCallback> clone() async {
+  Future<CloneCallback> cloneAndSaveRepo() async {
     Stream<RustSignal<CloneCallback>> rustStream =
         CloneCallback.rustSignalStream;
     CloneRepo(
@@ -69,6 +72,7 @@ class GitRepo {
       _directory =
           "${_directoryHelper!.getHomeDirectory()}/${callback.message.data}";
       repoId = callback.message.data;
+      _saveToStorage();
     }
     return callback.message;
   }
@@ -78,7 +82,7 @@ class GitRepo {
     return _directory == null ? null : Directory(_directory!);
   }
 
-  String getRepoName() {
-    return "$_userName/$repoId";
+  String getRepoId() {
+    return repoId!;
   }
 }

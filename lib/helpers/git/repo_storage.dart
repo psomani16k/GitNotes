@@ -11,10 +11,10 @@ class RepoStorage {
   RepoStorage._();
 
   void _cacheData() async {
-    String repoString = await _storage.read(key: "repos") ?? "";
-    var cache = jsonDecode(repoString) as Map<String, dynamic>;
+    String repoString = await _storage.read(key: "repos") ?? "{}";
+    var cache = jsonDecode(repoString);
     cache.forEach((repoId, repo) {
-      _cache[repoId] = GitRepo.fromMap(repo);
+      _cache[repoId] = GitRepo.fromJson(repo);
     });
   }
 
@@ -24,7 +24,7 @@ class RepoStorage {
     return _instance!;
   }
 
-  void storeRepo(GitRepo repo) async {
+  Future<void> storeRepo(GitRepo repo) async {
     _cache[repo.repoId!] = repo;
     String reposString = jsonEncode(_cache);
     await _storage.write(key: "repos", value: reposString);
