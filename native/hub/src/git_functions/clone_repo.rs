@@ -1,8 +1,9 @@
 pub mod clone_repo {
 
-    use std::path::Path;
+    use std::{fs::create_dir_all, path::Path};
 
-    use git2::{build::RepoBuilder, Cred, FetchOptions, RemoteCallbacks};
+    use git2::{build::RepoBuilder, CertificateCheckStatus, Cred, FetchOptions, RemoteCallbacks};
+    use rinf::debug_print;
 
     use crate::git_functions::errors::git_errors::GitError;
 
@@ -17,6 +18,7 @@ pub mod clone_repo {
     ) -> Result<String, GitError> {
         // creating a callback object
         let mut callbacks = RemoteCallbacks::new();
+         callbacks.certificate_check(|_, _| Ok(CertificateCheckStatus::CertificateOk));
 
         // adding the credentials to the callback
         callbacks.credentials(move |_a: &str, _b, _c| match &password {
@@ -32,10 +34,20 @@ pub mod clone_repo {
         let new_dir = match get_directory_name_from_url(&url) {
             Ok(dir) => dir,
             Err(err) => {
+                debug_print!("2");
                 return Err(GitError::new(err));
             }
         };
-        let dir_path = format!("{}/{}", dir_path, new_dir);
+        // let dir_path = format!("{}/{}", dir_path, new_dir);
+        // debug_print!("{}", dir_path);
+        // let dir_path = Path::new(&dir_path);
+        // match create_dir_all(dir_path) {
+        //     Ok(_) => {}
+        //     Err(err) => {
+        //         debug_print!("1");
+        //         return Err(GitError::new(err.to_string()));
+        //     }
+        // };
 
         // attempting to clone the repository
         let mut repo_builder = RepoBuilder::new();
@@ -45,6 +57,7 @@ pub mod clone_repo {
             Err(err) => {
                 let path = Path::new(&dir_path);
                 let _ = std::fs::remove_dir_all(path);
+                debug_print!("3");
                 return Err(GitError::new(err.message().to_string()));
             }
         };
