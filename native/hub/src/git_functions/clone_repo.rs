@@ -38,16 +38,16 @@ pub mod clone_repo {
                 return Err(GitError::new(err));
             }
         };
-        // let dir_path = format!("{}/{}", dir_path, new_dir);
-        // debug_print!("{}", dir_path);
-        // let dir_path = Path::new(&dir_path);
-        // match create_dir_all(dir_path) {
-        //     Ok(_) => {}
-        //     Err(err) => {
-        //         debug_print!("1");
-        //         return Err(GitError::new(err.to_string()));
-        //     }
-        // };
+        let dir_path = format!("{}/{}", dir_path, new_dir);
+        debug_print!("{}", dir_path);
+        let dir_path = Path::new(&dir_path);
+        match create_dir_all(dir_path) {
+            Ok(_) => {}
+            Err(err) => {
+                debug_print!("1");
+                return Err(GitError::new(err.to_string()));
+            }
+        };
 
         // attempting to clone the repository
         let mut repo_builder = RepoBuilder::new();
