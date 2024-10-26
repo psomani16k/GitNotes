@@ -85,7 +85,6 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
 
     on<HomeUpdateRepoEntitiesEvent>(
       (event, emit) async {
-        print("Updating entities");
         repoStorage ??= await RepoStorage.getInstance();
         List<GitRepo> repoEntities = repoStorage!.getAllRepos();
         selectedRepo ??= repoEntities.first;
