@@ -17,3 +17,5 @@ final class HomeChooseDirectoryEvent extends HomeEvent {
   final Directory dir;
   HomeChooseDirectoryEvent(this.dir);
 }
+
+final class HomeUpdateRepoEntitiesEvent extends HomeEvent {}

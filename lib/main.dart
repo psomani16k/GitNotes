@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:git_notes/helpers/git/git_repo.dart';
+import 'package:git_notes/ui/GitConfigurationScreen/bloc/git_configuration_bloc.dart';
+import 'package:git_notes/ui/HomeScreen/bloc/home_bloc.dart';
 import 'package:git_notes/ui/HomeScreen/screen/home_screen.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:rinf/rinf.dart';
@@ -115,7 +118,17 @@ class _EntryPointState extends State<EntryPoint> {
             ),
           ),
           darkTheme: ThemeData(colorScheme: darkDynamic),
-          home: const HomeScreen(),
+          home: MultiBlocProvider(
+            providers: [
+              BlocProvider<HomeBloc>(
+                create: (context) => HomeBloc(),
+              ),
+              BlocProvider(
+                create: (context) => GitConfigurationBloc(),
+              ),
+            ],
+            child: const HomeScreen(),
+          ),
         );
       },
     );
