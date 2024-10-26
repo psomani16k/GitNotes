@@ -10,7 +10,7 @@ class RepoStorage {
 
   RepoStorage._();
 
-  void _cacheData() async {
+  Future<void> _cacheData() async {
     String repoString = await _storage.read(key: "repos") ?? "{}";
     var cache = jsonDecode(repoString);
     cache.forEach((repoId, repo) {
@@ -18,9 +18,9 @@ class RepoStorage {
     });
   }
 
-  static RepoStorage getInstance() {
+  static Future<RepoStorage> getInstance() async {
     _instance ??= RepoStorage._();
-    _instance?._cacheData();
+    await _instance?._cacheData();
     return _instance!;
   }
 
