@@ -36,23 +36,15 @@ class _HomeScreenState extends State<HomeScreen> {
   };
 
 // Page State data
-  List<File> fileEntities = [
-    File("something/markdown.md"),
-    File("something/pdf file.pdf"),
-    File("something/excel.xlss"),
-    File("something/somemorethings/image_jpg.jpg"),
-    File("something/somemorethings/image_png.png"),
-    File("something/som/sdlkjfls.sldkfj")
-  ];
+  List<File> fileEntities = [];
 
-  List<Directory> directoryEntities = [
-    Directory("something/folder 1"),
-    Directory("something/folder 2")
-  ];
+  List<Directory> directoryEntities = [];
 
   List<GitRepo> repoEntities = [];
 
-  String? repoName;
+  GitRepo? currentRepo;
+
+  Directory? currentDirectory;
 
   @override
   Widget build(BuildContext context) {
@@ -64,52 +56,86 @@ class _HomeScreenState extends State<HomeScreen> {
           // TODO: implement listener
         },
         builder: (context, state) {
+          // initial state
+          if (state is HomeInitialState) {
+            print("initial state");
+            repoEntities = state.repoEntities;
+            directoryEntities = state.directoryEntities;
+            fileEntities = state.fileEntities;
+            currentRepo = state.initialRepo;
+          }
+
+          // no repo state
+          if (state is HomeNoRepoState) {
+            print("no repo state");
+          }
+
+          // update currentRepo to a newly choosen repo
+          if (state is HomeUpdateCurrentRepoState) {
+            currentRepo = state.newRepo;
+            fileEntities = state.fileEntities;
+            directoryEntities = state.directoryEntities;
+          }
+
+          // updates the list of files and directory when chooseing a directory
+          if (state is HomeUpdateDirectoryState) {
+            fileEntities = state.fileEntities;
+            directoryEntities = state.directoryEntities;
+          }
           return Scaffold(
             drawerEnableOpenDragGesture: false,
             drawer: Drawer(
               width: drawerWidth,
               child: SafeArea(
                 top: true,
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                    Padding(
-                      padding: EdgeInsets.symmetric(
-                          horizontal: drawerWidth * 0.1, vertical: 16),
-                      child: Text(
-                        "GitNotes",
-                        style: TextStyle(
-                          fontSize: 28,
-                          fontWeight: FontWeight.bold,
-                          color: Theme.of(context).colorScheme.onSurface,
+                child: Builder(builder: (context) {
+                  return Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      Padding(
+                        padding: EdgeInsets.symmetric(
+                            horizontal: drawerWidth * 0.1, vertical: 16),
+                        child: Text(
+                          "GitNotes",
+                          style: TextStyle(
+                            fontSize: 28,
+                            fontWeight: FontWeight.bold,
+                            color: Theme.of(context).colorScheme.onSurface,
+                          ),
                         ),
                       ),
-                    ),
-                    const Divider(
-                      height: 2,
-                      thickness: 2,
-                    ),
-                    // List of repos,
-                    Expanded(
-                      child: ListView.builder(
-                        itemCount: repoEntities.length,
-                        itemBuilder: (context, index) {
-                          return InkWell(
-                            onTap: () {
-                              // TODO: Select this repo to navigate
-                            },
-                            child: Padding(
-                              padding: const EdgeInsets.only(left: 64),
-                              child: Text(repoEntities[index].getRepoId()),
-                            ),
-                          );
-                        },
+                      const Divider(
+                        height: 2,
+                        thickness: 2,
                       ),
-                    ),
-                    const Divider(),
-                    Builder(builder: (context) {
+                      const SizedBox(height: 4),
+                      // List of repos,
+                      Expanded(
+                        child: ListView.builder(
+                          itemCount: repoEntities.length,
+                          itemBuilder: (context, index) {
+                            return InkWell(
+                              onTap: () {
+                                // TODO: Select this repo to navigate
+                                Scaffold.of(context).closeDrawer();
+                                _bloc.add(
+                                    HomeChooseRepoEvent(repoEntities[index]));
+                              },
+                              child: Padding(
+                                padding: const EdgeInsets.only(
+                                  left: 42,
+                                  top: 16,
+                                  bottom: 16,
+                                ),
+                                child: Text(repoEntities[index].getRepoId()),
+                              ),
+                            );
+                          },
+                        ),
+                      ),
+                      const Divider(),
                       // builder added to provide a new context with access to Scaffold.of(context)
-                      return InkWell(
+                      InkWell(
                         onTap: () {
                           // TODO: add a new repo
                           Scaffold.of(context).closeDrawer();
@@ -131,52 +157,53 @@ class _HomeScreenState extends State<HomeScreen> {
                             Text("New repository")
                           ],
                         ),
-                      );
-                    }),
-                    InkWell(
-                      onTap: () {
-                        // TODO: Perform a pull all on repositories
-                      },
-                      child: const Row(
-                        crossAxisAlignment: CrossAxisAlignment.center,
-                        children: [
-                          Padding(
-                            padding: EdgeInsets.symmetric(
-                                horizontal: 28, vertical: 16),
-                            child: Icon(
-                              Icons.download_outlined,
-                            ),
-                          ),
-                          Text("Pull All")
-                        ],
                       ),
-                    ),
-                    const Divider(),
-                    // settings button
-                    InkWell(
-                      onTap: () {
-                        // TODO: route to settings page
-                      },
-                      child: const Row(
-                        crossAxisAlignment: CrossAxisAlignment.center,
-                        children: [
-                          Padding(
-                            padding: EdgeInsets.symmetric(
-                                horizontal: 28, vertical: 20),
-                            child: Icon(
-                              Icons.settings_outlined,
+                      InkWell(
+                        onTap: () {
+                          // TODO: Perform a pull all on repositories
+                        },
+                        child: const Row(
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          children: [
+                            Padding(
+                              padding: EdgeInsets.symmetric(
+                                  horizontal: 28, vertical: 16),
+                              child: Icon(
+                                Icons.download_outlined,
+                              ),
                             ),
-                          ),
-                          Text("Settings")
-                        ],
+                            Text("Pull All")
+                          ],
+                        ),
                       ),
-                    ),
-                  ],
-                ),
+                      const Divider(),
+                      // settings button
+                      InkWell(
+                        onTap: () {
+                          // TODO: route to settings page
+                        },
+                        child: const Row(
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          children: [
+                            Padding(
+                              padding: EdgeInsets.symmetric(
+                                  horizontal: 28, vertical: 20),
+                              child: Icon(
+                                Icons.settings_outlined,
+                              ),
+                            ),
+                            Text("Settings")
+                          ],
+                        ),
+                      ),
+                    ],
+                  );
+                }),
               ),
             ),
             appBar: AppBar(
-              title: Text(repoName ?? "GitNotes"),
+              title: Text(
+                  (currentRepo != null) ? currentRepo!.repoId! : "GitNotes"),
               actions: [
                 IconButton(
                   onPressed: () {
@@ -219,6 +246,7 @@ class _HomeScreenState extends State<HomeScreen> {
     return InkWell(
       onTap: () {
         // TODO: open the folder
+        _bloc.add(HomeChooseDirectoryEvent(dir));
       },
       radius: 20,
       borderRadius: BorderRadius.circular(20),
