@@ -11,7 +11,7 @@ class DirectoryHelper {
   /// It creates a folder named GitNotes where everything will be stored.
   static Future<DirectoryHelper> getInstance() async {
     if (_instance == null) {
-      Directory homeDir = (await getExternalStorageDirectory())!;
+      Directory homeDir = (await getApplicationDocumentsDirectory());
       _instance = DirectoryHelper._(homeDir);
     }
     return _instance!;
