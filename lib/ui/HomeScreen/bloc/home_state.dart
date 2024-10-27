@@ -36,3 +36,5 @@ final class HomeUpdateDirectoryState extends HomeState {
   final List<File> fileEntities;
   HomeUpdateDirectoryState(this.directoryEntities, this.fileEntities);
 }
+
+final class HomeBackCloseState extends HomeState {}

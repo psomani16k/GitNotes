@@ -19,3 +19,5 @@ final class HomeChooseDirectoryEvent extends HomeEvent {
 }
 
 final class HomeUpdateRepoEntitiesEvent extends HomeEvent {}
+
+final class HomeBackPressEvent extends HomeEvent {}

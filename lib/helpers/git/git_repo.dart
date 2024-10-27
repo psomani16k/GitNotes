@@ -10,7 +10,7 @@ class GitRepo {
   String _url;
   String _userName;
   String? _password;
-  String? _directory;
+  late String _directory;
   String? repoId;
 
 // initiation
@@ -56,8 +56,8 @@ class GitRepo {
   }
 
   /// Returns the directory of the repository
-  Directory? getDirectory() {
-    return _directory == null ? null : Directory(_directory!);
+  Directory getDirectory() {
+    return Directory(_directory);
   }
 
   String getRepoId() {
