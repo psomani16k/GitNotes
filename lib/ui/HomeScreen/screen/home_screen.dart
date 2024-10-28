@@ -23,9 +23,21 @@ class _HomeScreenState extends State<HomeScreen> {
   Map<String, IconData> fileIcons = {
     "md": MaterialCommunityIcons.language_markdown,
     "pdf": MaterialCommunityIcons.file_pdf_box,
-    "xlss": MaterialCommunityIcons.google_spreadsheet,
+    "xlss": MaterialCommunityIcons.microsoft_excel,
+    "ppt": MaterialCommunityIcons.microsoft_powerpoint,
+    "pptx": MaterialCommunityIcons.microsoft_powerpoint,
     "jpg": MaterialCommunityIcons.file_jpg_box,
-    "png": MaterialCommunityIcons.file_png_box
+    "png": MaterialCommunityIcons.file_png_box,
+    "rs": MaterialCommunityIcons.language_rust,
+    "js": MaterialCommunityIcons.language_javascript,
+    "ts": MaterialCommunityIcons.language_typescript,
+    "html": MaterialCommunityIcons.language_html5,
+    "lua": MaterialCommunityIcons.language_lua,
+    "go": MaterialCommunityIcons.language_go,
+    "c": MaterialCommunityIcons.language_c,
+    "cpp": MaterialCommunityIcons.language_cpp,
+    "java": MaterialCommunityIcons.language_java,
+    "py": MaterialCommunityIcons.language_python,
   };
 
   Duration animationDuration = Durations.medium1;
