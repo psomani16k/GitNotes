@@ -135,7 +135,7 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
             }
           }
           emit(HomeTriggerAnimationState());
-          await Future.delayed(Durations.medium1);
+          await Future.delayed(Durations.short2);
           emit(HomeUpdateDirectoryState(directoryEntities, fileEntities));
         }
       },

@@ -40,7 +40,7 @@ class _HomeScreenState extends State<HomeScreen> {
     "py": MaterialCommunityIcons.language_python,
   };
 
-  Duration animationDuration = Durations.medium1;
+  Duration animationDuration = Durations.short2;
 
 // Page State data
   List<File> fileEntities = [];
@@ -260,17 +260,16 @@ class _HomeScreenState extends State<HomeScreen> {
               ],
             ),
             body: AnimatedOpacity(
-              // TODO: fine tune the animation curve and durations
               opacity: animationValue,
               duration: animationDuration,
-              curve: Easing.emphasizedAccelerate,
+              curve: Easing.standardDecelerate,
               child: ListView.builder(
                 itemCount: 1 + fileEntities.length + directoryEntities.length,
                 itemBuilder: (context, index) {
                   if (index == 0) {
                     return AnimatedContainer(
                       duration: animationDuration,
-                      curve: Easing.emphasizedAccelerate,
+                      curve: Easing.legacyDecelerate,
                       height: 100 * (1 - animationValue),
                     );
                   }
@@ -294,13 +293,11 @@ class _HomeScreenState extends State<HomeScreen> {
 
   Widget directoryBox(BuildContext context, Directory dir) {
     String dirName = dir.path.split("/").last;
-    return InkWell(
+    return GestureDetector(
       onTap: () {
         // TODO: open the folder
         _bloc.add(HomeChooseDirectoryEvent(dir));
       },
-      radius: 20,
-      borderRadius: BorderRadius.circular(20),
       child: Container(
         height: 60,
         decoration: BoxDecoration(
@@ -330,12 +327,10 @@ class _HomeScreenState extends State<HomeScreen> {
     if (fileIcons.keys.contains(extension)) {
       fileName = fileName.substring(0, fileName.length - extension.length - 1);
     }
-    return InkWell(
+    return GestureDetector(
       onTap: () {
         // TODO: open the file
       },
-      radius: 20,
-      borderRadius: BorderRadius.circular(20),
       child: Container(
         height: 60,
         decoration: BoxDecoration(
