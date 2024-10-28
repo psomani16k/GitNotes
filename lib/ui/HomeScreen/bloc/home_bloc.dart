@@ -82,6 +82,8 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
             directoryEntities.add(element);
           }
         }
+        emit(HomeTriggerAnimationState());
+        await Future.delayed(Durations.medium1);
         emit(HomeUpdateDirectoryState(directoryEntities, fileEntities));
       },
     );
@@ -132,6 +134,8 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
               directoryEntities.add(element);
             }
           }
+          emit(HomeTriggerAnimationState());
+          await Future.delayed(Durations.medium1);
           emit(HomeUpdateDirectoryState(directoryEntities, fileEntities));
         }
       },

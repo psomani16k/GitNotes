@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'package:flutter/rendering.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter/material.dart';
 import 'package:git_notes/helpers/git/git_repo.dart';
@@ -27,6 +28,8 @@ class _HomeScreenState extends State<HomeScreen> {
     "png": MaterialCommunityIcons.file_png_box
   };
 
+  Duration animationDuration = Durations.medium1;
+
 // Page State data
   List<File> fileEntities = [];
 
@@ -37,6 +40,8 @@ class _HomeScreenState extends State<HomeScreen> {
   GitRepo? currentRepo;
 
   bool canPop = true;
+
+  double animationValue = 1;
 
   @override
   Widget build(BuildContext context) {
@@ -76,13 +81,17 @@ class _HomeScreenState extends State<HomeScreen> {
         if (state is HomeUpdateDirectoryState) {
           fileEntities = state.fileEntities;
           directoryEntities = state.directoryEntities;
+          animationValue = 1;
           canPop = false;
         }
 
+        // changes the animationValue to trigger the animation
+        if (state is HomeTriggerAnimationState) {
+          animationValue = 0;
+        }
         return PopScope(
           canPop: canPop,
           onPopInvokedWithResult: (didPop, result) {
-            // TODO: handle the case of back button being pressed
             if (didPop) {
               canPop = false;
               return;
@@ -123,7 +132,6 @@ class _HomeScreenState extends State<HomeScreen> {
                           itemBuilder: (context, index) {
                             return InkWell(
                               onTap: () {
-                                // TODO: Select this repo to navigate
                                 Scaffold.of(context).closeDrawer();
                                 _bloc.add(
                                     HomeChooseRepoEvent(repoEntities[index]));
@@ -239,18 +247,32 @@ class _HomeScreenState extends State<HomeScreen> {
                 )
               ],
             ),
-            body: ListView.builder(
-              itemCount: fileEntities.length + directoryEntities.length,
-              itemBuilder: (context, index) {
-                return Padding(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                  child: (index < directoryEntities.length)
-                      ? directoryBox(context, directoryEntities[index])
-                      : fileBox(context,
-                          fileEntities[index - directoryEntities.length]),
-                );
-              },
+            body: AnimatedOpacity(
+              // TODO: fine tune the animation curve and durations
+              opacity: animationValue,
+              duration: animationDuration,
+              curve: Easing.emphasizedAccelerate,
+              child: ListView.builder(
+                itemCount: 1 + fileEntities.length + directoryEntities.length,
+                itemBuilder: (context, index) {
+                  if (index == 0) {
+                    return AnimatedContainer(
+                      duration: animationDuration,
+                      curve: Easing.emphasizedAccelerate,
+                      height: 100 * (1 - animationValue),
+                    );
+                  }
+                  index -= 1;
+                  return Padding(
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                    child: (index < directoryEntities.length)
+                        ? directoryBox(context, directoryEntities[index])
+                        : fileBox(context,
+                            fileEntities[index - directoryEntities.length]),
+                  );
+                },
+              ),
             ),
           ),
         );

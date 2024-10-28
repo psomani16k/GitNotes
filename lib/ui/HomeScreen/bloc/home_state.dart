@@ -38,3 +38,5 @@ final class HomeUpdateDirectoryState extends HomeState {
 }
 
 final class HomeBackCloseState extends HomeState {}
+
+final class HomeTriggerAnimationState extends HomeState {}
