@@ -79,6 +79,7 @@ class GitRepo {
       repoUrl: _url,
       password: _password,
       user: _userName,
+      gitImplementation: GitImplementation.Gix,
     ).sendSignalToRust();
     RustSignal<CloneCallback> callback = await rustStream.first;
     if (callback.message.status == CloneResult.Success) {

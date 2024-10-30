@@ -94,7 +94,7 @@ pub mod clone_repo {
         // Creating a url object
         let mut url = match gix::url::parse(url.as_str().into()) {
             Ok(url) => url,
-            Err(err) => return Err(GitError::new("4".to_owned())),
+            Err(err) => return Err(GitError::new(err.to_string())),
         };
 
         // setting password and username for the repo
@@ -109,7 +109,7 @@ pub mod clone_repo {
         // preparing fetch
         let mut prepare_fetch = match gix::prepare_clone(url, dir_path) {
             Ok(prepare_fetch) => prepare_fetch,
-            Err(err) => return Err(GitError::new("3".to_string())),
+            Err(err) => return Err(GitError::new(err.to_string())),
         };
 
         let (mut prepare_checkout, _) = match prepare_fetch
@@ -122,23 +122,12 @@ pub mod clone_repo {
             }
         };
 
-        let (repo, outcome) = match prepare_checkout
+        match prepare_checkout
             .main_worktree(gix::progress::Discard, &gix::interrupt::IS_INTERRUPTED)
         {
-            Ok(data) => data,
-            Err(err) => return Err(GitError::new("1".to_owned())),
-        };
-
-        let remote = match repo
-            .find_default_remote(gix::remote::Direction::Fetch)
-            .unwrap()
-        {
-            Ok(remote) => remote,
+            Ok(_) => {},
             Err(err) => return Err(GitError::new(err.to_string())),
         };
-
-        debug_print!("{:?}", outcome);
-
         return Ok(new_dir);
     }
 

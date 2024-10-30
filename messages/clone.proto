@@ -7,6 +7,12 @@ message CloneRepo {
   string repoUrl = 2;
   string user = 3;
   string password = 4;
+  GitImplementation gitImplementation = 5;
+}
+
+enum GitImplementation{
+  Git2 = 0;
+  Gix = 1;
 }
 
 // [RINF:RUST-SIGNAL]
