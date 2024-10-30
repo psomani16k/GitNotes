@@ -2,8 +2,9 @@ mod common;
 mod git_functions;
 mod messages;
 
-use git_functions::clone_repo::clone_repo::clone_repo_with_password;
+use git_functions::clone_repo::clone_repo::{clone_repo_git2, clone_repo_gix};
 use messages::clone::{CloneCallback, CloneRepo, CloneResult};
+use rinf::debug_print;
 use tokio;
 rinf::write_interface!();
 
@@ -22,7 +23,7 @@ async fn clone_handler() {
             "" => None,
             pass => Some(pass.to_string()),
         };
-        let clone_result = match clone_repo_with_password(url, dir_path, password, user) {
+        let clone_result = match clone_repo_gix(url, dir_path, password, user) {
             Ok(dir_path) => CloneCallback {
                 status: CloneResult::Success.into(),
                 data: dir_path,

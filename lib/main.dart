@@ -16,15 +16,8 @@ void main(List<String> args) async {
   runApp(const EntryPoint());
 }
 
-class EntryPoint extends StatefulWidget {
+class EntryPoint extends StatelessWidget {
   const EntryPoint({super.key});
-
-  @override
-  State<EntryPoint> createState() => _EntryPointState();
-}
-
-class _EntryPointState extends State<EntryPoint> {
-  bool switchValue = false;
 
   @override
   Widget build(BuildContext context) {

@@ -10,7 +10,7 @@ pub mod clone_repo {
     /// Attempts to clone the repo form the url provided with the credentials provided.
     /// Creates a new directory in the path provided named UserName_RepoName where the clone takes place.
     /// Returns the directory name if clone succeeds or a [GitError] if fails.
-    pub fn clone_repo_with_password(
+    pub fn clone_repo_git2(
         url: String,
         dir_path: String,
         password: Option<String>,
@@ -18,7 +18,7 @@ pub mod clone_repo {
     ) -> Result<String, GitError> {
         // creating a callback object
         let mut callbacks = RemoteCallbacks::new();
-         callbacks.certificate_check(|_, _| Ok(CertificateCheckStatus::CertificateOk));
+        callbacks.certificate_check(|_, _| Ok(CertificateCheckStatus::CertificateOk));
 
         // adding the credentials to the callback
         callbacks.credentials(move |_a: &str, _b, _c| match &password {
@@ -63,6 +63,82 @@ pub mod clone_repo {
         };
 
         // returning the path to the cloned repository
+        return Ok(new_dir);
+    }
+
+    pub fn clone_repo_gix(
+        url: String,
+        dir_path: String,
+        password: Option<String>,
+        user: String,
+    ) -> Result<String, GitError> {
+        // creating a new directory in the provided directory with name as {user_name}_{repo_name}
+        let new_dir = match get_directory_name_from_url(&url) {
+            Ok(dir) => dir,
+            Err(err) => {
+                debug_print!("2");
+                return Err(GitError::new(err));
+            }
+        };
+        let dir_path = format!("{}/{}", dir_path, new_dir);
+        debug_print!("{}", dir_path);
+        let dir_path = Path::new(&dir_path);
+        match create_dir_all(dir_path) {
+            Ok(_) => {}
+            Err(err) => {
+                debug_print!("1");
+                return Err(GitError::new(err.to_string()));
+            }
+        };
+
+        // Creating a url object
+        let mut url = match gix::url::parse(url.as_str().into()) {
+            Ok(url) => url,
+            Err(err) => return Err(GitError::new("4".to_owned())),
+        };
+
+        // setting password and username for the repo
+        match password {
+            Some(password) => {
+                url.set_password(Some(password));
+                url.set_user(Some(user));
+            }
+            None => {}
+        };
+
+        // preparing fetch
+        let mut prepare_fetch = match gix::prepare_clone(url, dir_path) {
+            Ok(prepare_fetch) => prepare_fetch,
+            Err(err) => return Err(GitError::new("3".to_string())),
+        };
+
+        let (mut prepare_checkout, _) = match prepare_fetch
+            .fetch_then_checkout(gix::progress::Discard, &gix::interrupt::IS_INTERRUPTED)
+        {
+            Ok(data) => data,
+            Err(err) => {
+                debug_print!("{}", err.to_string());
+                return Err(GitError::new("2".to_owned()));
+            }
+        };
+
+        let (repo, outcome) = match prepare_checkout
+            .main_worktree(gix::progress::Discard, &gix::interrupt::IS_INTERRUPTED)
+        {
+            Ok(data) => data,
+            Err(err) => return Err(GitError::new("1".to_owned())),
+        };
+
+        let remote = match repo
+            .find_default_remote(gix::remote::Direction::Fetch)
+            .unwrap()
+        {
+            Ok(remote) => remote,
+            Err(err) => return Err(GitError::new(err.to_string())),
+        };
+
+        debug_print!("{:?}", outcome);
+
         return Ok(new_dir);
     }
 
