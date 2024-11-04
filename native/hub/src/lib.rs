@@ -2,13 +2,51 @@ mod common;
 mod git_functions;
 mod messages;
 
-use git_functions::clone_repo::clone_repo::{clone_repo_git2, clone_repo_gix};
-use messages::clone::{CloneCallback, CloneRepo, CloneResult, GitImplementation};
+use git_functions::{
+    clone_repo::clone_repo::{clone_repo_git2, clone_repo_gix},
+    pull_repo::pull_repo::pull_repo_git2,
+};
+use messages::{
+    clone::{CloneCallback, CloneRepo, CloneResult, GitImplementation},
+    pull::{PullResult, PullSingleCallback, PullSingleRepo},
+};
 use tokio;
 rinf::write_interface!();
 
 async fn main() {
     tokio::spawn(clone_handler());
+    tokio::spawn(pull_single_handler());
+}
+
+async fn pull_single_handler() {
+    let mut reciever = PullSingleRepo::get_dart_signal_receiver().unwrap();
+    while let Some(dart_signal) = reciever.recv().await {
+        let message = dart_signal.message;
+        let dir_path = message.directory_path;
+        let remote_branch = match message.branch.as_str() {
+            "" => None,
+            branch => Some(branch.to_string()),
+        };
+        let user = message.user;
+        let password = match message.password.as_str() {
+            "" => None,
+            pass => Some(pass.to_string()),
+        };
+
+        let pull_result = pull_repo_git2(dir_path, password, user, remote_branch);
+
+        let callback = match pull_result {
+            Ok(result) => PullSingleCallback {
+                status: PullResult::Success.into(),
+                data: result,
+            },
+            Err(err) => PullSingleCallback {
+                status: PullResult::Fail.into(),
+                data: err.to_string(),
+            },
+        };
+        callback.send_signal_to_dart();
+    }
 }
 
 async fn clone_handler() {

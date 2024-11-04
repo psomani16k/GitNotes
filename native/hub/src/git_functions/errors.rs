@@ -1,13 +1,16 @@
 pub mod git_errors {
     use std::fmt;
 
+    use rinf::debug_print;
+
     #[derive(Clone, Debug)]
     pub struct GitError {
         message: String,
     }
 
     impl GitError {
-        pub fn new(message: String) -> GitError {
+        pub fn new(error_code: String, message: String) -> GitError {
+            debug_print!("ERROR_CODE: {}, ERROR: {}", error_code, message);
             GitError { message }
         }
     }

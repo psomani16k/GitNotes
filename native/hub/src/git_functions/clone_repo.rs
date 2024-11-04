@@ -35,7 +35,7 @@ pub mod clone_repo {
             Ok(dir) => dir,
             Err(err) => {
                 debug_print!("2");
-                return Err(GitError::new(err));
+                return Err(GitError::new("CR_E1".to_string(), err));
             }
         };
         let dir_path = format!("{}/{}", dir_path, new_dir);
@@ -45,7 +45,7 @@ pub mod clone_repo {
             Ok(_) => {}
             Err(err) => {
                 debug_print!("1");
-                return Err(GitError::new(err.to_string()));
+                return Err(GitError::new("CR_E2".to_string(), err.to_string()));
             }
         };
 
@@ -58,7 +58,10 @@ pub mod clone_repo {
                 let path = Path::new(&dir_path);
                 let _ = std::fs::remove_dir_all(path);
                 debug_print!("3");
-                return Err(GitError::new(err.message().to_string()));
+                return Err(GitError::new(
+                    "CR_E3".to_string(),
+                    err.message().to_string(),
+                ));
             }
         };
 
@@ -77,7 +80,7 @@ pub mod clone_repo {
             Ok(dir) => dir,
             Err(err) => {
                 debug_print!("2");
-                return Err(GitError::new(err));
+                return Err(GitError::new("CR_E4".to_string(), err));
             }
         };
         let dir_path = format!("{}/{}", dir_path, new_dir);
@@ -87,14 +90,14 @@ pub mod clone_repo {
             Ok(_) => {}
             Err(err) => {
                 debug_print!("1");
-                return Err(GitError::new(err.to_string()));
+                return Err(GitError::new("CR_E5".to_string(), err.to_string()));
             }
         };
 
         // Creating a url object
         let mut url = match gix::url::parse(url.as_str().into()) {
             Ok(url) => url,
-            Err(err) => return Err(GitError::new(err.to_string())),
+            Err(err) => return Err(GitError::new("CR_E6".to_string(), err.to_string())),
         };
 
         // setting password and username for the repo
@@ -109,7 +112,7 @@ pub mod clone_repo {
         // preparing fetch
         let mut prepare_fetch = match gix::prepare_clone(url, dir_path) {
             Ok(prepare_fetch) => prepare_fetch,
-            Err(err) => return Err(GitError::new(err.to_string())),
+            Err(err) => return Err(GitError::new("CR_E7".to_string(), err.to_string())),
         };
 
         let (mut prepare_checkout, _) = match prepare_fetch
@@ -118,15 +121,15 @@ pub mod clone_repo {
             Ok(data) => data,
             Err(err) => {
                 debug_print!("{}", err.to_string());
-                return Err(GitError::new("2".to_owned()));
+                return Err(GitError::new("CR_E8".to_string(), err.to_string()));
             }
         };
 
         match prepare_checkout
             .main_worktree(gix::progress::Discard, &gix::interrupt::IS_INTERRUPTED)
         {
-            Ok(_) => {},
-            Err(err) => return Err(GitError::new(err.to_string())),
+            Ok(_) => {}
+            Err(err) => return Err(GitError::new("CR_E9".to_string(), err.to_string())),
         };
         return Ok(new_dir);
     }

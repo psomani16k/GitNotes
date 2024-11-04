@@ -1,0 +1,22 @@
+syntax = "proto3";
+package pull;
+
+// [RINF:DART-SIGNAL]
+message PullSingleRepo{
+  string directoryPath = 1;
+  string branch = 2;
+  string user = 3;
+  string password = 4;
+}
+
+// [RINF:RUST-SIGNAL]
+message PullSingleCallback {
+  PullResult status = 1;
+  string data = 2;
+}
+
+enum PullResult{
+    Success = 0;
+    Fail = 1;
+}
+
