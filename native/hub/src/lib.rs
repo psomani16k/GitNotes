@@ -23,17 +23,13 @@ async fn pull_single_handler() {
     while let Some(dart_signal) = reciever.recv().await {
         let message = dart_signal.message;
         let dir_path = message.directory_path;
-        let remote_branch = match message.branch.as_str() {
-            "" => None,
-            branch => Some(branch.to_string()),
-        };
         let user = message.user;
         let password = match message.password.as_str() {
             "" => None,
             pass => Some(pass.to_string()),
         };
 
-        let pull_result = pull_repo_git2(dir_path, password, user, remote_branch);
+        let pull_result = pull_repo_git2(dir_path, password, user);
 
         let callback = match pull_result {
             Ok(result) => PullSingleCallback {
@@ -62,10 +58,12 @@ async fn clone_handler() {
             pass => Some(pass.to_string()),
         };
 
-        let clone_result = match git_implementation {
-            GitImplementation::Git2 => clone_repo_git2(url, dir_path, password, user),
-            GitImplementation::Gix => clone_repo_gix(url, dir_path, password, user),
-        };
+        let clone_result = clone_repo_git2(url, dir_path, password, user);
+
+        // let clone_result = match git_implementation {
+        //     GitImplementation::Git2 => clone_repo_git2(url, dir_path, password, user),
+        //     GitImplementation::Gix => clone_repo_gix(url, dir_path, password, user),
+        // };
 
         let callback = match clone_result {
             Ok(dir_path) => CloneCallback {

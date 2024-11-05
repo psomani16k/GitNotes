@@ -53,7 +53,7 @@ class _GitConfigurationScreenState extends State<GitConfigurationScreen> {
                     "Clone Failed",
                     style: TextStyle(
                       color: Theme.of(context).colorScheme.error,
-                      fontSize: 48,
+                      fontSize: 36,
                       fontWeight: FontWeight.w600,
                     ),
                   ),
@@ -61,7 +61,19 @@ class _GitConfigurationScreenState extends State<GitConfigurationScreen> {
                     height: 24,
                     width: UiHelper.minWidth(context, 129, widthFactor: 0.8),
                   ),
-                  Text(state.error)
+                  Text(state.error),
+                  SizedBox(
+                    height: 24,
+                    width: UiHelper.minWidth(context, 129, widthFactor: 0.8),
+                  ),
+                  FilledButton(
+                    onPressed: () {
+                      Navigator.pop(context);
+                    },
+                    child: const Text(
+                      "Continue",
+                    ),
+                  ),
                 ],
               ),
             ),
@@ -80,7 +92,7 @@ class _GitConfigurationScreenState extends State<GitConfigurationScreen> {
                     "Cloned Successfully",
                     style: TextStyle(
                       color: Colors.green.shade500,
-                      fontSize: 48,
+                      fontSize: 36,
                       fontWeight: FontWeight.w600,
                     ),
                   ),
@@ -89,6 +101,10 @@ class _GitConfigurationScreenState extends State<GitConfigurationScreen> {
                     width: UiHelper.minWidth(context, 129, widthFactor: 0.8),
                   ),
                   Text(state.repoName),
+                  SizedBox(
+                    height: 24,
+                    width: UiHelper.minWidth(context, 129, widthFactor: 0.8),
+                  ),
                   FilledButton(
                     onPressed: () {
                       context

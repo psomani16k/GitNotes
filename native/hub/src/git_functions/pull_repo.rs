@@ -1,4 +1,5 @@
 pub mod pull_repo {
+
     use crate::git_functions::errors::git_errors::GitError;
     use git2::{AnnotatedCommit, Cred, FetchOptions, Reference};
 
@@ -6,26 +7,38 @@ pub mod pull_repo {
         dir_path: String,
         password: Option<String>,
         user: String,
-        remote_branch: Option<String>,
     ) -> Result<String, GitError> {
         let repo = git2::Repository::open(dir_path).unwrap();
         let mut remote = match repo.find_remote("origin") {
             Ok(remote) => remote,
             Err(err) => return Err(GitError::new("PR_E1".to_string(), err.to_string())),
         };
-        let remote_branch = remote_branch.unwrap_or("main".to_string());
-        let remote_branch = remote_branch.as_str();
-        let remote_branch_list = &[remote_branch];
-        let fetch_annotated_commit =
-            match do_fetch(&repo, remote_branch_list, &mut remote, user, password) {
-                Ok(data) => data.1,
-                Err(err) => return Err(GitError::new("PR_E2".to_string(), err.to_string())),
-            };
-        let msg = match do_merge(&repo, remote_branch, fetch_annotated_commit) {
-            Ok(msg) => msg,
-            Err(err) => return Err(GitError::new("PR_E3".to_string(), err.to_string())),
+        remote.connect(git2::Direction::Fetch).unwrap();
+        let branches = match get_refs(&remote) {
+            Ok(branches) => branches,
+            Err(err) => return Err(err),
         };
-        Ok(msg)
+        let mut remote = match repo.find_remote("origin") {
+            Ok(remote) => remote,
+            Err(err) => return Err(GitError::new("PR_E1".to_string(), err.to_string())),
+        };
+        let b = branches.clone();
+        let (msg, fetch_annotated_commit) = match do_fetch(&repo, &b, &mut remote, user, password) {
+            Ok(data) => data,
+            Err(err) => return Err(err),
+        };
+
+      let mut  return_string = format!("Fetching...\n{}\n\nMerging...\n", msg);
+
+        for branch in branches {
+            return_string = format!("{}Branch '{}' - ", return_string, branch);
+            let msg = match do_merge(&repo, branch, &fetch_annotated_commit) {
+                Ok(msg) => msg,
+                Err(err) => format!("Error occured: {}", err.to_string()),
+            };
+            return_string = format!("{}{}\n", return_string, msg);
+        }
+        Ok(return_string)
     }
 
     fn fast_forward(
@@ -195,7 +208,7 @@ pub mod pull_repo {
     ) -> Result<(String, AnnotatedCommit<'a>), GitError> {
         let mut callback = git2::RemoteCallbacks::new();
 
-        callback.credentials(|_a,_b, _c| match &pass {
+        callback.credentials(|_a, _b, _c| match &pass {
             Some(pass) => Cred::userpass_plaintext(user.as_str(), pass.as_str()),
             None => Cred::username(user.as_str()),
         });
@@ -241,7 +254,7 @@ pub mod pull_repo {
     fn do_merge<'a>(
         repo: &'a git2::Repository,
         remote_branch: &'a str,
-        fetch_commit: git2::AnnotatedCommit<'a>,
+        fetch_commit: &'a git2::AnnotatedCommit,
     ) -> Result<String, GitError> {
         let analysis = match repo.merge_analysis(&[&fetch_commit]) {
             Ok(analysis) => analysis,
@@ -252,7 +265,7 @@ pub mod pull_repo {
                 ))
             }
         };
-        let result_string = String::new();
+        let mut result_string = String::new();
         if analysis.0.is_fast_forward() {
             let refname = format!("refs/heads/{}", remote_branch);
             let mut referance = match repo.find_reference(&refname) {
@@ -283,7 +296,36 @@ pub mod pull_repo {
                 Ok(_) => {}
                 Err(err) => return Err(err),
             };
+        } else if analysis.0.is_normal() {
+            let head_commit = repo
+                .reference_to_annotated_commit(&repo.head().unwrap())
+                .unwrap();
+            match normal_merge(&repo, &head_commit, &fetch_commit) {
+                Ok(_) => {}
+                Err(err) => return Err(err),
+            };
+        } else if analysis.0.is_up_to_date() {
+            result_string = "Already up to date".to_string();
         }
         return Ok(result_string);
+    }
+
+    fn get_refs<'a>(remote: &'a git2::Remote<'a>) -> Result<Vec<&'a str>, GitError> {
+        let refs = match remote.list() {
+            Ok(refs) => refs,
+            Err(err) => {
+                return Err(GitError::new(
+                    "PR_E20".to_string(),
+                    err.message().to_string(),
+                ))
+            }
+        };
+        let mut branches: Vec<&str> = Vec::new();
+        for reference in refs {
+            let name = reference.name();
+            let name = name.split("/").last().unwrap();
+            branches.push(name);
+        }
+        Ok(branches)
     }
 }

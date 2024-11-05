@@ -4,7 +4,6 @@ package pull;
 // [RINF:DART-SIGNAL]
 message PullSingleRepo{
   string directoryPath = 1;
-  string branch = 2;
   string user = 3;
   string password = 4;
 }

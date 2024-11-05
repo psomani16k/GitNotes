@@ -6,12 +6,14 @@ import 'package:git_notes/messages/clone.pb.dart';
 import 'package:rinf/rinf.dart';
 
 class GitRepo {
+  // TODO: add a way to manage the branch of the repository
   static DirectoryHelper? _directoryHelper;
   String _url;
   String _userName;
   String? _password;
   late String _directory;
   String? repoId;
+  // late String _branch;
 
 // initiation
   static Future<void> init() async {
@@ -26,6 +28,7 @@ class GitRepo {
     repo._password = map["password"].toString();
     repo._directory = map["directory"].toString();
     repo.repoId = map["repoId"].toString();
+    // repo._branch = map["branch"].toString();
     return repo;
   }
 
@@ -52,6 +55,7 @@ class GitRepo {
       "directory": _directory,
       "password": _password,
       "repoId": repoId,
+      // "branch": _branch
     };
   }
 
