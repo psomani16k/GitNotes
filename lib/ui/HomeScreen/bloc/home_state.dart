@@ -40,3 +40,11 @@ final class HomeUpdateDirectoryState extends HomeState {
 final class HomeBackCloseState extends HomeState {}
 
 final class HomeTriggerAnimationState extends HomeState {}
+
+final class HomeLoadingState extends HomeState {}
+
+final class HomePullSingleRepoResultState extends HomeState {
+  final PullSingleCallback callback;
+
+  HomePullSingleRepoResultState({required this.callback});
+}

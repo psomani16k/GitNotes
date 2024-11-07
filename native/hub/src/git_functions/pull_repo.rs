@@ -1,7 +1,7 @@
 pub mod pull_repo {
 
     use crate::git_functions::errors::git_errors::GitError;
-    use git2::{AnnotatedCommit, Cred, FetchOptions, Reference};
+    use git2::{AnnotatedCommit, CertificateCheckStatus, Cred, FetchOptions, Reference};
 
     pub fn pull_repo_git2<'a>(
         dir_path: String,
@@ -13,7 +13,16 @@ pub mod pull_repo {
             Ok(remote) => remote,
             Err(err) => return Err(GitError::new("PR_E1".to_string(), err.to_string())),
         };
-        remote.connect(git2::Direction::Fetch).unwrap();
+
+        let mut callback = git2::RemoteCallbacks::new();
+        callback.certificate_check(|_, _| Ok(CertificateCheckStatus::CertificateOk));
+
+        callback.credentials(|_a, _b, _c| match &password{
+            Some(pass) => Cred::userpass_plaintext(user.as_str(), pass.as_str()),
+            None => Cred::username(user.as_str()),
+        });
+        remote.connect_auth(git2::Direction::Fetch, Some(callback), None).unwrap();
+
         let branches = match get_refs(&remote) {
             Ok(branches) => branches,
             Err(err) => return Err(err),
@@ -207,6 +216,7 @@ pub mod pull_repo {
         pass: Option<String>,
     ) -> Result<(String, AnnotatedCommit<'a>), GitError> {
         let mut callback = git2::RemoteCallbacks::new();
+        callback.certificate_check(|_, _| Ok(CertificateCheckStatus::CertificateOk));
 
         callback.credentials(|_a, _b, _c| match &pass {
             Some(pass) => Cred::userpass_plaintext(user.as_str(), pass.as_str()),

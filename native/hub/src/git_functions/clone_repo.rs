@@ -3,7 +3,6 @@ pub mod clone_repo {
     use std::{fs::create_dir_all, path::Path};
 
     use git2::{build::RepoBuilder, CertificateCheckStatus, Cred, FetchOptions, RemoteCallbacks};
-    use rinf::debug_print;
 
     use crate::git_functions::errors::git_errors::GitError;
 
@@ -34,17 +33,14 @@ pub mod clone_repo {
         let new_dir = match get_directory_name_from_url(&url) {
             Ok(dir) => dir,
             Err(err) => {
-                debug_print!("2");
                 return Err(GitError::new("CR_E1".to_string(), err));
             }
         };
         let dir_path = format!("{}/{}", dir_path, new_dir);
-        debug_print!("{}", dir_path);
         let dir_path = Path::new(&dir_path);
         match create_dir_all(dir_path) {
             Ok(_) => {}
             Err(err) => {
-                debug_print!("1");
                 return Err(GitError::new("CR_E2".to_string(), err.to_string()));
             }
         };
@@ -57,7 +53,6 @@ pub mod clone_repo {
             Err(err) => {
                 let path = Path::new(&dir_path);
                 let _ = std::fs::remove_dir_all(path);
-                debug_print!("3");
                 return Err(GitError::new(
                     "CR_E3".to_string(),
                     err.message().to_string(),
@@ -79,17 +74,14 @@ pub mod clone_repo {
         let new_dir = match get_directory_name_from_url(&url) {
             Ok(dir) => dir,
             Err(err) => {
-                debug_print!("2");
                 return Err(GitError::new("CR_E4".to_string(), err));
             }
         };
         let dir_path = format!("{}/{}", dir_path, new_dir);
-        debug_print!("{}", dir_path);
         let dir_path = Path::new(&dir_path);
         match create_dir_all(dir_path) {
             Ok(_) => {}
             Err(err) => {
-                debug_print!("1");
                 return Err(GitError::new("CR_E5".to_string(), err.to_string()));
             }
         };
@@ -120,7 +112,6 @@ pub mod clone_repo {
         {
             Ok(data) => data,
             Err(err) => {
-                debug_print!("{}", err.to_string());
                 return Err(GitError::new("CR_E8".to_string(), err.to_string()));
             }
         };

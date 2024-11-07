@@ -3,6 +3,7 @@ import 'package:bloc/bloc.dart';
 import 'package:flutter/material.dart';
 import 'package:git_notes/helpers/git/git_repo.dart';
 import 'package:git_notes/helpers/git/repo_storage.dart';
+import 'package:git_notes/messages/pull.pbserver.dart';
 import 'package:meta/meta.dart';
 
 part 'home_event.dart';
@@ -138,6 +139,14 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
           await Future.delayed(Durations.short2);
           emit(HomeUpdateDirectoryState(directoryEntities, fileEntities));
         }
+      },
+    );
+
+    on<HomeSinglePullEvent>(
+      (event, emit) async {
+        emit(HomeLoadingState());
+        PullSingleCallback callback = await selectedRepo!.pull();
+        emit(HomePullSingleRepoResultState(callback: callback));
       },
     );
   }

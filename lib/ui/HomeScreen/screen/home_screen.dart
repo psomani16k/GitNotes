@@ -4,10 +4,12 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter/material.dart';
 import 'package:git_notes/helpers/git/git_repo.dart';
 import 'package:git_notes/helpers/ui_helper.dart';
+import 'package:git_notes/messages/pull.pbserver.dart';
 import 'package:git_notes/ui/GitConfigurationScreen/bloc/git_configuration_bloc.dart';
 import 'package:git_notes/ui/GitConfigurationScreen/screen/git_configuration_screen.dart';
 import 'package:git_notes/ui/HomeScreen/bloc/home_bloc.dart';
 import 'package:flutter_vector_icons/flutter_vector_icons.dart';
+import 'package:git_notes/ui/MarkdownRendering/screen/markdown_rendering_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -67,8 +69,18 @@ class _HomeScreenState extends State<HomeScreen> {
           ScaffoldMessenger.of(context).showSnackBar(
               const SnackBar(content: Text("Press again to exit.")));
         }
+        if (state is HomePullSingleRepoResultState) {
+          showDialog(
+              context: context,
+              builder: (context) {
+                return Text(state.callback.data);
+              });
+        }
       },
       builder: (context, state) {
+        // loading state
+        if (state is HomeLoadingState) {}
+
         // initial state
         if (state is HomeInitialState) {
           repoEntities = state.repoEntities;
@@ -112,153 +124,8 @@ class _HomeScreenState extends State<HomeScreen> {
           },
           child: Scaffold(
             drawerEnableOpenDragGesture: false,
-            drawer: Drawer(
-              width: drawerWidth,
-              child: SafeArea(
-                top: true,
-                child: Builder(builder: (context) {
-                  return Column(
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: [
-                      Padding(
-                        padding: EdgeInsets.symmetric(
-                            horizontal: drawerWidth * 0.1, vertical: 16),
-                        child: Text(
-                          "GitNotes",
-                          style: TextStyle(
-                            fontSize: 28,
-                            fontWeight: FontWeight.bold,
-                            color: Theme.of(context).colorScheme.onSurface,
-                          ),
-                        ),
-                      ),
-                      const Divider(
-                        height: 2,
-                        thickness: 2,
-                      ),
-                      const SizedBox(height: 4),
-                      // List of repos,
-                      Expanded(
-                        child: ListView.builder(
-                          itemCount: repoEntities.length,
-                          itemBuilder: (context, index) {
-                            return InkWell(
-                              onTap: () {
-                                Scaffold.of(context).closeDrawer();
-                                _bloc.add(
-                                    HomeChooseRepoEvent(repoEntities[index]));
-                              },
-                              child: Padding(
-                                padding: const EdgeInsets.only(
-                                  left: 42,
-                                  top: 16,
-                                  bottom: 16,
-                                ),
-                                child: Text(repoEntities[index].getRepoId()),
-                              ),
-                            );
-                          },
-                        ),
-                      ),
-                      const Divider(),
-                      // builder added to provide a new context with access to Scaffold.of(context)
-                      InkWell(
-                        onTap: () {
-                          // TODO: add a new repo
-                          Scaffold.of(context).closeDrawer();
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => MultiBlocProvider(
-                                providers: [
-                                  BlocProvider(
-                                    create: (context) => GitConfigurationBloc(),
-                                  ),
-                                  BlocProvider.value(
-                                    value: _bloc,
-                                  ),
-                                ],
-                                child: const GitConfigurationScreen(),
-                              ),
-                            ),
-                          );
-                        },
-                        child: const Row(
-                          crossAxisAlignment: CrossAxisAlignment.center,
-                          children: [
-                            Padding(
-                              padding: EdgeInsets.symmetric(
-                                  horizontal: 28, vertical: 16),
-                              child: Icon(Icons.add),
-                            ),
-                            Text("New repository")
-                          ],
-                        ),
-                      ),
-                      InkWell(
-                        onTap: () {
-                          // TODO: Perform a pull all on repositories
-                        },
-                        child: const Row(
-                          crossAxisAlignment: CrossAxisAlignment.center,
-                          children: [
-                            Padding(
-                              padding: EdgeInsets.symmetric(
-                                  horizontal: 28, vertical: 16),
-                              child: Icon(
-                                Icons.download_outlined,
-                              ),
-                            ),
-                            Text("Pull All")
-                          ],
-                        ),
-                      ),
-                      const Divider(),
-                      // settings button
-                      InkWell(
-                        onTap: () {
-                          // TODO: route to settings page
-                        },
-                        child: const Row(
-                          crossAxisAlignment: CrossAxisAlignment.center,
-                          children: [
-                            Padding(
-                              padding: EdgeInsets.symmetric(
-                                  horizontal: 28, vertical: 20),
-                              child: Icon(
-                                Icons.settings_outlined,
-                              ),
-                            ),
-                            Text("Settings")
-                          ],
-                        ),
-                      ),
-                    ],
-                  );
-                }),
-              ),
-            ),
-            appBar: AppBar(
-              title: Text(
-                  (currentRepo != null) ? currentRepo!.repoId! : "GitNotes"),
-              actions: [
-                IconButton(
-                  onPressed: () {
-                    // TODO: implement commit and push
-                  },
-                  icon: const Icon(Icons.upload_rounded),
-                ),
-                IconButton(
-                  onPressed: () {
-                    // TODO: implement fetch and merge / reclone
-                  },
-                  icon: const Icon(Icons.download_rounded),
-                ),
-                const SizedBox(
-                  width: 5,
-                )
-              ],
-            ),
+            drawer: homeDrawer(drawerWidth),
+            appBar: homeAppBar(context),
             body: AnimatedOpacity(
               opacity: animationValue,
               duration: animationDuration,
@@ -288,6 +155,165 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
         );
       },
+    );
+  }
+
+  Drawer homeDrawer(double drawerWidth) {
+    return Drawer(
+      width: drawerWidth,
+      child: SafeArea(
+        top: true,
+        child: Builder(builder: (context) {
+          return Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Padding(
+                padding: EdgeInsets.symmetric(
+                    horizontal: drawerWidth * 0.1, vertical: 16),
+                child: Text(
+                  "GitNotes",
+                  style: TextStyle(
+                    fontSize: 28,
+                    fontWeight: FontWeight.bold,
+                    color: Theme.of(context).colorScheme.onSurface,
+                  ),
+                ),
+              ),
+              const Divider(
+                height: 2,
+                thickness: 2,
+              ),
+              const SizedBox(height: 4),
+              // List of repos,
+              Expanded(
+                child: ListView.builder(
+                  itemCount: repoEntities.length,
+                  itemBuilder: (context, index) {
+                    return InkWell(
+                      onTap: () {
+                        Scaffold.of(context).closeDrawer();
+                        _bloc.add(HomeChooseRepoEvent(repoEntities[index]));
+                      },
+                      child: Padding(
+                        padding: const EdgeInsets.only(
+                          left: 42,
+                          top: 16,
+                          bottom: 16,
+                        ),
+                        child: Text(repoEntities[index].getRepoId()),
+                      ),
+                    );
+                  },
+                ),
+              ),
+              const Divider(),
+              // builder added to provide a new context with access to Scaffold.of(context)
+              InkWell(
+                onTap: () {
+                  // TODO: add a new repo
+                  Scaffold.of(context).closeDrawer();
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => MultiBlocProvider(
+                        providers: [
+                          BlocProvider(
+                            create: (context) => GitConfigurationBloc(),
+                          ),
+                          BlocProvider.value(
+                            value: _bloc,
+                          ),
+                        ],
+                        child: const GitConfigurationScreen(),
+                      ),
+                    ),
+                  );
+                },
+                child: const Row(
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    Padding(
+                      padding:
+                          EdgeInsets.symmetric(horizontal: 28, vertical: 16),
+                      child: Icon(Icons.add),
+                    ),
+                    Text("New repository")
+                  ],
+                ),
+              ),
+              InkWell(
+                onTap: () {
+                  // TODO: Perform a pull all on repositories
+                },
+                child: const Row(
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    Padding(
+                      padding:
+                          EdgeInsets.symmetric(horizontal: 28, vertical: 16),
+                      child: Icon(
+                        Icons.download_outlined,
+                      ),
+                    ),
+                    Text("Pull All")
+                  ],
+                ),
+              ),
+              const Divider(),
+              // settings button
+              InkWell(
+                onTap: () {
+                  // TODO: route to settings page
+                },
+                child: const Row(
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    Padding(
+                      padding:
+                          EdgeInsets.symmetric(horizontal: 28, vertical: 20),
+                      child: Icon(
+                        Icons.settings_outlined,
+                      ),
+                    ),
+                    Text("Settings")
+                  ],
+                ),
+              ),
+            ],
+          );
+        }),
+      ),
+    );
+  }
+
+  AppBar homeAppBar(BuildContext context) {
+    return AppBar(
+      title: Text((currentRepo != null) ? currentRepo!.repoId! : "GitNotes"),
+      actions: [
+        IconButton(
+          onPressed: () {
+            // TODO: implement commit and push
+          },
+          icon: const Icon(Icons.upload_rounded),
+        ),
+        IconButton(
+          onPressed: () {
+            if (currentRepo != null) {
+              _bloc.add(HomeSinglePullEvent());
+            } else {
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(
+                  content: Text("Please add a repository first"),
+                ),
+              );
+            }
+          },
+          icon: const Icon(Icons.download_rounded),
+        ),
+        const SizedBox(
+          width: 5,
+        )
+      ],
     );
   }
 
@@ -330,6 +356,14 @@ class _HomeScreenState extends State<HomeScreen> {
     return GestureDetector(
       onTap: () {
         // TODO: open the file
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => MarkdownRenderingScreen(
+              file: file,
+            ),
+          ),
+        );
       },
       child: Container(
         height: 60,

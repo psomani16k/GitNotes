@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:git_notes/helpers/directory.dart';
 import 'package:git_notes/helpers/git/repo_storage.dart';
 import 'package:git_notes/messages/clone.pb.dart';
+import 'package:git_notes/messages/pull.pbserver.dart';
 import 'package:rinf/rinf.dart';
 
 class GitRepo {
@@ -92,6 +93,22 @@ class GitRepo {
       repoId = callback.message.data;
       _saveToStorage();
     }
+    return callback.message;
+  }
+
+  /// Aims to perform a "git pull" on the repository associated with the object
+  /// Returns [PullSingleCallback] on completion with the result of the operation.
+  Future<PullSingleCallback> pull() async {
+    Stream<RustSignal<PullSingleCallback>> rustStream =
+        PullSingleCallback.rustSignalStream;
+
+    PullSingleRepo(
+      directoryPath: _directory,
+      password: _password,
+      user: _userName,
+    ).sendSignalToRust();
+
+    RustSignal<PullSingleCallback> callback = await rustStream.first;
     return callback.message;
   }
 }

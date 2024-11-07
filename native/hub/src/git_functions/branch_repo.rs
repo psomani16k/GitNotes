@@ -1,22 +1,20 @@
 pub mod branch_repo {
-    use git2::Branches;
+    use git2::build::CheckoutBuilder;
 
     use crate::git_functions::errors::git_errors::GitError;
 
-    pub fn list_branches(repo: &git2::Repository) -> Result<Branches, GitError> {
-        match repo.branches(Some(git2::BranchType::Local)) {
-            Ok(branches) => Ok(branches),
-            Err(err) => Err(GitError::new(
-                "BR_E1".to_string(),
-                err.message().to_string(),
-            )),
-        }
-    }
-
-    pub fn checkout_branch(repo: &git2::Repository, branch_name: String) -> Result<(), GitError> {
-        let (object, reference) = match repo.revparse_ext(branch_name.as_str()) {
-            Ok(data) => data,
-
+    pub fn list_branches(repo: &git2::Repository) -> Result<Vec<String>, GitError> {
+        let remote = match repo.find_remote("origin") {
+            Ok(remote) => remote,
+            Err(err) => {
+                return Err(GitError::new(
+                    "BR_E1".to_string(),
+                    err.message().to_string(),
+                ))
+            }
+        };
+        let branches = match remote.list() {
+            Ok(branches) => branches,
             Err(err) => {
                 return Err(GitError::new(
                     "BR_E2".to_string(),
@@ -24,8 +22,46 @@ pub mod branch_repo {
                 ))
             }
         };
+        let mut names: Vec<String> = Vec::new();
+        for branch in branches {
+            let name = branch.name().to_string();
+            names.push(name);
+        }
+        return Ok(names);
+    }
 
-        match repo.checkout_tree(&object, None) {
+    pub fn checkout_branch(
+        repo: &git2::Repository,
+        branch_name: String,
+        force: bool,
+    ) -> Result<(), GitError> {
+        let branch = match repo.find_reference(&format!("refs/remotes/origin/{}", branch_name)) {
+            Ok(branch) => branch,
+            Err(err) => {
+                return Err(GitError::new(
+                    "BR_E4".to_string(),
+                    err.message().to_string(),
+                ))
+            }
+        };
+
+        let target_commit = match branch.peel_to_commit() {
+            Ok(target_commit) => target_commit,
+            Err(err) => {
+                return Err(GitError::new(
+                    "BR_E5".to_string(),
+                    err.message().to_string(),
+                ))
+            }
+        };
+
+        let mut checkout_builder = CheckoutBuilder::new();
+
+        if force {
+            checkout_builder.force();
+        }
+
+        match repo.checkout_tree(&target_commit.as_object(), Some(&mut checkout_builder)) {
             Ok(_) => {}
             Err(err) => {
                 return Err(GitError::new(
@@ -35,20 +71,16 @@ pub mod branch_repo {
             }
         };
 
-        let temp = match reference {
-            Some(r) => repo.set_head(r.name().unwrap()),
-            None => repo.set_head_detached(object.id()),
-        };
-
-        match temp {
+        match repo.set_head(&format!("refs/remotes/origin/{}", branch_name)) {
             Ok(_) => {}
             Err(err) => {
                 return Err(GitError::new(
-                    "BR_E4".to_string(),
+                    "BR_E6".to_string(),
                     err.message().to_string(),
                 ))
             }
-        }
+        };
+
         Ok(())
     }
 }
