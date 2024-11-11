@@ -1,0 +1,12 @@
+syntax = "proto3";
+package status;
+
+// [RINF:DART-SIGNAL]
+message GetStatus{
+    string repoDirectory = 1;
+}
+
+// [RINF:RUST-SIGNAL]
+message StatusCallBack{
+    repeated string status = 1;
+}

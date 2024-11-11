@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:git_notes/helpers/git/git_repo.dart';
+import 'package:git_notes/helpers/git/repo_storage.dart';
 import 'package:git_notes/ui/GitConfigurationScreen/bloc/git_configuration_bloc.dart';
 import 'package:git_notes/ui/HomeScreen/bloc/home_bloc.dart';
 import 'package:git_notes/ui/HomeScreen/screen/home_screen.dart';
@@ -12,6 +13,7 @@ import 'package:dynamic_color/dynamic_color.dart';
 void main(List<String> args) async {
   WidgetsFlutterBinding.ensureInitialized();
   await initializeRust(assignRustSignal);
+  await RepoStorage.init();
   GitRepo.init();
   runApp(const EntryPoint());
 }

@@ -10,6 +10,11 @@ class RepoStorage {
 
   RepoStorage._();
 
+  static Future<void> init() async {
+    _instance ??= RepoStorage._();
+    await _instance!._cacheData();
+  }
+
   Future<void> _cacheData() async {
     String repoString = await _storage.read(key: "repos") ?? "{}";
     var cache = jsonDecode(repoString);
@@ -18,9 +23,8 @@ class RepoStorage {
     });
   }
 
-  static Future<RepoStorage> getInstance() async {
-    _instance ??= RepoStorage._();
-    await _instance?._cacheData();
+  static RepoStorage getInstance() {
+    // we are not caching any data here assuming init() will be called...
     return _instance!;
   }
 
@@ -30,8 +34,8 @@ class RepoStorage {
     await _storage.write(key: "repos", value: reposString);
   }
 
-  GitRepo? getRepo(String id) {
-    return _cache[id];
+  GitRepo? getRepo(String repoId) {
+    return _cache[repoId];
   }
 
   List<GitRepo> getAllRepos() {

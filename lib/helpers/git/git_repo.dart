@@ -14,7 +14,7 @@ class GitRepo {
   String? _password;
   late String _directory;
   String? repoId;
-  // late String _branch;
+  late String _branch;
 
 // initiation
   static Future<void> init() async {
@@ -29,7 +29,7 @@ class GitRepo {
     repo._password = map["password"].toString();
     repo._directory = map["directory"].toString();
     repo.repoId = map["repoId"].toString();
-    // repo._branch = map["branch"].toString();
+    repo._branch = map["branch"].toString();
     return repo;
   }
 
@@ -56,7 +56,7 @@ class GitRepo {
       "directory": _directory,
       "password": _password,
       "repoId": repoId,
-      // "branch": _branch
+      "branch": _branch
     };
   }
 
@@ -70,7 +70,7 @@ class GitRepo {
   }
 
   Future<void> _saveToStorage() async {
-    await (await RepoStorage.getInstance()).storeRepo(this);
+    await (RepoStorage.getInstance()).storeRepo(this);
   }
 
 // utility functions
@@ -84,13 +84,12 @@ class GitRepo {
       repoUrl: _url,
       password: _password,
       user: _userName,
-      gitImplementation: GitImplementation.Gix,
     ).sendSignalToRust();
     RustSignal<CloneCallback> callback = await rustStream.first;
     if (callback.message.status == CloneResult.Success) {
-      _directory =
-          "${_directoryHelper!.getHomeDirectory().path}/${callback.message.data}";
       repoId = callback.message.data;
+      _branch = callback.message.branch;
+      _directory = "${_directoryHelper!.getHomeDirectory().path}/$repoId";
       _saveToStorage();
     }
     return callback.message;

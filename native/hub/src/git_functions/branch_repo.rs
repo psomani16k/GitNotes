@@ -1,10 +1,10 @@
 pub mod branch_repo {
-    use git2::build::CheckoutBuilder;
+    use git2::{build::CheckoutBuilder, CertificateCheckStatus, Cred};
 
     use crate::git_functions::errors::git_errors::GitError;
 
-    pub fn list_branches(repo: &git2::Repository) -> Result<Vec<String>, GitError> {
-        let remote = match repo.find_remote("origin") {
+    pub fn list_branches(repo: &git2::Repository, user: String, password: Option<String>) -> Result<Vec<String>, GitError> {
+        let mut remote = match repo.find_remote("origin") {
             Ok(remote) => remote,
             Err(err) => {
                 return Err(GitError::new(
@@ -13,6 +13,25 @@ pub mod branch_repo {
                 ))
             }
         };
+
+        let mut callback = git2::RemoteCallbacks::new();
+        callback.certificate_check(|_, _| Ok(CertificateCheckStatus::CertificateOk));
+
+        callback.credentials(|_a, _b, _c| match &password{
+            Some(pass) => Cred::userpass_plaintext(user.as_str(), pass.as_str()),
+            None => Cred::username(user.as_str()),
+        });
+
+        match remote.connect_auth(git2::Direction::Fetch, Some(callback), None) {
+            Ok(_) => {}
+            Err(err) => {
+                return Err(GitError::new(
+                    "BR_E3".to_string(),
+                    err.message().to_string(),
+                ))
+            }
+        };
+
         let branches = match remote.list() {
             Ok(branches) => branches,
             Err(err) => {

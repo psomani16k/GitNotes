@@ -1,10 +1,13 @@
 pub mod clone_repo {
 
-    use std::{fs::create_dir_all, path::Path};
+    use std::{fs::create_dir_all, path::Path, str::FromStr};
 
     use git2::{build::RepoBuilder, CertificateCheckStatus, Cred, FetchOptions, RemoteCallbacks};
 
-    use crate::git_functions::errors::git_errors::GitError;
+    use crate::git_functions::{
+        branch_repo::branch_repo::{checkout_branch, list_branches},
+        errors::git_errors::GitError,
+    };
 
     /// Attempts to clone the repo form the url provided with the credentials provided.
     /// Creates a new directory in the path provided named UserName_RepoName where the clone takes place.
@@ -14,10 +17,13 @@ pub mod clone_repo {
         dir_path: String,
         password: Option<String>,
         user: String,
-    ) -> Result<String, GitError> {
+    ) -> Result<(String, String), GitError> {
         // creating a callback object
         let mut callbacks = RemoteCallbacks::new();
         callbacks.certificate_check(|_, _| Ok(CertificateCheckStatus::CertificateOk));
+
+        let user_copy = user.clone();
+        let password_copy = password.clone();
 
         // adding the credentials to the callback
         callbacks.credentials(move |_a: &str, _b, _c| match &password {
@@ -60,10 +66,30 @@ pub mod clone_repo {
             }
         };
 
-        // returning the path to the cloned repository
-        return Ok(new_dir);
+        // finding the branch and checking out to main if available.
+        let repo = git2::Repository::open(dir_path).expect("Should be available here...");
+
+        let branches =
+            list_branches(&repo, user_copy, password_copy).expect("needs error handling here");
+        let branch = match checkout_branch(&repo, "main".to_string(), false) {
+            Ok(_) => String::from_str("main").unwrap(),
+            Err(_) => {
+                checkout_branch(
+                    &repo,
+                    branches
+                        .first()
+                        .expect("there should be atleast one branch!")
+                        .to_string(),
+                    false,
+                )
+                .unwrap();
+                branches.first().unwrap().to_string()
+            }
+        };
+        return Ok((new_dir, branch));
     }
 
+    // This isn't upto date, in case gix is used for this in the future, make sure to update this code for cloning
     pub fn clone_repo_gix(
         url: String,
         dir_path: String,
