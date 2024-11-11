@@ -4,6 +4,15 @@ pub mod branch_repo {
     use crate::git_functions::errors::git_errors::GitError;
 
     pub fn list_branches(repo: &git2::Repository, user: String, password: Option<String>) -> Result<Vec<String>, GitError> {
+        match unsafe { git2::opts::set_verify_owner_validation(false) } {
+            Ok(_) => {}
+            Err(err) => {
+                return Err(GitError::new(
+                    "BR_E0".to_string(),
+                    err.message().to_string(),
+                ))
+            }
+        };
         let mut remote = match repo.find_remote("origin") {
             Ok(remote) => remote,
             Err(err) => {
@@ -54,6 +63,15 @@ pub mod branch_repo {
         branch_name: String,
         force: bool,
     ) -> Result<(), GitError> {
+        match unsafe { git2::opts::set_verify_owner_validation(false) } {
+            Ok(_) => {}
+            Err(err) => {
+                return Err(GitError::new(
+                    "BR_E7".to_string(),
+                    err.message().to_string(),
+                ))
+            }
+        };
         let branch = match repo.find_reference(&format!("refs/remotes/origin/{}", branch_name)) {
             Ok(branch) => branch,
             Err(err) => {

@@ -18,6 +18,15 @@ pub mod clone_repo {
         password: Option<String>,
         user: String,
     ) -> Result<(String, String), GitError> {
+        match unsafe { git2::opts::set_verify_owner_validation(false) } {
+            Ok(_) => {}
+            Err(err) => {
+                return Err(GitError::new(
+                    "CR_E0".to_string(),
+                    err.message().to_string(),
+                ))
+            }
+        };
         // creating a callback object
         let mut callbacks = RemoteCallbacks::new();
         callbacks.certificate_check(|_, _| Ok(CertificateCheckStatus::CertificateOk));

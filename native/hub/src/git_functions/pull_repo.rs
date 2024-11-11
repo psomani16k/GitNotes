@@ -8,6 +8,15 @@ pub mod pull_repo {
         password: Option<String>,
         user: String,
     ) -> Result<String, GitError> {
+        match unsafe { git2::opts::set_verify_owner_validation(false) } {
+            Ok(_) => {}
+            Err(err) => {
+                return Err(GitError::new(
+                    "PR_E0".to_string(),
+                    err.message().to_string(),
+                ))
+            }
+        };
         let repo = git2::Repository::open(dir_path).unwrap();
         let mut remote = match repo.find_remote("origin") {
             Ok(remote) => remote,

@@ -1,10 +1,32 @@
 pub mod status {
     use git2::{Error, Repository, StatusOptions};
 
-    pub fn get_status(path: String) -> Result<Vec<String>, Error> {
-        let repo = Repository::open(&path)?;
+    use crate::git_functions::errors::git_errors::GitError;
+
+    pub fn get_status(path: String) -> Result<Vec<String>, GitError> {
+        match unsafe { git2::opts::set_verify_owner_validation(false) } {
+            Ok(_) => {}
+            Err(err) => {
+                return Err(GitError::new(
+                    "SR_E0".to_string(),
+                    err.message().to_string(),
+                ))
+            }
+        };
+        let repo = match Repository::open(&path) {
+            Ok(repo) => repo,
+            Err(err) => {
+                return Err(GitError::new(
+                    "SR_E1".to_string(),
+                    err.message().to_string(),
+                ))
+            }
+        };
         if repo.is_bare() {
-            return Err(Error::from_str("cannot report status on bare repository"));
+            return Err(GitError::new(
+                "SR_E2".to_string(),
+                "cannot report status on bare repository".to_string(),
+            ));
         }
 
         let mut opts = StatusOptions::new();
