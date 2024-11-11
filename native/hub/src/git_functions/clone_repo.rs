@@ -89,68 +89,6 @@ pub mod clone_repo {
         return Ok((new_dir, branch));
     }
 
-    // This isn't upto date, in case gix is used for this in the future, make sure to update this code for cloning
-    pub fn clone_repo_gix(
-        url: String,
-        dir_path: String,
-        password: Option<String>,
-        user: String,
-    ) -> Result<String, GitError> {
-        // creating a new directory in the provided directory with name as {user_name}_{repo_name}
-        let new_dir = match get_directory_name_from_url(&url) {
-            Ok(dir) => dir,
-            Err(err) => {
-                return Err(GitError::new("CR_E4".to_string(), err));
-            }
-        };
-        let dir_path = format!("{}/{}", dir_path, new_dir);
-        let dir_path = Path::new(&dir_path);
-        match create_dir_all(dir_path) {
-            Ok(_) => {}
-            Err(err) => {
-                return Err(GitError::new("CR_E5".to_string(), err.to_string()));
-            }
-        };
-
-        // Creating a url object
-        let mut url = match gix::url::parse(url.as_str().into()) {
-            Ok(url) => url,
-            Err(err) => return Err(GitError::new("CR_E6".to_string(), err.to_string())),
-        };
-
-        // setting password and username for the repo
-        match password {
-            Some(password) => {
-                url.set_password(Some(password));
-                url.set_user(Some(user));
-            }
-            None => {}
-        };
-
-        // preparing fetch
-        let mut prepare_fetch = match gix::prepare_clone(url, dir_path) {
-            Ok(prepare_fetch) => prepare_fetch,
-            Err(err) => return Err(GitError::new("CR_E7".to_string(), err.to_string())),
-        };
-
-        let (mut prepare_checkout, _) = match prepare_fetch
-            .fetch_then_checkout(gix::progress::Discard, &gix::interrupt::IS_INTERRUPTED)
-        {
-            Ok(data) => data,
-            Err(err) => {
-                return Err(GitError::new("CR_E8".to_string(), err.to_string()));
-            }
-        };
-
-        match prepare_checkout
-            .main_worktree(gix::progress::Discard, &gix::interrupt::IS_INTERRUPTED)
-        {
-            Ok(_) => {}
-            Err(err) => return Err(GitError::new("CR_E9".to_string(), err.to_string())),
-        };
-        return Ok(new_dir);
-    }
-
     fn get_directory_name_from_url(url: &str) -> Result<String, String> {
         let stripped_url = match url.strip_suffix(".git") {
             Some(stripped) => stripped,

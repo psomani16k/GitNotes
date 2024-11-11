@@ -1,5 +1,4 @@
 pub mod git_handlers {
-    use gix::submodule::config::branch;
 
     use crate::{
         git_functions::{
