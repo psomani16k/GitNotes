@@ -1,5 +1,5 @@
 pub mod status {
-    use git2::{Error, Repository, StatusOptions};
+    use git2::{ Repository, StatusOptions};
 
     use crate::git_functions::errors::git_errors::GitError;
 

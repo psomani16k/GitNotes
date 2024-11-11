@@ -18,7 +18,7 @@ class GitRepo {
 
 // initiation
   static Future<void> init() async {
-    _directoryHelper = await DirectoryHelper.getInstance();
+    _directoryHelper = DirectoryHelper.getInstance();
   }
 
 // construction
