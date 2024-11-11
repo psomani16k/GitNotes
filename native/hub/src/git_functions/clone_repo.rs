@@ -122,6 +122,6 @@ pub mod clone_repo {
                 )
             }
         };
-        return Ok(format!("{}_{}", user_name, repo_name));
+        return Ok(format!("{}/{}", user_name, repo_name));
     }
 }
