@@ -26,6 +26,7 @@ class DirectoryHelper {
       if (homeDirPath == null) {
         return init();
       }
+      const FlutterSecureStorage().write(key: "home_dir", value: homeDirPath);
       _instance = DirectoryHelper._(Directory(homeDirPath));
     }
     return _instance!;
