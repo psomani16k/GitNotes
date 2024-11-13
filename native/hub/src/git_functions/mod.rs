@@ -4,3 +4,7 @@ pub mod pull_repo;
 pub mod branch_repo;
 pub mod status;
 pub mod git_handlers;
+pub mod commit_stage;
+pub mod push_commit;
+pub mod restore_file;
+pub mod stage_file;

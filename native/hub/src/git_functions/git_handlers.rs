@@ -90,7 +90,6 @@ pub mod git_handlers {
 
             let callback = match status_result {
                 Ok(result) => StatusCallBack { status: result },
-
                 Err(_) => {
                     // TODO: find a way to manage this case too
                     continue;
