@@ -1,14 +1,14 @@
 import 'dart:io';
-import 'package:flutter/rendering.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter/material.dart';
 import 'package:git_notes/helpers/git/git_repo.dart';
 import 'package:git_notes/helpers/ui_helper.dart';
-import 'package:git_notes/messages/pull.pbserver.dart';
+import 'package:git_notes/messages/status.pbserver.dart';
 import 'package:git_notes/ui/GitConfigurationScreen/bloc/git_configuration_bloc.dart';
 import 'package:git_notes/ui/GitConfigurationScreen/screen/git_configuration_screen.dart';
 import 'package:git_notes/ui/HomeScreen/bloc/home_bloc.dart';
 import 'package:flutter_vector_icons/flutter_vector_icons.dart';
+import 'package:git_notes/ui/HomeScreen/screen/status_screen.dart';
 import 'package:git_notes/ui/MarkdownRendering/screen/markdown_rendering_screen.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -45,6 +45,8 @@ class _HomeScreenState extends State<HomeScreen> {
   Duration animationDuration = Durations.short2;
 
 // Page State data
+  int pageIndex = 0;
+
   List<File> fileEntities = [];
 
   List<Directory> directoryEntities = [];
@@ -126,35 +128,60 @@ class _HomeScreenState extends State<HomeScreen> {
             drawerEnableOpenDragGesture: false,
             drawer: homeDrawer(drawerWidth),
             appBar: homeAppBar(context),
-            body: AnimatedOpacity(
-              opacity: animationValue,
-              duration: animationDuration,
-              curve: Easing.standardDecelerate,
-              child: ListView.builder(
-                itemCount: 1 + fileEntities.length + directoryEntities.length,
-                itemBuilder: (context, index) {
-                  if (index == 0) {
-                    return AnimatedContainer(
-                      duration: animationDuration,
-                      curve: Easing.legacyDecelerate,
-                      height: 100 * (1 - animationValue),
-                    );
-                  }
-                  index -= 1;
-                  return Padding(
-                    padding:
-                        const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                    child: (index < directoryEntities.length)
-                        ? directoryBox(context, directoryEntities[index])
-                        : fileBox(context,
-                            fileEntities[index - directoryEntities.length]),
-                  );
-                },
-              ),
+            bottomNavigationBar: NavigationBar(
+              destinations: const [
+                NavigationDestination(
+                  icon: Icon(MaterialCommunityIcons.folder),
+                  label: "Directory",
+                ),
+                NavigationDestination(
+                  icon: Icon(MaterialCommunityIcons.git),
+                  label: "Status",
+                )
+              ],
+              selectedIndex: pageIndex,
+              onDestinationSelected: (value) {
+                if (currentRepo != null && value == 1) {
+                  GetStatus(repoDirectory: currentRepo!.getDirectory().path)
+                      .sendSignalToRust();
+                }
+                setState(() {
+                  pageIndex = value;
+                });
+              },
             ),
+            body: [homeDirectory(), StatusScreen()][pageIndex],
           ),
         );
       },
+    );
+  }
+
+  AnimatedOpacity homeDirectory() {
+    return AnimatedOpacity(
+      opacity: animationValue,
+      duration: animationDuration,
+      curve: Easing.standardDecelerate,
+      child: ListView.builder(
+        itemCount: 1 + fileEntities.length + directoryEntities.length,
+        itemBuilder: (context, index) {
+          if (index == 0) {
+            return AnimatedContainer(
+              duration: animationDuration,
+              curve: Easing.legacyDecelerate,
+              height: 100 * (1 - animationValue),
+            );
+          }
+          index -= 1;
+          return Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+            child: (index < directoryEntities.length)
+                ? directoryBox(context, directoryEntities[index])
+                : fileBox(
+                    context, fileEntities[index - directoryEntities.length]),
+          );
+        },
+      ),
     );
   }
 

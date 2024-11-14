@@ -1,0 +1,7 @@
+syntax = "proto3";
+package snack_error;
+
+// [RINF:RUST-SIGNAL]
+message SnackError{
+    string errorMessage = 1;
+}

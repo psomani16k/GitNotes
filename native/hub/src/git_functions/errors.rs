@@ -17,7 +17,7 @@ pub mod git_errors {
 
     impl fmt::Display for GitError {
         fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-            write!(f, "ERROR: {}", self.message)
+            write!(f, "{}", self.message)
         }
     }
 }

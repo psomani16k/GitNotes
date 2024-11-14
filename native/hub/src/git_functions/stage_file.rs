@@ -1,12 +1,21 @@
 pub mod stage_file {
     use std::path::Path;
 
-    use git2::{IndexEntry, IndexTime, Repository};
+    use git2::{IndexAddOption, IndexEntry, IndexTime, Repository, StatusOptions};
 
     use crate::git_functions::errors::git_errors::GitError;
 
     pub fn add_to_stage(repo_dir: String, file_absolute_path: String) -> Result<(), GitError> {
         let file_path = file_absolute_path[repo_dir.len() + 1..].to_string();
+        match unsafe { git2::opts::set_verify_owner_validation(false) } {
+            Ok(_) => {}
+            Err(err) => {
+                return Err(GitError::new(
+                    "CS_E1".to_string(),
+                    err.message().to_string(),
+                ))
+            }
+        };
         let repo = match Repository::open(Path::new(&repo_dir)) {
             Ok(repo) => repo,
             Err(err) => {
@@ -48,6 +57,60 @@ pub mod stage_file {
             }
         };
 
+        Ok(())
+    }
+
+    pub fn add_all_to_stage(repo_dir: String) -> Result<(), GitError> {
+        match unsafe { git2::opts::set_verify_owner_validation(false) } {
+            Ok(_) => {}
+            Err(err) => {
+                return Err(GitError::new(
+                    "CS_E1".to_string(),
+                    err.message().to_string(),
+                ))
+            }
+        };
+        let repo = match Repository::open(Path::new(&repo_dir)) {
+            Ok(repo) => repo,
+            Err(err) => {
+                return Err(GitError::new(
+                    "SF_E0".to_string(),
+                    err.message().to_string(),
+                ))
+            }
+        };
+
+        let mut index = repo.index().unwrap();
+
+        let mut opts = StatusOptions::new();
+        opts.include_ignored(false);
+        opts.include_untracked(true).recurse_untracked_dirs(true);
+        opts.exclude_submodules(true);
+        let statuses = repo.statuses(Some(&mut opts)).unwrap();
+        let statuses = statuses.iter();
+        let mut paths: Vec<String> = Vec::new();
+        for i in statuses {
+            let path = i.path().unwrap().to_string();
+            paths.push(path);
+        }
+        match index.add_all(paths, IndexAddOption::DEFAULT, None) {
+            Ok(_) => {}
+            Err(err) => {
+                return Err(GitError::new(
+                    "SF_E3".to_string(),
+                    err.message().to_string(),
+                ))
+            }
+        };
+        match index.write() {
+            Ok(_) => {}
+            Err(err) => {
+                return Err(GitError::new(
+                    "SF_E4".to_string(),
+                    err.message().to_string(),
+                ))
+            }
+        };
         Ok(())
     }
 

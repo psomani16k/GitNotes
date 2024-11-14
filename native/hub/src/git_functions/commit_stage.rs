@@ -1,5 +1,5 @@
 pub mod commit_stage {
-    use std::{os::linux::raw::stat, path::Path};
+    use std::path::Path;
 
     use git2::{Repository, Signature, StatusOptions};
 
@@ -108,4 +108,6 @@ pub mod commit_stage {
         }
         return false;
     }
+
+    pub fn has_unsynced_changes(){}
 }
