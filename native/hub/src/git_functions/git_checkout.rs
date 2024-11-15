@@ -3,7 +3,11 @@ pub mod branch_repo {
 
     use crate::git_functions::errors::git_errors::GitError;
 
-    pub fn list_branches(repo: &git2::Repository, user: String, password: Option<String>) -> Result<Vec<String>, GitError> {
+    pub fn list_branches(
+        repo: &git2::Repository,
+        user: String,
+        password: Option<String>,
+    ) -> Result<Vec<String>, GitError> {
         match unsafe { git2::opts::set_verify_owner_validation(false) } {
             Ok(_) => {}
             Err(err) => {
@@ -26,7 +30,7 @@ pub mod branch_repo {
         let mut callback = git2::RemoteCallbacks::new();
         callback.certificate_check(|_, _| Ok(CertificateCheckStatus::CertificateOk));
 
-        callback.credentials(|_a, _b, _c| match &password{
+        callback.credentials(|_a, _b, _c| match &password {
             Some(pass) => Cred::userpass_plaintext(user.as_str(), pass.as_str()),
             None => Cred::username(user.as_str()),
         });
@@ -58,7 +62,7 @@ pub mod branch_repo {
         return Ok(names);
     }
 
-    pub fn checkout_branch(
+    pub fn git_checkout(
         repo: &git2::Repository,
         branch_name: String,
         force: bool,

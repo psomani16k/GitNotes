@@ -3,7 +3,7 @@ pub mod pull_repo {
     use crate::git_functions::errors::git_errors::GitError;
     use git2::{AnnotatedCommit, CertificateCheckStatus, Cred, FetchOptions, Reference};
 
-    pub fn pull_repo_git2<'a>(
+    pub fn git_pull(
         dir_path: String,
         password: Option<String>,
         user: String,

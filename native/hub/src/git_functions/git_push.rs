@@ -5,7 +5,7 @@ pub mod push_commits {
 
     use crate::git_functions::errors::git_errors::GitError;
 
-    pub fn push(repo_dir: String, user: String, password: Option<String>) -> Result<(), GitError> {
+    pub fn git_push(repo_dir: String, user: String, password: Option<String>) -> Result<(), GitError> {
         match unsafe { git2::opts::set_verify_owner_validation(false) } {
             Ok(_) => {}
             Err(err) => {
