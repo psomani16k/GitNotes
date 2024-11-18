@@ -1,2 +1,18 @@
 syntax = "proto3";
 package git_restore;
+
+// [RINF:DART-SIGNAL]
+message GitRestore{
+    string repoDir = 1;
+    string absoluteFilePath = 2;
+}
+
+// [RINF:RUST-SIGNAL]
+message GitRestoreCallback{
+    GitRestoreResult result = 1;
+}
+
+enum GitRestoreResult{
+    Fail = 0;
+    Success = 1;
+}

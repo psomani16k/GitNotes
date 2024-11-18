@@ -5,6 +5,7 @@ import 'package:git_notes/messages/git_add.pb.dart';
 import 'package:git_notes/messages/git_clone.pb.dart';
 import 'package:git_notes/messages/git_clone.pbenum.dart';
 import 'package:git_notes/messages/git_pull.pb.dart';
+import 'package:git_notes/messages/git_restore.pb.dart';
 import 'package:git_notes/messages/git_status.pb.dart';
 import 'package:rinf/rinf.dart';
 
@@ -134,6 +135,18 @@ class GitRepo {
             absoluteFilePath: "$_directory/$relativeFilePath")
         .sendSignalToRust();
     RustSignal<GitRemoveCallback> callback = await rustStream.first;
+    return callback.message;
+  }
+
+  /// Performs a "git restore" on the file mentioned
+  Future<GitRestoreCallback> gitRestore(String relativeFilePath) async {
+    Stream<RustSignal<GitRestoreCallback>> rustStream =
+        GitRestoreCallback.rustSignalStream;
+    GitRemove(
+            repoDir: _directory,
+            absoluteFilePath: "$_directory/$relativeFilePath")
+        .sendSignalToRust();
+    RustSignal<GitRestoreCallback> callback = await rustStream.first;
     return callback.message;
   }
 }

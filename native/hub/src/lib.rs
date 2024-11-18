@@ -5,7 +5,7 @@ mod messages;
 
 use handlers::{
     git_add_handler, git_clone_handler, git_pull_single_handler, git_remove_handler,
-    git_status_handler,
+    git_restore_handler, git_status_handler,
 };
 use tokio; // Comment this line to target the web.
 
@@ -16,4 +16,5 @@ async fn main() {
     tokio::spawn(git_status_handler());
     tokio::spawn(git_add_handler());
     tokio::spawn(git_remove_handler());
+    tokio::spawn(git_restore_handler());
 }

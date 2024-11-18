@@ -3,12 +3,14 @@ use crate::{
         git_add::stage_file::{git_add, remove_from_stage},
         git_clone::clone_repo::git_clone_https,
         git_pull::pull_repo::git_pull,
+        git_restore::restore_file::restore_file,
         git_status::status::git_status,
     },
     messages::{
         git_add::{GitAdd, GitAddCallback, GitAddResult, GitRemove, GitRemoveCallback},
         git_clone::{GitCloneCallback, GitCloneRequest, GitCloneResult},
         git_pull::{GitPullResult, GitPullSingle, GitPullSingleCallback},
+        git_restore::{GitRestore, GitRestoreCallback, GitRestoreResult},
         git_status::{GitStatus, GitStatusCallback},
     },
 };
@@ -124,6 +126,27 @@ pub async fn git_remove_handler() {
             },
             Err(_) => GitRemoveCallback {
                 result: GitAddResult::Fail.into(),
+            },
+        };
+        callback.send_signal_to_dart();
+    }
+}
+
+pub async fn git_restore_handler() {
+    let mut recv = GitRestore::get_dart_signal_receiver().unwrap();
+    while let Some(dart_signal) = recv.recv().await {
+        let message = dart_signal.message;
+        let dir_path = message.repo_dir;
+        let absolute_file_path = message.absolute_file_path;
+
+        let add_result = restore_file(dir_path, absolute_file_path);
+
+        let callback = match add_result {
+            Ok(_) => GitRestoreCallback {
+                result: GitRestoreResult::Success.into(),
+            },
+            Err(_) => GitRestoreCallback {
+                result: GitRestoreResult::Fail.into(),
             },
         };
         callback.send_signal_to_dart();

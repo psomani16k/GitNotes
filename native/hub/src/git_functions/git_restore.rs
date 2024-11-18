@@ -33,6 +33,11 @@ pub mod restore_file {
                 Ok(_) => {}
                 Err(err) => return Err(GitError::new("RF_E2".to_string(), err.to_string())),
             }
+        } else {
+            match std::fs::remove_file(Path::new(&file_absolute_path)) {
+                Ok(_) => {}
+                Err(err) => return Err(GitError::new("RF_E3".to_string(), err.to_string())),
+            };
         }
 
         Ok(())

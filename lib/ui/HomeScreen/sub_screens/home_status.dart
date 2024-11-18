@@ -1,9 +1,9 @@
 import 'dart:io';
-
 import 'package:flutter/material.dart';
 import 'package:git_notes/helpers/git/git_repo.dart';
 import 'package:git_notes/helpers/git/git_repo_manager.dart';
 import 'package:git_notes/messages/git_add.pb.dart';
+import 'package:git_notes/messages/git_restore.pb.dart';
 import 'package:git_notes/messages/git_status.pb.dart';
 import 'package:visibility_detector/visibility_detector.dart';
 
@@ -211,7 +211,8 @@ class _StatusScreenState extends State<HomeStatus> {
               const Spacer(),
               GestureDetector(
                 onTap: () async {
-                  // TODO: rever file
+                  await statusData.restore();
+                  updateStatus();
                 },
                 child: Container(
                   height: 35,
@@ -327,7 +328,15 @@ class FileStatusData {
     return true;
   }
 
-  void revertChanges() {
-    // TODO: rever the changes in this file
+  Future<bool?> restore() async {
+    if (_staged) {
+      return null;
+    }
+    GitRestoreCallback? result =
+        await GitRepoManager.getInstance().restore(_file.path);
+    if (result == null || result.result == GitRestoreResult.Fail) {
+      return false;
+    }
+    return true;
   }
 }
