@@ -2,13 +2,14 @@ use crate::{
     git_functions::{
         git_add::stage_file::{git_add, remove_from_stage},
         git_clone::clone_repo::git_clone_https,
-        git_commit::commit_stage::git_commit,
+        git_commit::commit_stage::{can_commit, git_commit},
         git_pull::pull_repo::git_pull,
-        git_push::push_commits::git_push,
+        git_push::push_commits::{can_push, git_push},
         git_restore::restore_file::restore_file,
         git_status::status::git_status,
     },
     messages::{
+        commit_push_check::{CommitAndPushCheck, CommitAndPushCheckCallback},
         git_add::{GitAdd, GitAddCallback, GitAddResult, GitRemove, GitRemoveCallback},
         git_clone::{GitCloneCallback, GitCloneRequest, GitCloneResult},
         git_commit::{GitCommitCallback, GitCommitRequest, GitCommitResult},
@@ -199,6 +200,23 @@ pub async fn git_push_handler() {
             Err(_) => GitPushCallback {
                 result: GitPushResult::Fail.into(),
             },
+        };
+        callback.send_signal_to_dart();
+    }
+}
+
+pub async fn commit_push_check_handler() {
+    let mut recv = CommitAndPushCheck::get_dart_signal_receiver().unwrap();
+    while let Some(dart_signal) = recv.recv().await {
+        let message = dart_signal.message;
+        let dir_path = message.repo_dir;
+
+        let can_commit = can_commit(&dir_path);
+        let can_push = can_push(&dir_path);
+
+        let callback = CommitAndPushCheckCallback {
+            commit_allowed: can_commit,
+            push_allowed: can_push,
         };
         callback.send_signal_to_dart();
     }

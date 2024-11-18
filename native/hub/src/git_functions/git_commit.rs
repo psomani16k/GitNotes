@@ -109,5 +109,27 @@ pub mod commit_stage {
         return false;
     }
 
-    pub fn has_unsynced_changes(){}
+    pub fn can_commit(repo_dir: &str) -> bool {
+        unsafe { let _ = git2::opts::set_verify_owner_validation(false); };
+        let  repo = Repository::open(Path::new(&repo_dir)).unwrap();
+        let mut opts = StatusOptions::new();
+        opts.include_ignored(false);
+        opts.include_untracked(true).recurse_untracked_dirs(true);
+        opts.exclude_submodules(true);
+
+        let statuses = repo.statuses(Some(&mut opts)).unwrap();
+        let statuses = statuses.iter();
+        for i in statuses {
+            let file_status = i.status();
+            if file_status.is_index_renamed()
+                || file_status.is_index_modified()
+                || file_status.is_index_new()
+                || file_status.is_index_deleted()
+                || file_status.is_index_typechange()
+            {
+                return true;
+            }
+        }
+        return false;
+    }
 }

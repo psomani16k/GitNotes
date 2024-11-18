@@ -3,9 +3,12 @@ import 'dart:io';
 import 'package:git_notes/helpers/git/directory.dart';
 import 'package:git_notes/helpers/git/git_repo.dart';
 import 'package:git_notes/helpers/git/repo_storage.dart';
+import 'package:git_notes/messages/commit_push_check.pb.dart';
 import 'package:git_notes/messages/git_add.pb.dart';
 import 'package:git_notes/messages/git_clone.pb.dart';
+import 'package:git_notes/messages/git_commit.pb.dart';
 import 'package:git_notes/messages/git_pull.pb.dart';
+import 'package:git_notes/messages/git_push.pb.dart';
 import 'package:git_notes/messages/git_restore.pb.dart';
 import 'package:git_notes/messages/git_status.pb.dart';
 
@@ -119,5 +122,26 @@ class GitRepoManager {
       return null;
     }
     return _currentRepo!.gitRestore(relativeFilePath);
+  }
+
+  Future<GitCommitCallback?> commit(String message) async {
+    if (_currentRepo == null) {
+      return null;
+    }
+    return _currentRepo!.gitCommit(message);
+  }
+
+  Future<GitPushCallback?> push() async {
+    if (_currentRepo == null) {
+      return null;
+    }
+    return _currentRepo!.gitPush();
+  }
+
+  Future<CommitAndPushCheckCallback?> checkCommitAndPush() async {
+    if (_currentRepo == null) {
+      return null;
+    }
+    return _currentRepo!.checkCommitAndPush();
   }
 }

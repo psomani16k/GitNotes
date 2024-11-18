@@ -1,10 +1,13 @@
 import 'dart:async';
 import 'dart:io';
 import 'package:git_notes/helpers/git/directory.dart';
+import 'package:git_notes/messages/commit_push_check.pb.dart';
 import 'package:git_notes/messages/git_add.pb.dart';
 import 'package:git_notes/messages/git_clone.pb.dart';
 import 'package:git_notes/messages/git_clone.pbenum.dart';
+import 'package:git_notes/messages/git_commit.pb.dart';
 import 'package:git_notes/messages/git_pull.pb.dart';
+import 'package:git_notes/messages/git_push.pb.dart';
 import 'package:git_notes/messages/git_restore.pb.dart';
 import 'package:git_notes/messages/git_status.pb.dart';
 import 'package:rinf/rinf.dart';
@@ -76,7 +79,7 @@ class GitRepo {
     GitCloneRequest(
       directoryPath: _directoryHelper!.getHomeDirectory().path,
       repoUrl: _url,
-      password: _password,
+      password: _password ?? "",
       user: _email,
     ).sendSignalToRust();
     RustSignal<GitCloneCallback> callback = await rustStream.first;
@@ -147,6 +150,37 @@ class GitRepo {
             absoluteFilePath: "$_directory/$relativeFilePath")
         .sendSignalToRust();
     RustSignal<GitRestoreCallback> callback = await rustStream.first;
+    return callback.message;
+  }
+
+  /// Performs a "git commit" on the staged files
+  Future<GitCommitCallback> gitCommit(String message) async {
+    Stream<RustSignal<GitCommitCallback>> rustStream =
+        GitCommitCallback.rustSignalStream;
+    GitCommitRequest(
+            repoDir: _directory, email: _email, name: _name, message: message)
+        .sendSignalToRust();
+    RustSignal<GitCommitCallback> callback = await rustStream.first;
+    return callback.message;
+  }
+
+  /// Performs a "git push"
+  Future<GitPushCallback> gitPush() async {
+    Stream<RustSignal<GitPushCallback>> rustStream =
+        GitPushCallback.rustSignalStream;
+    GitPushRequest(
+            email: _email, password: _password ?? "", repoDir: _directory)
+        .sendSignalToRust();
+    RustSignal<GitPushCallback> callback = await rustStream.first;
+    return callback.message;
+  }
+
+  /// Performs a "git push"
+  Future<CommitAndPushCheckCallback> checkCommitAndPush() async {
+    Stream<RustSignal<CommitAndPushCheckCallback>> rustStream =
+        CommitAndPushCheckCallback.rustSignalStream;
+    CommitAndPushCheck(repoDir: _directory).sendSignalToRust();
+    RustSignal<CommitAndPushCheckCallback> callback = await rustStream.first;
     return callback.message;
   }
 }

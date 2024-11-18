@@ -5,7 +5,11 @@ pub mod push_commits {
 
     use crate::git_functions::errors::git_errors::GitError;
 
-    pub fn git_push(repo_dir: String, user: String, password: Option<String>) -> Result<(), GitError> {
+    pub fn git_push(
+        repo_dir: String,
+        user: String,
+        password: Option<String>,
+    ) -> Result<(), GitError> {
         match unsafe { git2::opts::set_verify_owner_validation(false) } {
             Ok(_) => {}
             Err(err) => {
@@ -41,5 +45,18 @@ pub mod push_commits {
         };
 
         Ok(())
+    }
+
+    pub fn can_push(repo_dir: &str) -> bool {
+        unsafe { let _ = git2::opts::set_verify_owner_validation(false); };
+        let repo = Repository::open(Path::new(&repo_dir)).unwrap();
+        let branch = repo.head().unwrap();
+        let branch_name = branch.name().unwrap();
+        let local_commit = branch.peel_to_commit().unwrap();
+        let remote = repo
+            .find_reference(&format!("origin/{}", branch_name))
+            .unwrap();
+        let remote_commit = remote.peel_to_commit().unwrap();
+        return remote_commit.id() != local_commit.id();
     }
 }

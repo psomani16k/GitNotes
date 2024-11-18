@@ -52,7 +52,6 @@ pub mod clone_repo {
             }
         };
         let dir_path = format!("{}/{}", dir_path, new_dir);
-        let dir_path_string = dir_path.clone();
         let dir_path = Path::new(&dir_path);
         match create_dir_all(dir_path) {
             Ok(_) => {}
