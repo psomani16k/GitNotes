@@ -132,14 +132,16 @@ class _HomeDirectoryState extends State<HomeDirectory> {
 
   ListView homeDirectoryDirectory() {
     return ListView.builder(
-      itemCount: fileEntities.length + directoryEntities.length,
+      itemCount: fileEntities.length + directoryEntities.length + 1,
       itemBuilder: (context, index) {
         if (index < directoryEntities.length) {
           return directoryBox(directoryEntities[index]);
-        } else {
-          index = index - directoryEntities.length;
+        }
+        index = index - directoryEntities.length;
+        if (index < fileEntities.length) {
           return fileBox(fileEntities[index]);
         }
+        return const SizedBox(height: 90);
       },
     );
   }

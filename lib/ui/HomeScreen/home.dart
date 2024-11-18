@@ -93,9 +93,7 @@ class _HomeState extends State<Home> {
               },
             );
             setState(() {});
-          } else if (pageIndex == 1) {
-            // TODO: handle git commit and push
-          }
+          } else if (pageIndex == 1) {}
         },
         child: Icon(
           (pageIndex == 0) ? Icons.download : Icons.upload,

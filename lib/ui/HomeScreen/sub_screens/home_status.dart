@@ -81,7 +81,7 @@ class _StatusScreenState extends State<HomeStatus> {
       );
     }
     return ListView.builder(
-      itemCount: changed.length + staged.length + 2,
+      itemCount: changed.length + staged.length + 3,
       itemBuilder: (context, index) {
         if (index == 0) {
           return Container(
@@ -126,7 +126,7 @@ class _StatusScreenState extends State<HomeStatus> {
         if (index < changed.length) {
           return changedBox(changed[index]);
         }
-        return Container();
+        return const SizedBox(height: 90);
       },
     );
   }
