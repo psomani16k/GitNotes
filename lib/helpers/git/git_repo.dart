@@ -142,7 +142,7 @@ class GitRepo {
   Future<GitRestoreCallback> gitRestore(String relativeFilePath) async {
     Stream<RustSignal<GitRestoreCallback>> rustStream =
         GitRestoreCallback.rustSignalStream;
-    GitRemove(
+    GitRestore(
             repoDir: _directory,
             absoluteFilePath: "$_directory/$relativeFilePath")
         .sendSignalToRust();
