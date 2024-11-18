@@ -1,4 +1,3 @@
-mod common;
 mod git_functions;
 mod handlers;
 mod messages;
