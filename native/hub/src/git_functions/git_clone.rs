@@ -5,14 +5,14 @@ pub mod clone_repo {
     use git2::{build::RepoBuilder, CertificateCheckStatus, Cred, FetchOptions, RemoteCallbacks};
 
     use crate::git_functions::{
-        branch_repo::branch_repo::{checkout_branch, list_branches},
+        git_checkout::branch_repo::{git_checkout, list_branches},
         errors::git_errors::GitError,
     };
 
     /// Attempts to clone the repo form the url provided with the credentials provided.
     /// Creates a new directory in the path provided named UserName_RepoName where the clone takes place.
     /// Returns the directory name if clone succeeds or a [GitError] if fails.
-    pub fn clone_repo_git2(
+    pub fn git_clone_https(
         url: String,
         dir_path: String,
         password: Option<String>,
@@ -52,6 +52,7 @@ pub mod clone_repo {
             }
         };
         let dir_path = format!("{}/{}", dir_path, new_dir);
+        let dir_path_string = dir_path.clone();
         let dir_path = Path::new(&dir_path);
         match create_dir_all(dir_path) {
             Ok(_) => {}
@@ -80,10 +81,10 @@ pub mod clone_repo {
 
         let branches =
             list_branches(&repo, user_copy, password_copy).expect("needs error handling here");
-        let branch = match checkout_branch(&repo, "main".to_string(), false) {
+        let branch = match git_checkout(&repo, "main".to_string(), false) {
             Ok(_) => String::from_str("main").unwrap(),
             Err(_) => {
-                checkout_branch(
+                git_checkout(
                     &repo,
                     branches
                         .first()

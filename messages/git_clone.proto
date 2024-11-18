@@ -1,28 +1,22 @@
 syntax = "proto3";
-package clone;
+package git_clone;
 
 // [RINF:DART-SIGNAL]
-message CloneRepo {
+message GitCloneRequest {
   string directoryPath = 1;
   string repoUrl = 2;
   string user = 3;
   string password = 4;
-  GitImplementation gitImplementation = 5;
-}
-
-enum GitImplementation{
-  Git2 = 0;
-  Gix = 1;
 }
 
 // [RINF:RUST-SIGNAL]
-message CloneCallback {
-  CloneResult status = 1;
+message GitCloneCallback {
+  GitCloneResult status = 1;
   string data = 2;
   string branch = 3;
 }
 
-enum CloneResult{
+enum GitCloneResult{
     Success = 0;
     Fail = 1;
 }

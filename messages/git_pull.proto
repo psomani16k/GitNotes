@@ -1,20 +1,20 @@
 syntax = "proto3";
-package pull;
+package git_pull;
 
 // [RINF:DART-SIGNAL]
-message PullSingleRepo{
+message GitPullSingle{
   string directoryPath = 1;
   string user = 3;
   string password = 4;
 }
 
 // [RINF:RUST-SIGNAL]
-message PullSingleCallback {
-  PullResult status = 1;
+message GitPullSingleCallback {
+  GitPullResult status = 1;
   string data = 2;
 }
 
-enum PullResult{
+enum GitPullResult{
     Success = 0;
     Fail = 1;
 }

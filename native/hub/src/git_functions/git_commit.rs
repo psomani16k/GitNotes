@@ -5,7 +5,7 @@ pub mod commit_stage {
 
     use crate::git_functions::errors::git_errors::GitError;
 
-    pub fn commit_staged_files(
+    pub fn git_commit(
         repo_dir: String,
         name: String,
         email: String,

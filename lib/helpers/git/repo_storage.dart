@@ -28,7 +28,7 @@ class RepoStorage {
     return _instance!;
   }
 
-  Future<void> storeRepo(GitRepo repo) async {
+  Future<void> addRepo(GitRepo repo) async {
     _cache[repo.repoId!] = repo;
     String reposString = jsonEncode(_cache);
     await _storage.write(key: "repos", value: reposString);

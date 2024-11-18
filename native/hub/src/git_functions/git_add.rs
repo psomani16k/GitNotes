@@ -5,7 +5,7 @@ pub mod stage_file {
 
     use crate::git_functions::errors::git_errors::GitError;
 
-    pub fn add_to_stage(repo_dir: String, file_absolute_path: String) -> Result<(), GitError> {
+    pub fn git_add(repo_dir: String, file_absolute_path: String) -> Result<(), GitError> {
         let file_path = file_absolute_path[repo_dir.len() + 1..].to_string();
         match unsafe { git2::opts::set_verify_owner_validation(false) } {
             Ok(_) => {}

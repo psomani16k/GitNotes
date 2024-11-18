@@ -3,7 +3,7 @@ pub mod status {
 
     use crate::git_functions::errors::git_errors::GitError;
 
-    pub fn get_status(path: String) -> Result<Vec<String>, GitError> {
+    pub fn git_status(path: String) -> Result<Vec<String>, GitError> {
         match unsafe { git2::opts::set_verify_owner_validation(false) } {
             Ok(_) => {}
             Err(err) => {

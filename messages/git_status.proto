@@ -1,12 +1,12 @@
 syntax = "proto3";
-package status;
+package git_status;
 
 // [RINF:DART-SIGNAL]
-message GetStatus{
+message GitStatus{
     string repoDirectory = 1;
 }
 
 // [RINF:RUST-SIGNAL]
-message StatusCallBack{
+message GitStatusCallback{
     repeated string status = 1;
 }

@@ -1,5 +1,5 @@
 syntax = "proto3";
-package checkout;
+package git_checkout;
 
 // [RINF:DART-SIGNAL]
 message CheckoutBranch{
@@ -8,6 +8,16 @@ message CheckoutBranch{
     bool force = 3;
 }
 
+// [RINF:RUST-SIGNAL]
+message CheckoutCallback{
+    CheckoutStatus status = 1;
+    string data = 2;
+}
+
+enum CheckoutStatus{
+    Success = 0;
+    Fail = 1;
+}
 
 // [RINF:DART-SIGNAL]
 message ListBranches{
@@ -20,15 +30,4 @@ message ListBranches{
 message ListBranchesCallback{
     repeated string branches = 1;
     CheckoutStatus status = 2;
-}
-
-// [RINF:RUST-SIGNAL]
-message CheckoutCallback{
-    CheckoutStatus status = 1;
-    string data = 2;
-}
-
-enum CheckoutStatus{
-    Success = 0;
-    Fail = 1;
 }
