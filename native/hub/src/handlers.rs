@@ -2,14 +2,18 @@ use crate::{
     git_functions::{
         git_add::stage_file::{git_add, remove_from_stage},
         git_clone::clone_repo::git_clone_https,
+        git_commit::commit_stage::git_commit,
         git_pull::pull_repo::git_pull,
+        git_push::push_commits::git_push,
         git_restore::restore_file::restore_file,
         git_status::status::git_status,
     },
     messages::{
         git_add::{GitAdd, GitAddCallback, GitAddResult, GitRemove, GitRemoveCallback},
         git_clone::{GitCloneCallback, GitCloneRequest, GitCloneResult},
+        git_commit::{GitCommitCallback, GitCommitRequest, GitCommitResult},
         git_pull::{GitPullResult, GitPullSingle, GitPullSingleCallback},
+        git_push::{GitPushCallback, GitPushRequest, GitPushResult},
         git_restore::{GitRestore, GitRestoreCallback, GitRestoreResult},
         git_status::{GitStatus, GitStatusCallback},
     },
@@ -147,6 +151,53 @@ pub async fn git_restore_handler() {
             },
             Err(_) => GitRestoreCallback {
                 result: GitRestoreResult::Fail.into(),
+            },
+        };
+        callback.send_signal_to_dart();
+    }
+}
+
+pub async fn git_commit_handler() {
+    let mut recv = GitCommitRequest::get_dart_signal_receiver().unwrap();
+    while let Some(dart_signal) = recv.recv().await {
+        let message = dart_signal.message;
+        let dir_path = message.repo_dir;
+        let name = message.name;
+        let email = message.email;
+        let message = message.message;
+
+        let commit_result = git_commit(dir_path, name, email, message);
+
+        let callback = match commit_result {
+            Ok(_) => GitCommitCallback {
+                result: GitCommitResult::Success.into(),
+            },
+            Err(_) => GitCommitCallback {
+                result: GitCommitResult::Fail.into(),
+            },
+        };
+        callback.send_signal_to_dart();
+    }
+}
+
+pub async fn git_push_handler() {
+    let mut recv = GitPushRequest::get_dart_signal_receiver().unwrap();
+    while let Some(dart_signal) = recv.recv().await {
+        let message = dart_signal.message;
+        let dir_path = message.repo_dir;
+        let email = message.email;
+        let password = match message.password.as_str() {
+            "" => None,
+            pass => Some(pass.to_string()),
+        };
+        let push_result = git_push(dir_path, email, password);
+
+        let callback = match push_result {
+            Ok(_) => GitPushCallback {
+                result: GitPushResult::Success.into(),
+            },
+            Err(_) => GitPushCallback {
+                result: GitPushResult::Fail.into(),
             },
         };
         callback.send_signal_to_dart();

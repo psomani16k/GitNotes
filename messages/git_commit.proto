@@ -1,2 +1,20 @@
 syntax = "proto3";
 package git_commit;
+
+// [RINF:DART-SIGNAL]
+message GitCommitRequest{
+    string repoDir = 1;
+    string name = 2;
+    string email = 3;
+    string message = 4;
+}
+
+// [RINF:RUST-SIGNAL]
+message GitCommitCallback{
+    GitCommitResult result = 1;
+}
+
+enum GitCommitResult{
+    Fail = 0;
+    Success = 1;
+}

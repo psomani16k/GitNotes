@@ -1,2 +1,20 @@
 syntax = "proto3";
 package git_push;
+
+
+// [RINF:DART-SIGNAL]
+message GitPushRequest{
+    string repoDir = 1;
+    string email = 2;
+    string password = 3;
+}
+
+// [RINF:RUST-SIGNAL]
+message GitPushCallback{
+    GitPushResult result = 1;
+}
+
+enum GitPushResult{
+    Fail = 0;
+    Success = 1;
+}
