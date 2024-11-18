@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:io';
 import 'package:git_notes/helpers/git/directory.dart';
+import 'package:git_notes/messages/git_add.pb.dart';
 import 'package:git_notes/messages/git_clone.pb.dart';
 import 'package:git_notes/messages/git_clone.pbenum.dart';
 import 'package:git_notes/messages/git_pull.pb.dart';
@@ -109,6 +110,30 @@ class GitRepo {
         GitStatusCallback.rustSignalStream;
     GitStatus(repoDirectory: _directory).sendSignalToRust();
     RustSignal<GitStatusCallback> callback = await rustStream.first;
+    return callback.message;
+  }
+
+  /// Performs a "git add" on the file mentioned
+  Future<GitAddCallback> gitAdd(String relativeFilePath) async {
+    Stream<RustSignal<GitAddCallback>> rustStream =
+        GitAddCallback.rustSignalStream;
+    GitAdd(
+            repoDir: _directory,
+            absoluteFilePath: "$_directory/$relativeFilePath")
+        .sendSignalToRust();
+    RustSignal<GitAddCallback> callback = await rustStream.first;
+    return callback.message;
+  }
+
+  /// Performs a "git add" on the file mentioned
+  Future<GitRemoveCallback> gitRemove(String relativeFilePath) async {
+    Stream<RustSignal<GitRemoveCallback>> rustStream =
+        GitRemoveCallback.rustSignalStream;
+    GitRemove(
+            repoDir: _directory,
+            absoluteFilePath: "$_directory/$relativeFilePath")
+        .sendSignalToRust();
+    RustSignal<GitRemoveCallback> callback = await rustStream.first;
     return callback.message;
   }
 }

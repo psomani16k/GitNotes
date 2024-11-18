@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:git_notes/helpers/git/git_multiple_repo.dart';
+import 'package:git_notes/helpers/git/git_repo_manager.dart';
 import 'package:git_notes/ui/HomeScreen/home.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:rinf/rinf.dart';

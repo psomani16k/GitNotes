@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_vector_icons/flutter_vector_icons.dart';
-import 'package:git_notes/helpers/git/git_multiple_repo.dart';
+import 'package:git_notes/helpers/git/git_repo_manager.dart';
 import 'package:git_notes/helpers/git/git_repo.dart';
 import 'package:git_notes/ui/GitCloneScreen.dart/git_clone_screen.dart';
 import 'package:git_notes/ui/HomeScreen/sub_screens/home_directory.dart';

@@ -1,9 +1,12 @@
 use crate::{
     git_functions::{
-        git_clone::clone_repo::git_clone_https, git_pull::pull_repo::git_pull,
+        git_add::stage_file::{git_add, remove_from_stage},
+        git_clone::clone_repo::git_clone_https,
+        git_pull::pull_repo::git_pull,
         git_status::status::git_status,
     },
     messages::{
+        git_add::{GitAdd, GitAddCallback, GitAddResult, GitRemove, GitRemoveCallback},
         git_clone::{GitCloneCallback, GitCloneRequest, GitCloneResult},
         git_pull::{GitPullResult, GitPullSingle, GitPullSingleCallback},
         git_status::{GitStatus, GitStatusCallback},
@@ -79,6 +82,48 @@ pub async fn git_status_handler() {
             Ok(result) => GitStatusCallback { status: result },
             Err(err) => GitStatusCallback {
                 status: vec![format!("ERROR: {}", err.to_string())],
+            },
+        };
+        callback.send_signal_to_dart();
+    }
+}
+
+pub async fn git_add_handler() {
+    let mut recv = GitAdd::get_dart_signal_receiver().unwrap();
+    while let Some(dart_signal) = recv.recv().await {
+        let message = dart_signal.message;
+        let dir_path = message.repo_dir;
+        let absolute_file_path = message.absolute_file_path;
+
+        let add_result = git_add(dir_path, absolute_file_path);
+
+        let callback = match add_result {
+            Ok(_) => GitAddCallback {
+                result: GitAddResult::Success.into(),
+            },
+            Err(_) => GitAddCallback {
+                result: GitAddResult::Fail.into(),
+            },
+        };
+        callback.send_signal_to_dart();
+    }
+}
+
+pub async fn git_remove_handler() {
+    let mut recv = GitRemove::get_dart_signal_receiver().unwrap();
+    while let Some(dart_signal) = recv.recv().await {
+        let message = dart_signal.message;
+        let dir_path = message.repo_dir;
+        let absolute_file_path = message.absolute_file_path;
+
+        let add_result = remove_from_stage(dir_path, absolute_file_path);
+
+        let callback = match add_result {
+            Ok(_) => GitRemoveCallback {
+                result: GitAddResult::Success.into(),
+            },
+            Err(_) => GitRemoveCallback {
+                result: GitAddResult::Fail.into(),
             },
         };
         callback.send_signal_to_dart();

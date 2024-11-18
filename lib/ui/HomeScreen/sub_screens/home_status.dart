@@ -2,6 +2,8 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:git_notes/helpers/git/git_repo.dart';
+import 'package:git_notes/helpers/git/git_repo_manager.dart';
+import 'package:git_notes/messages/git_add.pb.dart';
 import 'package:git_notes/messages/git_status.pb.dart';
 import 'package:visibility_detector/visibility_detector.dart';
 
@@ -72,12 +74,29 @@ class _StatusScreenState extends State<HomeStatus> {
     );
   }
 
-  ListView homeStatusStatus() {
+  Widget homeStatusStatus() {
+    if (changed.length + staged.length == 0) {
+      return const Center(
+        child: Text("Nothing to see here!"),
+      );
+    }
     return ListView.builder(
       itemCount: changed.length + staged.length + 2,
       itemBuilder: (context, index) {
         if (index == 0) {
-          return Text("Staged");
+          return Container(
+            decoration: BoxDecoration(
+                color: Theme.of(context).colorScheme.secondaryContainer),
+            height: 30,
+            child: Center(
+              child: Text(
+                "Staged",
+                style: TextStyle(
+                    fontSize: 16,
+                    color: Theme.of(context).colorScheme.onSecondaryContainer),
+              ),
+            ),
+          );
         }
         index -= 1;
         if (index < staged.length) {
@@ -85,11 +104,27 @@ class _StatusScreenState extends State<HomeStatus> {
         }
         index -= staged.length;
         if (index == 0) {
-          return Text("Changed");
+          return Padding(
+            padding: const EdgeInsets.only(top: 5),
+            child: Container(
+              decoration: BoxDecoration(
+                  color: Theme.of(context).colorScheme.secondaryContainer),
+              height: 30,
+              child: Center(
+                child: Text(
+                  "Changed",
+                  style: TextStyle(
+                      fontSize: 16,
+                      color:
+                          Theme.of(context).colorScheme.onSecondaryContainer),
+                ),
+              ),
+            ),
+          );
         }
         index -= 1;
         if (index < changed.length) {
-          return chanedBox(changed[index]);
+          return changedBox(changed[index]);
         }
         return Container();
       },
@@ -98,56 +133,125 @@ class _StatusScreenState extends State<HomeStatus> {
 
   Widget stagedBox(FileStatusData statusData) {
     return SizedBox(
-      height: 45,
-      child: Row(
+      height: 70,
+      child: Column(
         children: [
-          Text(
-            statusData._changeChar,
-            style: TextStyle(
-              color: statusData.getChangedCharColor(),
-              fontSize: 16,
-              fontWeight: FontWeight.w700,
-            ),
-          ),
-          Text(statusData.getFileName()),
           const Spacer(),
-          IconButton(
-            onPressed: () {
-              // TODO: stage file
-            },
-            icon: const Icon(Icons.remove),
+          Row(
+            children: [
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 25),
+                child: Center(
+                  child: Text(
+                    statusData._changeChar,
+                    style: TextStyle(
+                      color: statusData.getChangedCharColor(),
+                      fontSize: 18,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                ),
+              ),
+              Text(statusData.getFileName()),
+              const Spacer(),
+              GestureDetector(
+                onTap: () async {
+                  await statusData.unstage();
+                  updateStatus();
+                },
+                child: Container(
+                  height: 35,
+                  width: 35,
+                  decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(20),
+                      color: Theme.of(context).colorScheme.primaryContainer),
+                  child: Icon(
+                    Icons.remove,
+                    color: Theme.of(context).colorScheme.onPrimaryContainer,
+                  ),
+                ),
+              ),
+              const SizedBox(width: 20)
+            ],
+          ),
+          const Spacer(),
+          const Divider(
+            thickness: 1,
+            height: 1,
+            indent: 60,
+            endIndent: 10,
           )
         ],
       ),
     );
   }
 
-  Widget chanedBox(FileStatusData statusData) {
+  Widget changedBox(FileStatusData statusData) {
     return SizedBox(
-      height: 45,
-      child: Row(
+      height: 70,
+      child: Column(
         children: [
-          Text(
-            statusData._changeChar,
-            style: TextStyle(
-              color: statusData.getChangedCharColor(),
-              fontSize: 16,
-              fontWeight: FontWeight.w700,
-            ),
-          ),
-          Text(statusData.getFileName()),
           const Spacer(),
-          IconButton(
-            onPressed: () {
-              // TODO: revert file
-            },
-            icon: const Icon(Icons.undo),
+          Row(
+            children: [
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 25),
+                child: Center(
+                  child: Text(
+                    statusData._changeChar,
+                    style: TextStyle(
+                      color: statusData.getChangedCharColor(),
+                      fontSize: 18,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                ),
+              ),
+              Text(statusData.getFileName()),
+              const Spacer(),
+              GestureDetector(
+                onTap: () async {
+                  // TODO: rever file
+                },
+                child: Container(
+                  height: 35,
+                  width: 35,
+                  decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(20),
+                      color: Theme.of(context).colorScheme.tertiaryContainer),
+                  child: Icon(
+                    Icons.undo,
+                    color: Theme.of(context).colorScheme.onTertiaryContainer,
+                  ),
+                ),
+              ),
+              const SizedBox(width: 15),
+              GestureDetector(
+                onTap: () async {
+                  await statusData.stage();
+                  updateStatus();
+                },
+                child: Container(
+                  height: 35,
+                  width: 35,
+                  decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(20),
+                      color: Theme.of(context).colorScheme.primaryContainer),
+                  child: Icon(
+                    Icons.add,
+                    color: Theme.of(context).colorScheme.onPrimaryContainer,
+                  ),
+                ),
+              ),
+              const SizedBox(width: 20),
+            ],
           ),
-          IconButton(
-            onPressed: () {
-              // TODO: stage file
-            },
-            icon: const Icon(Icons.add),
+          const Spacer(),
+          const Divider(
+            thickness: 1,
+            height: 1,
+            indent: 60,
+            endIndent: 10,
           )
         ],
       ),
@@ -199,20 +303,28 @@ class FileStatusData {
     return _staged;
   }
 
-  void stage() {
+  Future<bool?> stage() async {
     if (_staged) {
-      return;
-    } else {
-      // TODO: stage the file
+      return null;
     }
+    GitAddCallback? result =
+        await GitRepoManager.getInstance().stage(_file.path);
+    if (result == null || result.result == GitAddResult.Fail) {
+      return false;
+    }
+    return true;
   }
 
-  void unstage() {
+  Future<bool?> unstage() async {
     if (!_staged) {
-      return;
-    } else {
-      // TODO: unstage this file
+      return null;
     }
+    GitRemoveCallback? result =
+        await GitRepoManager.getInstance().unstage(_file.path);
+    if (result == null || result.result == GitAddResult.Fail) {
+      return false;
+    }
+    return true;
   }
 
   void revertChanges() {

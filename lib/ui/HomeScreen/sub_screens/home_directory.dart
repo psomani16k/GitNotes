@@ -116,11 +116,9 @@ class _HomeDirectoryState extends State<HomeDirectory> {
       child: VisibilityDetector(
         onVisibilityChanged: (info) {
           if (info.visibleFraction > 0.1 && !updated) {
-            print("1");
             populateData();
             updated = true;
           } else {
-            print("2");
             updated = false;
           }
         },
@@ -173,6 +171,8 @@ class _HomeDirectoryState extends State<HomeDirectory> {
             const Divider(
               thickness: 1,
               height: 1,
+              indent: 70,
+              endIndent: 15,
             )
           ],
         ),
@@ -206,6 +206,8 @@ class _HomeDirectoryState extends State<HomeDirectory> {
             const Divider(
               thickness: 1,
               height: 1,
+              indent: 70,
+              endIndent: 15,
             )
           ],
         ),

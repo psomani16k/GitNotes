@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:git_notes/helpers/git/git_multiple_repo.dart';
+import 'package:git_notes/helpers/git/git_repo_manager.dart';
 import 'package:git_notes/helpers/ui_helper.dart';
 import 'package:git_notes/messages/git_clone.pb.dart';
 

@@ -56,7 +56,7 @@ pub mod status {
                     continue;
                 }
             };
-            let status_string = format!("{}_{}\n", status_string, entry.path().unwrap());
+            let status_string = format!("{}_{}", status_string, entry.path().unwrap());
             return_string.push(status_string);
         }
         return return_string;
