@@ -152,7 +152,16 @@ class _StatusScreenState extends State<HomeStatus> {
                   ),
                 ),
               ),
-              Text(statusData.getFileName()),
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(statusData.getFileName()),
+                  Text(
+                    statusData.getFilePath(),
+                    style: const TextStyle(fontSize: 10, color: Colors.grey),
+                  )
+                ],
+              ),
               const Spacer(),
               GestureDetector(
                 onTap: () async {
@@ -207,7 +216,16 @@ class _StatusScreenState extends State<HomeStatus> {
                   ),
                 ),
               ),
-              Text(statusData.getFileName()),
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(statusData.getFileName()),
+                  Text(
+                    statusData.getFilePath(),
+                    style: const TextStyle(fontSize: 10, color: Colors.grey),
+                  )
+                ],
+              ),
               const Spacer(),
               GestureDetector(
                 onTap: () async {

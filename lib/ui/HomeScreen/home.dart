@@ -14,16 +14,16 @@ class Home extends StatefulWidget {
 }
 
 class _HomeState extends State<Home> {
+  void handleFloatingActionButton() {}
+
   int pageIndex = 0;
   @override
   Widget build(BuildContext context) {
-    if (GitRepoManager.getInstance().repoDirectory() != null) {
-      print(GitRepoManager.getInstance().repoDirectory()!.path);
-    }
     return Scaffold(
       drawerEnableOpenDragGesture: false,
       drawer: homeDrawer(350),
       appBar: homeAppBar(context),
+      floatingActionButton: homeFloatingActionButton(),
       bottomNavigationBar: NavigationBar(
         destinations: const [
           NavigationDestination(
@@ -51,6 +51,57 @@ class _HomeState extends State<Home> {
         )
       ][pageIndex],
     );
+  }
+
+  Widget homeFloatingActionButton() {
+    return Builder(builder: (context) {
+      return FloatingActionButton(
+        onPressed: () async {
+          if (pageIndex == 0) {
+            await showModalBottomSheet(
+              context: context,
+              showDragHandle: true,
+              enableDrag: true,
+              elevation: 10,
+              isDismissible: true,
+              builder: (context) {
+                return FutureBuilder(
+                  future: GitRepoManager.getInstance().pull(),
+                  builder: (context, snapshot) {
+                    if (snapshot.hasData) {
+                      return SizedBox(
+                        width: MediaQuery.sizeOf(context).width,
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(vertical: 20),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Text(snapshot.data!.data),
+                            ],
+                          ),
+                        ),
+                      );
+                    }
+                    return const SizedBox(
+                      height: 150,
+                      child: Center(
+                        child: CircularProgressIndicator(),
+                      ),
+                    );
+                  },
+                );
+              },
+            );
+            setState(() {});
+          } else if (pageIndex == 1) {
+            // TODO: handle git commit and push
+          }
+        },
+        child: Icon(
+          (pageIndex == 0) ? Icons.download : Icons.upload,
+        ),
+      );
+    });
   }
 
   AppBar homeAppBar(BuildContext context) {
