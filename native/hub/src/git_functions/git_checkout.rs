@@ -1,5 +1,5 @@
 pub mod branch_repo {
-    use git2::{build::CheckoutBuilder, CertificateCheckStatus, Cred};
+    use git2::{build::CheckoutBuilder, CertificateCheckStatus, Cred, Repository};
 
     use crate::git_functions::errors::git_errors::GitError;
 
@@ -60,6 +60,14 @@ pub mod branch_repo {
             names.push(name);
         }
         return Ok(names);
+    }
+
+    pub fn current_branch(repo_dir: &str) -> String {
+         unsafe { let _ = git2::opts::set_verify_owner_validation(false); } 
+        let repo = Repository::open(repo_dir).unwrap();
+        let head = repo.head().unwrap();
+        return head.shorthand().unwrap().to_string();
+
     }
 
     pub fn git_checkout(

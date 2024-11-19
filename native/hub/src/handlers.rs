@@ -210,10 +210,8 @@ pub async fn commit_push_check_handler() {
     while let Some(dart_signal) = recv.recv().await {
         let message = dart_signal.message;
         let dir_path = message.repo_dir;
-
         let can_commit = can_commit(&dir_path);
         let can_push = can_push(&dir_path);
-
         let callback = CommitAndPushCheckCallback {
             commit_allowed: can_commit,
             push_allowed: can_push,
