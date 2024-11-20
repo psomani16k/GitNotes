@@ -8,7 +8,7 @@
     <uses-permission android:name="android.permission.READ_MEDIA_AUDIO" />
     <uses-permission android:name="android.permission.INTERNET"/>
     <application
-        android:label="MarGitDown"
+        android:label="GitNotes"
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher">
         <activity
