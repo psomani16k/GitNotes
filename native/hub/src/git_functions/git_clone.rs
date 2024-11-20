@@ -1,12 +1,11 @@
 pub mod clone_repo {
 
-    use std::{fs::create_dir_all, path::Path, str::FromStr};
+    use std::{fs::create_dir_all, path::Path};
 
     use git2::{build::RepoBuilder, CertificateCheckStatus, Cred, FetchOptions, RemoteCallbacks};
 
     use crate::git_functions::{
-        git_checkout::branch_repo::{git_checkout, list_branches},
-        errors::git_errors::GitError,
+        errors::git_errors::GitError, git_checkout::branch_repo::current_branch,
     };
 
     /// Attempts to clone the repo form the url provided with the credentials provided.
@@ -31,9 +30,6 @@ pub mod clone_repo {
         let mut callbacks = RemoteCallbacks::new();
         callbacks.certificate_check(|_, _| Ok(CertificateCheckStatus::CertificateOk));
 
-        let user_copy = user.clone();
-        let password_copy = password.clone();
-
         // adding the credentials to the callback
         callbacks.credentials(move |_a: &str, _b, _c| match &password {
             Some(pass) => Cred::userpass_plaintext(&user, &pass),
@@ -51,7 +47,9 @@ pub mod clone_repo {
                 return Err(GitError::new("CR_E1".to_string(), err));
             }
         };
+
         let dir_path = format!("{}/{}", dir_path, new_dir);
+        let dir_path_string = dir_path.to_string();
         let dir_path = Path::new(&dir_path);
         match create_dir_all(dir_path) {
             Ok(_) => {}
@@ -75,26 +73,7 @@ pub mod clone_repo {
             }
         };
 
-        // finding the branch and checking out to main if available.
-        let repo = git2::Repository::open(dir_path).expect("Should be available here...");
-
-        let branches =
-            list_branches(&repo, user_copy, password_copy).expect("needs error handling here");
-        let branch = match git_checkout(&repo, "main".to_string(), false) {
-            Ok(_) => String::from_str("main").unwrap(),
-            Err(_) => {
-                git_checkout(
-                    &repo,
-                    branches
-                        .first()
-                        .expect("there should be atleast one branch!")
-                        .to_string(),
-                    false,
-                )
-                .unwrap();
-                branches.first().unwrap().to_string()
-            }
-        };
+        let branch = current_branch(&dir_path_string);
         return Ok((new_dir, branch));
     }
 
