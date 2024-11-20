@@ -1,4 +1,6 @@
 import 'dart:io';
+import 'package:google_fonts/google_fonts.dart';
+import 'package:open_file_plus/open_file_plus.dart';
 import 'package:path/path.dart' as path;
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -6,7 +8,6 @@ import 'package:git_notes/ui/MarkdownRendering/bloc/markdown_rendering_bloc.dart
 import 'package:markdown_widget/config/configs.dart';
 import 'package:markdown_widget/widget/inlines/all.dart';
 import 'package:markdown_widget/widget/markdown.dart';
-import 'package:protobuf/protobuf.dart';
 
 class MarkdownRenderingScreen extends StatefulWidget {
   const MarkdownRenderingScreen({super.key, required this.file});
@@ -37,11 +38,15 @@ class _MarkdownRenderingScreenState extends State<MarkdownRenderingScreen> {
           if (state is MarkdownRenderingRenderDataState) {
             content = state.data;
             return Scaffold(
-              body: markdownWidget(),
+              body: Padding(
+                padding: EdgeInsets.symmetric(
+                    horizontal: MediaQuery.sizeOf(context).width * 0.03),
+                child: markdownWidget(),
+              ),
             );
           }
           return const Scaffold(
-            body: CircularProgressIndicator(),
+            body: Center(child: CircularProgressIndicator()),
           );
         },
       ),
@@ -51,15 +56,20 @@ class _MarkdownRenderingScreenState extends State<MarkdownRenderingScreen> {
   MarkdownWidget markdownWidget() {
     return MarkdownWidget(
       data: content,
+      selectable: true,
       config: MarkdownConfig(configs: [
+        CodeConfig(style: GoogleFonts.jetBrainsMono()),
         ImgConfig(
           builder: (url, attributes) {
             Directory parent = widget.file.parent;
             String filePath = path.join(parent.path, url);
             File file = File(filePath);
             file = file.absolute;
-            print(file.path);
-            return Image.file(file);
+            return GestureDetector(
+                onTap: () async {
+                  await OpenFile.open(file.path);
+                },
+                child: Image.file(file));
           },
         )
       ]),

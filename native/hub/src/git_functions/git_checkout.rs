@@ -63,11 +63,12 @@ pub mod branch_repo {
     }
 
     pub fn current_branch(repo_dir: &str) -> String {
-         unsafe { let _ = git2::opts::set_verify_owner_validation(false); } 
+        unsafe {
+            let _ = git2::opts::set_verify_owner_validation(false);
+        }
         let repo = Repository::open(repo_dir).unwrap();
         let head = repo.head().unwrap();
         return head.shorthand().unwrap().to_string();
-
     }
 
     pub fn git_checkout(

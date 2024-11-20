@@ -22,6 +22,7 @@ dependencies:
   flutter_secure_storage: ^9.2.2
   flutter_vector_icons: ^2.0.0
   markdown_widget: ^2.3.2+6
+  open_file_plus: ^3.4.1+1
   path_provider: ^2.1.3
   permission_handler: ^11.3.1
   protobuf: ^3.1.0

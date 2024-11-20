@@ -181,6 +181,7 @@ class GitRepo {
         CommitAndPushCheckCallback.rustSignalStream;
     CommitAndPushCheck(repoDir: _directory).sendSignalToRust();
     RustSignal<CommitAndPushCheckCallback> callback = await rustStream.first;
+    print("2");
     return callback.message;
   }
 }

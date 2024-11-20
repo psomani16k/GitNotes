@@ -1,3 +1,5 @@
+import 'dart:ffi';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_vector_icons/flutter_vector_icons.dart';
 import 'package:git_notes/helpers/git/git_repo_manager.dart';
@@ -92,8 +94,18 @@ class _HomeState extends State<Home> {
                 );
               },
             );
-            setState(() {});
-          } else if (pageIndex == 1) {}
+          } else if (pageIndex == 1) {
+            await showModalBottomSheet(
+              context: context,
+              builder: (context) {
+                return const Padding(
+                  padding: EdgeInsets.all(20),
+                  child: _PushAndCommitBottomSheet(),
+                );
+              },
+            );
+          }
+          setState(() {});
         },
         child: Icon(
           (pageIndex == 0) ? Icons.download : Icons.upload,
@@ -207,3 +219,199 @@ class _HomeState extends State<Home> {
     );
   }
 }
+
+class _PushAndCommitBottomSheet extends StatefulWidget {
+  const _PushAndCommitBottomSheet({super.key});
+
+  @override
+  State<_PushAndCommitBottomSheet> createState() =>
+      __PushAndCommitBottomSheetState();
+}
+
+class __PushAndCommitBottomSheetState extends State<_PushAndCommitBottomSheet> {
+  void push() async {
+    setState(() {
+      loading = true;
+    });
+
+    var res = await GitRepoManager.getInstance().push();
+    print(res);
+    setState(() {
+      loading = false;
+    });
+  }
+
+  void commit() async {
+    setState(() {
+      loading = true;
+    });
+    String commitMessage = _commitMessageController.text == ""
+        ? "Commit from GitNotes at ${DateTime.now().toLocal().toIso8601String()}"
+        : _commitMessageController.text;
+    await GitRepoManager.getInstance().commit(commitMessage);
+    setState(() {
+      loading = false;
+    });
+  }
+
+  StateHelper _helper = StateHelper.none;
+
+  final TextEditingController _commitMessageController =
+      TextEditingController();
+
+  bool loading = false;
+  @override
+  Widget build(BuildContext context) {
+    if (loading) {
+      return const SizedBox(
+        height: 300,
+        child: Center(
+          child: CircularProgressIndicator(),
+        ),
+      );
+    }
+    return FutureBuilder(
+      future: GitRepoManager.getInstance().checkCommitAndPush(),
+      builder: (context, snapshot) {
+        if (snapshot.hasData) {
+          if (snapshot.data!.commitAllowed && snapshot.data!.pushAllowed) {
+            _helper = StateHelper.commitAndPush;
+          } else if (snapshot.data!.commitAllowed &&
+              !snapshot.data!.pushAllowed) {
+            _helper = StateHelper.commit;
+          } else if (!snapshot.data!.commitAllowed &&
+              snapshot.data!.pushAllowed) {
+            _helper = StateHelper.push;
+          } else {
+            _helper = StateHelper.none;
+          }
+        } else {
+          return const SizedBox(
+            height: 300,
+            child: Center(
+              child: CircularProgressIndicator(),
+            ),
+          );
+        }
+        switch (_helper) {
+          case StateHelper.commit:
+            return SizedBox(
+              height: 300,
+              child: commitUi(),
+            );
+          case StateHelper.push:
+            return SizedBox(
+              height: 300,
+              child: pushUi(),
+            );
+          case StateHelper.commitAndPush:
+            return SizedBox(
+              height: 300,
+              child: Column(
+                children: [
+                  commitUi(),
+                  const Divider(
+                    thickness: 2,
+                    height: 20,
+                  ),
+                  pushUi(),
+                ],
+              ),
+            );
+          case StateHelper.none:
+            return const SizedBox(
+              height: 300,
+              child: Center(
+                child: Text(
+                  "No files to commit and no commits to push.",
+                  style: TextStyle(
+                    fontSize: 16,
+                  ),
+                ),
+              ),
+            );
+        }
+      },
+    );
+  }
+
+  InkWell pushUi() {
+    return InkWell(
+      onTap: () {
+        push();
+      },
+      child: Container(
+        height: 80,
+        width: MediaQuery.sizeOf(context).width < 500
+            ? MediaQuery.sizeOf(context).width
+            : 500,
+        decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(25),
+            color: Theme.of(context).colorScheme.tertiaryContainer),
+        child: Center(
+          child: Text(
+            "Push",
+            style: TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.w500,
+                color: Theme.of(context).colorScheme.onTertiaryContainer),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget commitUi() {
+    return Column(
+      children: [
+        Center(
+          child: TextFormField(
+            decoration: InputDecoration(
+              contentPadding: const EdgeInsets.all(20),
+              label: const Text("Commit Message"),
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(25),
+                borderSide: BorderSide(
+                  color: Theme.of(context).colorScheme.primaryContainer,
+                  width: 2,
+                ),
+              ),
+            ),
+            controller: _commitMessageController,
+          ),
+        ),
+        const SizedBox(height: 12),
+        const Text(
+          "*Default message will be used if not commit message is provided.",
+          style: TextStyle(fontSize: 11, fontStyle: FontStyle.italic),
+        ),
+        const SizedBox(height: 12),
+        InkWell(
+          onTap: () {
+            commit();
+          },
+          child: Container(
+            height: 80,
+            width: MediaQuery.sizeOf(context).width < 500
+                ? MediaQuery.sizeOf(context).width
+                : 500,
+            decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(25),
+                color: Theme.of(context).colorScheme.primaryContainer),
+            child: Center(
+              child: Text(
+                "Commit",
+                style: TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.w500,
+                    color: Theme.of(context).colorScheme.onPrimaryContainer),
+              ),
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+enum StateHelper { commit, push, commitAndPush, none }

@@ -2,6 +2,8 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_vector_icons/flutter_vector_icons.dart';
+import 'package:git_notes/ui/MarkdownRendering/screen/markdown_rendering_screen.dart';
+import 'package:open_file_plus/open_file_plus.dart';
 import 'package:visibility_detector/visibility_detector.dart';
 
 class HomeDirectory extends StatefulWidget {
@@ -186,8 +188,17 @@ class _HomeDirectoryState extends State<HomeDirectory> {
     String name = file.path.split("/").last;
     String extension = name.split(".").last;
     return InkWell(
-      onTap: () {
+      onTap: () async {
         // TODO: open the file
+        if (extension == "md") {
+          Navigator.of(context).push(MaterialPageRoute(
+            builder: (context) {
+              return MarkdownRenderingScreen(file: file);
+            },
+          ));
+        } else {
+          await OpenFile.open(file.path);
+        }
       },
       child: SizedBox(
         height: 70,
