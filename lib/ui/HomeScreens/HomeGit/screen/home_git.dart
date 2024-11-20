@@ -7,16 +7,16 @@ import 'package:git_notes/messages/git_restore.pb.dart';
 import 'package:git_notes/messages/git_status.pb.dart';
 import 'package:visibility_detector/visibility_detector.dart';
 
-class HomeStatus extends StatefulWidget {
-  const HomeStatus({super.key, required this.repo});
+class HomeGit extends StatefulWidget {
+  const HomeGit({super.key, required this.repo});
   final GitRepo? repo;
   @override
-  State<HomeStatus> createState() => _StatusScreenState();
+  State<HomeGit> createState() => _HomeGitState();
 }
 
-class _StatusScreenState extends State<HomeStatus> {
+class _HomeGitState extends State<HomeGit> {
   @override
-  void didUpdateWidget(covariant HomeStatus oldWidget) {
+  void didUpdateWidget(covariant HomeGit oldWidget) {
     super.didUpdateWidget(oldWidget);
     updateStatus();
   }

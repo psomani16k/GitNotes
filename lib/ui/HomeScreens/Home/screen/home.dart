@@ -1,12 +1,13 @@
-import 'dart:ffi';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_vector_icons/flutter_vector_icons.dart';
 import 'package:git_notes/helpers/git/git_repo_manager.dart';
 import 'package:git_notes/helpers/git/git_repo.dart';
-import 'package:git_notes/ui/GitCloneScreen.dart/git_clone_screen.dart';
-import 'package:git_notes/ui/HomeScreen/sub_screens/home_directory.dart';
-import 'package:git_notes/ui/HomeScreen/sub_screens/home_status.dart';
+import 'package:git_notes/ui/GitCloneScreen/screen/git_clone_screen.dart';
+import 'package:git_notes/ui/HomeScreens/HomeDirectory/screen/home_directory.dart';
+import 'package:git_notes/ui/HomeScreens/HomeGit/screen/home_git.dart';
+import 'dart:math' as math;
+
+import 'package:page_transition/page_transition.dart';
 
 class Home extends StatefulWidget {
   const Home({super.key});
@@ -23,7 +24,8 @@ class _HomeState extends State<Home> {
   Widget build(BuildContext context) {
     return Scaffold(
       drawerEnableOpenDragGesture: false,
-      drawer: homeDrawer(350),
+      drawer:
+          homeDrawer(math.min(MediaQuery.sizeOf(context).width * 0.75, 300)),
       appBar: homeAppBar(context),
       floatingActionButton: homeFloatingActionButton(),
       bottomNavigationBar: NavigationBar(
@@ -48,7 +50,7 @@ class _HomeState extends State<Home> {
         HomeDirectory(
           repoDir: GitRepoManager.getInstance().repoDirectory(),
         ),
-        HomeStatus(
+        HomeGit(
           repo: GitRepoManager.getInstance().getRepo(),
         )
       ][pageIndex],
@@ -67,6 +69,15 @@ class _HomeState extends State<Home> {
               elevation: 10,
               isDismissible: true,
               builder: (context) {
+                if (!GitRepoManager.getInstance().repoExists()) {
+                  return SizedBox(
+                    width: MediaQuery.sizeOf(context).width,
+                    height: 300,
+                    child: const Center(
+                      child: Text("No repository to pull from."),
+                    ),
+                  );
+                }
                 return FutureBuilder(
                   future: GitRepoManager.getInstance().pull(),
                   builder: (context, snapshot) {
@@ -175,9 +186,15 @@ class _HomeState extends State<Home> {
               const Divider(),
               InkWell(
                 onTap: () async {
-                  await Navigator.of(context).push(MaterialPageRoute(
-                    builder: (context) => const GitCloneScreen(),
-                  ));
+                  await Navigator.of(context).push(
+                    PageTransition(
+                      child: const GitCloneScreen(),
+                      type: PageTransitionType.rightToLeftWithFade,
+                      curve: Easing.emphasizedAccelerate,
+                      reverseDuration: Durations.medium2,
+                      duration: Durations.long1,
+                    ),
+                  );
                   setState(() {});
                 },
                 child: const Row(
@@ -340,21 +357,23 @@ class __PushAndCommitBottomSheetState extends State<_PushAndCommitBottomSheet> {
       onTap: () {
         push();
       },
-      child: Container(
+      child: SizedBox(
         height: 80,
-        width: MediaQuery.sizeOf(context).width < 500
-            ? MediaQuery.sizeOf(context).width
-            : 500,
-        decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(25),
-            color: Theme.of(context).colorScheme.tertiaryContainer),
-        child: Center(
-          child: Text(
-            "Push",
-            style: TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.w500,
-                color: Theme.of(context).colorScheme.onTertiaryContainer),
+        child: Container(
+          width: MediaQuery.sizeOf(context).width < 500
+              ? MediaQuery.sizeOf(context).width
+              : 500,
+          decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(25),
+              color: Theme.of(context).colorScheme.tertiaryContainer),
+          child: Center(
+            child: Text(
+              "Push",
+              style: TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.w500,
+                  color: Theme.of(context).colorScheme.onTertiaryContainer),
+            ),
           ),
         ),
       ),
