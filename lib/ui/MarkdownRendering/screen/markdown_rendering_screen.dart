@@ -65,11 +65,16 @@ class _MarkdownRenderingScreenState extends State<MarkdownRenderingScreen> {
             String filePath = path.join(parent.path, url);
             File file = File(filePath);
             file = file.absolute;
-            return GestureDetector(
+            if (file.existsSync()) {
+              return GestureDetector(
                 onTap: () async {
                   await OpenFile.open(file.path);
                 },
-                child: Image.file(file));
+                child: Image.file(file),
+              );
+            } else {
+              return Text("Couldn't file file: $url");
+            }
           },
         )
       ]),
