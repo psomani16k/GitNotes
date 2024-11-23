@@ -55,11 +55,6 @@ class _HomeDirectoryState extends State<HomeDirectory> {
     if (currentDirectory == null) {
       return;
     }
-    if (mounted) {
-      setState(() {
-        loading = true;
-      });
-    }
     currentDirectory ??= widget.repoDir;
     if (!currentDirectory!.path.startsWith(widget.repoDir!.path)) {
       currentDirectory = widget.repoDir;
@@ -75,18 +70,12 @@ class _HomeDirectoryState extends State<HomeDirectory> {
         directoryEntities.add(entity);
       }
     }
-    if (mounted) {
-      setState(() {
-        loading = false;
-      });
-    }
   }
 
   List<File> fileEntities = [];
   List<Directory> directoryEntities = [];
   bool updated = false;
   bool shouldPop = false;
-  bool loading = true;
   Directory? currentDirectory;
 
   @override
@@ -125,9 +114,7 @@ class _HomeDirectoryState extends State<HomeDirectory> {
           }
         },
         key: const Key("home-directory"),
-        child: loading
-            ? const LinearProgressIndicator()
-            : homeDirectoryDirectory(),
+        child: homeDirectoryDirectory(),
       ),
     );
   }
@@ -189,7 +176,6 @@ class _HomeDirectoryState extends State<HomeDirectory> {
     String extension = name.split(".").last;
     return InkWell(
       onTap: () async {
-        // TODO: open the file
         if (extension == "md") {
           Navigator.of(context).push(MaterialPageRoute(
             builder: (context) {
