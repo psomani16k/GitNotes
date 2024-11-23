@@ -26,11 +26,13 @@ pub mod pull_repo {
         let mut callback = git2::RemoteCallbacks::new();
         callback.certificate_check(|_, _| Ok(CertificateCheckStatus::CertificateOk));
 
-        callback.credentials(|_a, _b, _c| match &password{
+        callback.credentials(|_a, _b, _c| match &password {
             Some(pass) => Cred::userpass_plaintext(user.as_str(), pass.as_str()),
             None => Cred::username(user.as_str()),
         });
-        remote.connect_auth(git2::Direction::Fetch, Some(callback), None).unwrap();
+        remote
+            .connect_auth(git2::Direction::Fetch, Some(callback), None)
+            .unwrap();
 
         let branches = match get_refs(&remote) {
             Ok(branches) => branches,
@@ -46,7 +48,7 @@ pub mod pull_repo {
             Err(err) => return Err(err),
         };
 
-      let mut  return_string = format!("Fetching...\n{}\n\nMerging...\n", msg);
+        let mut return_string = format!("Fetching...\n{}\n\nMerging...\n", msg);
 
         for branch in branches {
             return_string = format!("{}Branch '{}' - ", return_string, branch);
@@ -312,7 +314,13 @@ pub mod pull_repo {
                 }
             };
             match fast_forward(repo, &mut referance, &fetch_commit) {
-                Ok(_) => {}
+                Ok(_) => {
+                    result_string = format!(
+                        "Fast-Forward: Setting {} to id {}",
+                        String::from_utf8_lossy(referance.name_bytes()),
+                        fetch_commit.id()
+                    );
+                }
                 Err(err) => return Err(err),
             };
         } else if analysis.0.is_normal() {
@@ -320,7 +328,9 @@ pub mod pull_repo {
                 .reference_to_annotated_commit(&repo.head().unwrap())
                 .unwrap();
             match normal_merge(&repo, &head_commit, &fetch_commit) {
-                Ok(_) => {}
+                Ok(_) => {
+                    result_string = format!("Merging: {} into {}", fetch_commit.id(), head_commit.id());
+                }
                 Err(err) => return Err(err),
             };
         } else if analysis.0.is_up_to_date() {

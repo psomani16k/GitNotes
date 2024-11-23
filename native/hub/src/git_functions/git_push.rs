@@ -49,7 +49,6 @@ pub mod push_commits {
         // getting refspecs
         // this seems to be only returning "HEAD" on android... for now forcefully using "main" as the branch... need to investigate
         let branch = current_branch(&repo_dir);
-        let branch = "main";
         let refspec = format!("refs/heads/{}:refs/heads/{}", branch, branch);
         debug_print!("Starting push now");
         match remote.push::<&str>(&[&refspec], Some(&mut options)) {
