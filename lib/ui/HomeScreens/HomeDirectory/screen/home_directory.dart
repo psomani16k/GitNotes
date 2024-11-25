@@ -70,6 +70,7 @@ class _HomeDirectoryState extends State<HomeDirectory> {
         directoryEntities.add(entity);
       }
     }
+    setState(() {});
   }
 
   List<File> fileEntities = [];
@@ -139,10 +140,8 @@ class _HomeDirectoryState extends State<HomeDirectory> {
     String name = dir.path.split("/").last;
     return InkWell(
       onTap: () {
-        setState(() {
-          currentDirectory = dir;
-          populateData();
-        });
+        currentDirectory = dir;
+        populateData();
       },
       child: SizedBox(
         height: 70,
