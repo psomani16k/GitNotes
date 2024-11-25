@@ -2,7 +2,6 @@ pub mod push_commits {
     use std::path::Path;
 
     use git2::{CertificateCheckStatus, Cred, PushOptions, RemoteCallbacks, Repository};
-    use rinf::debug_print;
 
     use crate::git_functions::{
         errors::git_errors::GitError, git_checkout::branch_repo::current_branch,
@@ -13,7 +12,6 @@ pub mod push_commits {
         user: String,
         password: Option<String>,
     ) -> Result<(), GitError> {
-        debug_print!("push called");
         match unsafe { git2::opts::set_verify_owner_validation(false) } {
             Ok(_) => {}
             Err(err) => {
@@ -50,7 +48,6 @@ pub mod push_commits {
         // this seems to be only returning "HEAD" on android... for now forcefully using "main" as the branch... need to investigate
         let branch = current_branch(&repo_dir);
         let refspec = format!("refs/heads/{}:refs/heads/{}", branch, branch);
-        debug_print!("Starting push now");
         match remote.push::<&str>(&[&refspec], Some(&mut options)) {
             Ok(_) => {}
             Err(err) => {
@@ -70,7 +67,6 @@ pub mod push_commits {
         };
         let repo = Repository::open(Path::new(&repo_dir)).unwrap();
         let branch = repo.head().unwrap();
-        debug_print!("{}", branch.is_branch());
         let local_commit = branch.peel_to_commit().unwrap();
         let remote_ref = repo.find_reference("refs/remotes/origin/HEAD").unwrap();
         let remote_commit = remote_ref.peel_to_commit().unwrap();

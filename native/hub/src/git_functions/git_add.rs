@@ -1,7 +1,7 @@
 pub mod stage_file {
     use std::path::Path;
 
-    use git2::{IndexAddOption, IndexEntry, IndexTime, Repository, StatusOptions};
+    use git2::{Index, IndexAddOption, Repository, StatusOptions};
 
     use crate::git_functions::errors::git_errors::GitError;
 
@@ -140,48 +140,19 @@ pub mod stage_file {
         let mut index = repo.index().unwrap();
         if file_status.is_index_new() {
             index.remove_path(Path::new(&file_path)).unwrap();
-        }
-
-        if file_status.is_index_renamed()
+        } else if file_status.is_index_renamed()
             || file_status.is_index_modified()
             || file_status.is_index_typechange()
+            || file_status.is_index_deleted()
         {
             let last_commit = repo.head().unwrap().peel_to_commit().unwrap();
             let commit_tree = last_commit.tree().unwrap();
-            let tree_entry = commit_tree.get_path(Path::new(&file_path)).unwrap();
-            let current_index_entry = index.get_path(Path::new(&file_path), 0).unwrap();
-            let mut new_index_entry = IndexEntry::from(current_index_entry);
-            new_index_entry.ctime = IndexTime::new(0, 0);
-            new_index_entry.mtime = IndexTime::new(0, 0);
-            new_index_entry.dev = 0;
-            new_index_entry.ino = 0;
-            new_index_entry.uid = 0;
-            new_index_entry.gid = 0;
-            new_index_entry.file_size = 0;
-            new_index_entry.id = tree_entry.id();
-            new_index_entry.path = file_path.into();
-            index.add(&new_index_entry).expect("should just work");
-        } else if file_status.is_index_deleted() {
-            // let last_commit = repo.head().unwrap().peel_to_commit().unwrap();
-            // let commit_tree = last_commit.tree().unwrap();
-            // let tree_entry = commit_tree.get_path(Path::new(&file_path)).unwrap();
-            // let current_index_entry = index.get_path(Path::new(&file_path), 0).unwrap();
-            // let mut new_index_entry = IndexEntry::from(current_index_entry);
-            // new_index_entry.ctime = IndexTime::new(0, 0);
-            // new_index_entry.mtime = IndexTime::new(0, 0);
-            // new_index_entry.dev = 0;
-            // new_index_entry.ino = 0;
-            // new_index_entry.uid = 0;
-            // new_index_entry.gid = 0;
-            // new_index_entry.file_size = 0;
-            // new_index_entry.id = tree_entry.id();
-            // new_index_entry.path = file_path.into();
-            // index.add(&new_index_entry).expect("should just work");
-            return Err(GitError::new(
-                "".to_string(),
-                "Unstaging deleted files not supported yet".to_string(),
-            ));
+            let mut temp_index = Index::new().unwrap();
+            temp_index.read_tree(&commit_tree).unwrap();
+            let new_index_entry = temp_index.get_path(Path::new(&file_path), 0).unwrap();
+            index.add(&new_index_entry).unwrap();
         }
+
         index.write().expect("should just work");
 
         Ok(())
