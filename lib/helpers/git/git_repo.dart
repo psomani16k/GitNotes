@@ -4,7 +4,6 @@ import 'package:git_notes/helpers/git/directory.dart';
 import 'package:git_notes/messages/commit_push_check.pb.dart';
 import 'package:git_notes/messages/git_add.pb.dart';
 import 'package:git_notes/messages/git_clone.pb.dart';
-import 'package:git_notes/messages/git_clone.pbenum.dart';
 import 'package:git_notes/messages/git_commit.pb.dart';
 import 'package:git_notes/messages/git_pull.pb.dart';
 import 'package:git_notes/messages/git_push.pb.dart';

@@ -1,10 +1,10 @@
 name: git_notes
-description: "A new Flutter project."
+description: "A Git based notes app... Currently is just a Git client for android."
 # The following line prevents the package from being accidentally published to
 # pub.dev using `flutter pub publish`. This is preferred for private packages.
 publish_to: 'none' # Remove this line if you wish to publish to pub.dev
 
-version: 0.0.0-alpha
+version: 0.0.1-alpha
 
 environment:
   sdk: ^3.5.3

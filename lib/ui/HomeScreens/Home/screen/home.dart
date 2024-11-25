@@ -5,6 +5,7 @@ import 'package:git_notes/helpers/git/git_repo.dart';
 import 'package:git_notes/ui/GitCloneScreen/screen/git_clone_screen.dart';
 import 'package:git_notes/ui/HomeScreens/HomeDirectory/screen/home_directory.dart';
 import 'package:git_notes/ui/HomeScreens/HomeGit/screen/home_git.dart';
+import 'package:git_notes/ui/SettingsScreen/Settings/settings.dart';
 import 'dart:math' as math;
 
 import 'package:page_transition/page_transition.dart';
@@ -107,6 +108,7 @@ class _HomeState extends State<Home> {
             );
           } else if (pageIndex == 1) {
             await showModalBottomSheet(
+              useSafeArea: true,
               context: context,
               builder: (context) {
                 return const Padding(
@@ -212,8 +214,16 @@ class _HomeState extends State<Home> {
               const Divider(),
               // settings button
               InkWell(
-                onTap: () {
-                  // TODO: route to settings page
+                onTap: () async {
+                  await Navigator.of(context).push(
+                    PageTransition(
+                      child: const SettingsScreen(),
+                      type: PageTransitionType.rightToLeftWithFade,
+                      curve: Easing.emphasizedAccelerate,
+                      reverseDuration: Durations.medium2,
+                      duration: Durations.long1,
+                    ),
+                  );
                 },
                 child: const Row(
                   crossAxisAlignment: CrossAxisAlignment.center,
@@ -251,8 +261,7 @@ class __PushAndCommitBottomSheetState extends State<_PushAndCommitBottomSheet> {
       loading = true;
     });
 
-    var res = await GitRepoManager.getInstance().push();
-    print(res);
+    await GitRepoManager.getInstance().push();
     setState(() {
       loading = false;
     });
