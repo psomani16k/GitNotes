@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:git_notes/helpers/git/git_repo_manager.dart';
+import 'package:git_notes/helpers/settings/settings_helper.dart';
 import 'package:git_notes/ui/HomeScreens/Home/screen/home.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:rinf/rinf.dart';
@@ -8,8 +9,11 @@ import 'package:dynamic_color/dynamic_color.dart';
 
 void main(List<String> args) async {
   WidgetsFlutterBinding.ensureInitialized();
-  await initializeRust(assignRustSignal);
-  await GitRepoManager.init();
+  await Future.wait([
+    initializeRust(assignRustSignal),
+    GitRepoManager.init(),
+    SettingsHelper.init(),
+  ]);
   runApp(const EntryPoint());
 }
 

@@ -14,7 +14,7 @@ class SettingsHelper {
     _instance = SettingsHelper._(listOfSettings[0]);
   }
 
-  SettingsHelper getInstance() {
+  static SettingsHelper getInstance() {
     return _instance!;
   }
 }

@@ -19,24 +19,31 @@ class InterfaceSettings {
     String? settingsJson =
         await const FlutterSecureStorage().read(key: "interface_settings");
     if (settingsJson == null) {
-      InterfaceSettings settings = InterfaceSettings._(AppTheme.system, false,
-          Colors.blue, false, GoogleFonts.poppins().fontFamily!);
+      // -----defaults-----
+      InterfaceSettings settings = InterfaceSettings._(
+        AppTheme.system,
+        false,
+        Colors.blue,
+        false,
+        "Poppins",
+      );
+      //-------------------
       Map<String, String> map = settings.toJson();
       const FlutterSecureStorage()
           .write(key: "interface_settings", value: jsonEncode(map));
       _instance = settings;
       return settings;
     } else {
-      Map<String, String> json = jsonDecode(settingsJson);
+      Map<String, dynamic> json = jsonDecode(settingsJson);
       _instance = fromJson(json);
       return _instance!;
     }
   }
 
-  static InterfaceSettings fromJson(Map<String, String> json) {
+  static InterfaceSettings fromJson(Map<String, dynamic> json) {
     bool customAccentColor = json["customAccentColor"] == "true";
     bool showHiddenFolders = json["showHiddenFolders"] == "true";
-    String fontFamily = json["fontFamily"] ?? GoogleFonts.poppins().fontFamily!;
+    String fontFamily = json["fontFamily"] ?? "Poppins";
     AppTheme theme = AppTheme.values.where(
       (element) {
         return element.toString() == json["theme"];
@@ -102,11 +109,20 @@ class InterfaceSettings {
   }
 
   TextStyle getFont(TextStyle style) {
+    print(GoogleFonts.asMap().keys.toList());
     return GoogleFonts.getFont(_fontFamily, textStyle: style);
   }
 
   bool getShowHiddenFolders() {
     return _showHiddenFolders;
+  }
+
+  bool getCustomAccentColor() {
+    return _customAccentColor;
+  }
+
+  Color getAccentColor() {
+    return _accentColor;
   }
 
   ThemeMode getTheme() {
@@ -120,6 +136,14 @@ class InterfaceSettings {
       case AppTheme.black:
         return ThemeMode.dark;
     }
+  }
+
+  AppTheme getThemeRaw() {
+    return _theme;
+  }
+
+  String getFontName() {
+    return _fontFamily;
   }
 
   void setShowHiddenFolders(bool showhiddenFolders) {
