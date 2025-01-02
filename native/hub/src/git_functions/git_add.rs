@@ -139,6 +139,9 @@ pub mod stage_file {
         let file_status = repo.status_file(Path::new(&file_path)).unwrap();
         let mut index = repo.index().unwrap();
         if file_status.is_index_new() {
+
+
+
             index.remove_path(Path::new(&file_path)).unwrap();
         } else if file_status.is_index_renamed()
             || file_status.is_index_modified()

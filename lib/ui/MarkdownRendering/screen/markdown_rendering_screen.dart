@@ -225,6 +225,35 @@ class _MarkdownPreviewState extends State<MarkdownPreview> {
       return 'input type="checkbox" onclick="notelesscheckbox.postMessage( this.checked + \'-$checkboxIndex\');"';
     });
 
+    // Making images and attachments work
+
+    htmlData = htmlData.replaceAll("<img ", '<img width="100%" ');
+
+    print("----------------------");
+    String imgCorrectedHtml = "";
+    htmlData.splitMapJoin(
+      RegExp(r'<img width="100%" src="([^"]*)"(.*)/>'),
+      onNonMatch: (p0) {
+        imgCorrectedHtml = "$imgCorrectedHtml\n$p0";
+        return "";
+      },
+      onMatch: (p0) {
+        RegExpMatch altMatch = RegExp(r'alt="([^"]*)"').firstMatch(p0[0]!)!;
+        String alt = p0[0]!.substring(altMatch.start + 5, altMatch.end - 1);
+        RegExpMatch srcMatch = RegExp(r'src="([^"]*)"').firstMatch(p0[0]!)!;
+        String src = p0[0]!.substring(srcMatch.start + 5, srcMatch.end - 1);
+        if (!src.contains("://")) {
+          src = "file://${widget.mdFile.parent.path}/$src";
+        }
+        String correctedTag = '<img width="100%" src="$src" alt="$alt" />';
+        print(correctedTag);
+        imgCorrectedHtml = imgCorrectedHtml + correctedTag;
+        return "";
+      },
+    );
+    print("----------------------");
+    htmlData = imgCorrectedHtml;
+
     // Writing generated HTML to the temp file
     htmlFile = await htmlFile.writeAsString(htmlData);
 
