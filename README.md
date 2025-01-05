@@ -19,15 +19,16 @@ Please note: The app is still in its initial stages and the UI is *surely* going
 
 ## Building Yourself
 
-1. Make sure Flutter and the Rust compiler is installed on your machine. Also add the `Android NDK` to your path variable.
-2. Clone the repository.
-3. Install rinf on your machine in the cloned directory using cargo
+1. Make sure [Flutter](https://docs.flutter.dev/get-started/install) and the [Rust](https://www.rust-lang.org/tools/install) Toolchain is installed on your maching.
+2. Ensure Android-Studio is installed.
+3. Ensure `ANDROID_NDK_HOME` is set to the correct location.
+4. Clone the repository.
+5. Install rinf on your machine in the cloned directory using cargo
 
     `cargo install rinf@6.15.0`
 
-4. Run `rinf message` to generate messages between Dart and Rust.
-5. Run `flutter build apk` to build the app.
-6. Profit.
+6. Run `rinf message` to generate messages between Dart and Rust.
+7. Run `flutter build apk` to build the app.
 
 ## FAQs
 

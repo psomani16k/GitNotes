@@ -1,9 +1,12 @@
 import 'dart:io';
+import 'package:animations/animations.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_vector_icons/flutter_vector_icons.dart';
 import 'package:git_notes/ui/MarkdownRendering/screen/markdown_rendering_screen.dart';
 import 'package:open_file_plus/open_file_plus.dart';
+import 'package:page_transition/page_transition.dart';
+import 'package:text_scroll/text_scroll.dart';
 import 'package:visibility_detector/visibility_detector.dart';
 
 class HomeDirectory extends StatefulWidget {
@@ -78,6 +81,7 @@ class _HomeDirectoryState extends State<HomeDirectory> {
   bool updated = false;
   bool shouldPop = false;
   Directory? currentDirectory;
+	bool reverseAnimation = false;
 
   @override
   Widget build(BuildContext context) {
@@ -101,6 +105,7 @@ class _HomeDirectoryState extends State<HomeDirectory> {
         }
         if (currentDirectory != null) {
           currentDirectory = currentDirectory!.parent;
+					reverseAnimation = true;
           populateData();
           return;
         }
@@ -115,7 +120,21 @@ class _HomeDirectoryState extends State<HomeDirectory> {
           }
         },
         key: const Key("home-directory"),
-        child: homeDirectoryDirectory(),
+        child: PageTransitionSwitcher(
+				reverse: reverseAnimation,
+
+          transitionBuilder: (child, primaryAnimation, secondaryAnimation) {
+            return SharedAxisTransition(
+              animation: primaryAnimation,
+              secondaryAnimation: secondaryAnimation,
+              transitionType: SharedAxisTransitionType.horizontal,
+              child: child,
+            );
+          },
+          duration: Durations.medium2,
+          child: KeyedSubtree(
+              key: ValueKey(currentDirectory), child: homeDirectoryDirectory()),
+        ),
       ),
     );
   }
@@ -141,6 +160,7 @@ class _HomeDirectoryState extends State<HomeDirectory> {
     return InkWell(
       onTap: () {
         currentDirectory = dir;
+				reverseAnimation = false;
         populateData();
       },
       child: SizedBox(
@@ -154,7 +174,13 @@ class _HomeDirectoryState extends State<HomeDirectory> {
                   padding: EdgeInsets.symmetric(horizontal: 25),
                   child: Icon(MaterialCommunityIcons.folder_outline),
                 ),
-                Text(name),
+                SizedBox(
+                  width: MediaQuery.sizeOf(context).width - 150,
+                  child: TextScroll(
+                    name,
+                    pauseBetween: const Duration(milliseconds: 1200),
+                  ),
+                ),
               ],
             ),
             const Spacer(),
@@ -176,10 +202,13 @@ class _HomeDirectoryState extends State<HomeDirectory> {
     return InkWell(
       onTap: () async {
         if (extension == "md") {
-          Navigator.of(context).push(MaterialPageRoute(
-            builder: (context) {
-              return MarkdownRenderingScreen(file: file);
-            },
+          Navigator.of(context).push(PageTransition(
+            child: MarkdownRenderingScreen(file: file),
+            childCurrent: widget,
+            type: PageTransitionType.rightToLeftJoined,
+            curve: Easing.emphasizedDecelerate,
+            reverseDuration: Durations.medium2,
+            duration: Durations.long1,
           ));
         } else {
           await OpenFile.open(file.path);
@@ -197,7 +226,14 @@ class _HomeDirectoryState extends State<HomeDirectory> {
                   child: Icon(fileIcons[extension] ??
                       MaterialCommunityIcons.file_outline),
                 ),
-                Text(name),
+                SizedBox(
+                  width: MediaQuery.sizeOf(context).width - 120,
+                  child: TextScroll(
+                    mode: TextScrollMode.endless,
+                    "$name             ",
+                    pauseBetween: const Duration(seconds: 2),
+                  ),
+                ),
               ],
             ),
             const Spacer(),
