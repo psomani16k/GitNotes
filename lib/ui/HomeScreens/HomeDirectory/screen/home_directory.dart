@@ -81,7 +81,7 @@ class _HomeDirectoryState extends State<HomeDirectory> {
   bool updated = false;
   bool shouldPop = false;
   Directory? currentDirectory;
-	bool reverseAnimation = false;
+  bool reverseAnimation = false;
 
   @override
   Widget build(BuildContext context) {
@@ -105,7 +105,7 @@ class _HomeDirectoryState extends State<HomeDirectory> {
         }
         if (currentDirectory != null) {
           currentDirectory = currentDirectory!.parent;
-					reverseAnimation = true;
+          reverseAnimation = true;
           populateData();
           return;
         }
@@ -121,8 +121,7 @@ class _HomeDirectoryState extends State<HomeDirectory> {
         },
         key: const Key("home-directory"),
         child: PageTransitionSwitcher(
-				reverse: reverseAnimation,
-
+          reverse: reverseAnimation,
           transitionBuilder: (child, primaryAnimation, secondaryAnimation) {
             return SharedAxisTransition(
               animation: primaryAnimation,
@@ -160,7 +159,7 @@ class _HomeDirectoryState extends State<HomeDirectory> {
     return InkWell(
       onTap: () {
         currentDirectory = dir;
-				reverseAnimation = false;
+        reverseAnimation = false;
         populateData();
       },
       child: SizedBox(
@@ -202,14 +201,16 @@ class _HomeDirectoryState extends State<HomeDirectory> {
     return InkWell(
       onTap: () async {
         if (extension == "md") {
-          Navigator.of(context).push(PageTransition(
-            child: MarkdownRenderingScreen(file: file),
-            childCurrent: widget,
-            type: PageTransitionType.rightToLeftJoined,
-            curve: Easing.emphasizedDecelerate,
-            reverseDuration: Durations.medium2,
-            duration: Durations.long1,
-          ));
+          Navigator.of(context).push(
+            PageTransition(
+              child: MarkdownRenderingScreen(file: file),
+              childCurrent: widget,
+              type: PageTransitionType.rightToLeftWithFade,
+              curve: Curves.easeInOut,
+              reverseDuration: Durations.long1,
+              duration: Durations.long1,
+            ),
+          );
         } else {
           await OpenFile.open(file.path);
         }

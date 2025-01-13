@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_vector_icons/flutter_vector_icons.dart';
 import 'package:git_notes/helpers/git/git_repo_manager.dart';
 import 'package:git_notes/helpers/git/git_repo.dart';
 import 'package:git_notes/ui/GitCloneScreen/screen/git_clone_screen.dart';
+import 'package:git_notes/ui/HomeScreens/Home/bloc/home_bloc.dart';
 import 'package:git_notes/ui/HomeScreens/HomeDirectory/screen/home_directory.dart';
 import 'package:git_notes/ui/HomeScreens/HomeGit/screen/home_git.dart';
 import 'package:git_notes/ui/SettingsScreen/Settings/settings.dart';
@@ -20,41 +22,55 @@ class Home extends StatefulWidget {
 class _HomeState extends State<Home> {
   void handleFloatingActionButton() {}
 
+  final HomeDirectory _homeDirectory = HomeDirectory(
+    repoDir: GitRepoManager.getInstance().repoDirectory(),
+  );
+
+  final HomeGit _homeGit = HomeGit(
+    repo: GitRepoManager.getInstance().getRepo(),
+  );
+
+  // State variables
   int pageIndex = 0;
+
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      drawerEnableOpenDragGesture: false,
-      drawer:
-          homeDrawer(math.min(MediaQuery.sizeOf(context).width * 0.75, 300)),
-      appBar: homeAppBar(context),
-      floatingActionButton: homeFloatingActionButton(),
-      bottomNavigationBar: NavigationBar(
-        destinations: const [
-          NavigationDestination(
-            icon: Icon(MaterialCommunityIcons.folder),
-            label: "Directory",
+    return BlocConsumer<HomeBloc, HomeState>(
+      bloc: BlocProvider.of<HomeBloc>(context),
+      listener: (context, state) {},
+      builder: (context, state) {
+        if (state is HomeSetRepositoryState) {}
+        return Scaffold(
+          drawerEnableOpenDragGesture: false,
+          drawer: homeDrawer(
+              math.min(MediaQuery.sizeOf(context).width * 0.75, 300)),
+          appBar: homeAppBar(context),
+          floatingActionButton: homeFloatingActionButton(),
+          bottomNavigationBar: NavigationBar(
+            destinations: const [
+              NavigationDestination(
+                icon: Icon(MaterialCommunityIcons.folder),
+                label: "Directory",
+              ),
+              NavigationDestination(
+                icon: Icon(MaterialCommunityIcons.git),
+                label: "Git",
+              )
+            ],
+            selectedIndex: pageIndex,
+            onDestinationSelected: (value) {
+              // no need to use bloc here...
+              setState(() {
+                pageIndex = value;
+              });
+            },
           ),
-          NavigationDestination(
-            icon: Icon(MaterialCommunityIcons.git),
-            label: "Git",
-          )
-        ],
-        selectedIndex: pageIndex,
-        onDestinationSelected: (value) {
-          setState(() {
-            pageIndex = value;
-          });
-        },
-      ),
-      body: [
-        HomeDirectory(
-          repoDir: GitRepoManager.getInstance().repoDirectory(),
-        ),
-        HomeGit(
-          repo: GitRepoManager.getInstance().getRepo(),
-        )
-      ][pageIndex],
+          body: [
+            _homeDirectory,
+            _homeGit,
+          ][pageIndex],
+        );
+      },
     );
   }
 
@@ -197,6 +213,8 @@ class _HomeState extends State<Home> {
                       duration: Durations.long1,
                     ),
                   );
+                  // TODO: replace this with something that sets current repo to the new
+                  // repo if it was previously empty also maybe use bloc here
                   setState(() {});
                 },
                 child: const Row(
@@ -248,7 +266,7 @@ class _HomeState extends State<Home> {
 }
 
 class _PushAndCommitBottomSheet extends StatefulWidget {
-  const _PushAndCommitBottomSheet({super.key});
+  const _PushAndCommitBottomSheet();
 
   @override
   State<_PushAndCommitBottomSheet> createState() =>

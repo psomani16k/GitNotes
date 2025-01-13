@@ -29,7 +29,7 @@ pub mod restore_file {
             let id = entry.id();
             let blob = repo.find_blob(id).unwrap();
             let file_content = blob.content();
-            match std::fs::write(file_absolute_path, file_content) {
+            match std::fs::write(Path::new(&file_absolute_path), file_content) {
                 Ok(_) => {}
                 Err(err) => return Err(GitError::new("RF_E2".to_string(), err.to_string())),
             }

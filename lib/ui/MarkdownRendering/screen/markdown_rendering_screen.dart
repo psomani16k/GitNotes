@@ -77,11 +77,18 @@ class _MarkdownPreviewState extends State<MarkdownPreview> {
         widget.mdFile.writeAsStringSync(mdData);
       });
     if (loading) {
-      return const Center(
-        child: CircularProgressIndicator(),
+      return Center(
+        child: PopScope(
+            canPop: true,
+            onPopInvokedWithResult: (didPop, result) {
+              Navigator.of(context).pop();
+            },
+            child: const CircularProgressIndicator()),
       );
     } else {
-      return WebViewWidget(controller: viewController..loadFile(htmlFile.path));
+      return WebViewWidget(
+        controller: viewController..loadFile(htmlFile.path),
+      );
     }
   }
 
