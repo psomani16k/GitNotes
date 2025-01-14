@@ -1,7 +1,9 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:markdown/markdown.dart' as md;
+import 'package:page_transition/page_transition.dart';
 import 'package:path_provider/path_provider.dart';
+import 'package:url_launcher/url_launcher_string.dart';
 import 'package:webview_flutter/webview_flutter.dart';
 
 class MarkdownRenderingScreen extends StatefulWidget {
@@ -23,7 +25,7 @@ class _MarkdownRenderingScreenState extends State<MarkdownRenderingScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('file'),
+        title: Text(widget.file.path.split("/").last),
       ),
       body: MarkdownPreview(
         theme: Theme.of(context),
@@ -62,7 +64,7 @@ class _MarkdownPreviewState extends State<MarkdownPreview> {
     WebViewController viewController = WebViewController()
       ..setJavaScriptMode(JavaScriptMode.unrestricted)
       ..setBackgroundColor(Theme.of(context).scaffoldBackgroundColor)
-      ..addJavaScriptChannel("notelesscheckbox", onMessageReceived: (msg) {
+      ..addJavaScriptChannel("GitNotesCheckBox", onMessageReceived: (msg) {
         final parts = msg.message.split('-');
 
         final bool checked = parts[0] == 'true';
@@ -75,7 +77,28 @@ class _MarkdownPreviewState extends State<MarkdownPreview> {
             (checked ? 'x' : ' ') +
             mdData.substring(index + 1);
         widget.mdFile.writeAsStringSync(mdData);
-      });
+      })
+      ..addJavaScriptChannel(
+        "GitNotesLink",
+        onMessageReceived: (msg) {
+          if (msg.message.contains("://")) {
+            launchUrlString(msg.message);
+          } else {
+						File file = File("${widget.mdFile.parent.path}/${msg.message}"); 
+            Navigator.of(context).push(
+              PageTransition(
+                child: MarkdownRenderingScreen(file: file),
+                childCurrent: widget,
+                type: PageTransitionType.rightToLeftWithFade,
+                curve: Curves.easeInOut,
+                reverseDuration: Durations.long1,
+                duration: Durations.long1,
+              ),
+            );
+						print(file.path);
+          }
+        },
+      );
     if (loading) {
       return Center(
         child: PopScope(
@@ -106,8 +129,18 @@ class _MarkdownPreviewState extends State<MarkdownPreview> {
     await htmlFile.create(recursive: true);
 
     // Generating HTML preview
-    String htmlData =
-        md.markdownToHtml(mdData, extensionSet: md.ExtensionSet.gitHubFlavored);
+    String htmlData = md.markdownToHtml(
+      mdData,
+      extensionSet: md.ExtensionSet.gitHubFlavored,
+    );
+
+    // Making linking files work
+    htmlData = htmlData.replaceAll("<a href=",
+        '<a onclick=" event.preventDefault(); GitNotesLink.postMessage(this.getAttribute(\'href\'));" href=');
+    print("--------------------------------");
+    print(htmlData);
+    print("--------------------------------");
+
     const staticPreviewDir =
         'file:///android_asset/flutter_assets/assets/preview';
     ThemeData theme = widget.theme;
@@ -123,6 +156,7 @@ class _MarkdownPreviewState extends State<MarkdownPreview> {
         .toRadixString(16)
         .padLeft(8, '0')
         .substring(2);
+
     // Pretifying the HTML
     htmlData = '''
 <!DOCTYPE html>
@@ -229,14 +263,12 @@ class _MarkdownPreviewState extends State<MarkdownPreview> {
     int checkboxIndex = -1;
     htmlData = htmlData.replaceAllMapped('input type="checkbox"', (match) {
       checkboxIndex++;
-      return 'input type="checkbox" onclick="notelesscheckbox.postMessage( this.checked + \'-$checkboxIndex\');"';
+      return 'input type="checkbox" onclick="GitNotesCheckBox.postMessage( this.checked + \'-$checkboxIndex\');"';
     });
 
-    // Making images and attachments work
-
+    // Making images work
     htmlData = htmlData.replaceAll("<img ", '<img width="100%" ');
 
-    print("----------------------");
     String imgCorrectedHtml = "";
     htmlData.splitMapJoin(
       RegExp(r'<img width="100%" src="([^"]*)"(.*)/>'),
@@ -258,7 +290,6 @@ class _MarkdownPreviewState extends State<MarkdownPreview> {
         return "";
       },
     );
-    print("----------------------");
     htmlData = imgCorrectedHtml;
 
     // Writing generated HTML to the temp file

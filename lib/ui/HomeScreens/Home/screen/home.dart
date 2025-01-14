@@ -80,6 +80,7 @@ class _HomeState extends State<Home> {
         onPressed: () async {
           if (pageIndex == 0) {
             await showModalBottomSheet(
+              useSafeArea: true,
               context: context,
               showDragHandle: true,
               enableDrag: true,

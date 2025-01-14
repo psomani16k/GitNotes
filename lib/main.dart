@@ -35,12 +35,14 @@ class EntryPoint extends StatelessWidget {
             colorScheme: lightDynamic,
             textTheme: GoogleFonts.montserratTextTheme(),
           ),
-          darkTheme: ThemeData(colorScheme: darkDynamic),
+          darkTheme: ThemeData(
+            colorScheme: darkDynamic,
+          ),
           home: MultiBlocProvider(providers: [
             BlocProvider(create: (context) => HomeBloc()),
             BlocProvider(create: (context) => HomeDirectoryBloc()),
             BlocProvider(create: (context) => HomeGitBloc()),
-            BlocProvider(create: (context) => GitCloneBloc()),
+            // BlocProvider(create: (context) => GitCloneBloc()),
           ], child: const Home()),
         );
       },

@@ -235,7 +235,7 @@ pub mod pull_repo {
         });
         let mut fetch_options = FetchOptions::new();
         fetch_options.remote_callbacks(callback);
-        fetch_options.download_tags(git2::AutotagOption::All);
+        fetch_options.download_tags(git2::AutotagOption::Auto);
         match remote.fetch(refs, Some(&mut fetch_options), None) {
             Ok(_) => {}
             Err(err) => {
@@ -329,7 +329,8 @@ pub mod pull_repo {
                 .unwrap();
             match normal_merge(&repo, &head_commit, &fetch_commit) {
                 Ok(_) => {
-                    result_string = format!("Merging: {} into {}", fetch_commit.id(), head_commit.id());
+                    result_string =
+                        format!("Merging: {} into {}", fetch_commit.id(), head_commit.id());
                 }
                 Err(err) => return Err(err),
             };
