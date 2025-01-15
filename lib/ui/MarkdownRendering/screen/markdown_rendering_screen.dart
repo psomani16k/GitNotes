@@ -1,5 +1,6 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:git_notes/ui/MarkdownRendering/screen/markdown_editing_screen.dart';
 import 'package:markdown/markdown.dart' as md;
 import 'package:page_transition/page_transition.dart';
 import 'package:path_provider/path_provider.dart';
@@ -26,6 +27,24 @@ class _MarkdownRenderingScreenState extends State<MarkdownRenderingScreen> {
     return Scaffold(
       appBar: AppBar(
         title: Text(widget.file.path.split("/").last),
+        actions: [
+          IconButton(
+            onPressed: () async {
+              await Navigator.of(context).push(
+                PageTransition(
+                  child: MarkdownEditingScreen(file: widget.file),
+                  childCurrent: widget,
+                  type: PageTransitionType.rightToLeftWithFade,
+                  curve: Curves.easeInOut,
+                  reverseDuration: Durations.long1,
+                  duration: Durations.long1,
+                ),
+              );
+              setState(() {});
+            },
+            icon: const Icon(Icons.edit_note),
+          )
+        ],
       ),
       body: MarkdownPreview(
         theme: Theme.of(context),
@@ -59,6 +78,12 @@ class _MarkdownPreviewState extends State<MarkdownPreview> {
     processMarkdown();
   }
 
+	@override
+	  void didUpdateWidget(covariant MarkdownPreview oldWidget) {
+	    super.didUpdateWidget(oldWidget);
+			processMarkdown();
+	  }
+
   @override
   Widget build(BuildContext context) {
     WebViewController viewController = WebViewController()
@@ -84,7 +109,7 @@ class _MarkdownPreviewState extends State<MarkdownPreview> {
           if (msg.message.contains("://")) {
             launchUrlString(msg.message);
           } else {
-						File file = File("${widget.mdFile.parent.path}/${msg.message}"); 
+            File file = File("${widget.mdFile.parent.path}/${msg.message}");
             Navigator.of(context).push(
               PageTransition(
                 child: MarkdownRenderingScreen(file: file),
@@ -95,7 +120,7 @@ class _MarkdownPreviewState extends State<MarkdownPreview> {
                 duration: Durations.long1,
               ),
             );
-						print(file.path);
+            print(file.path);
           }
         },
       );
