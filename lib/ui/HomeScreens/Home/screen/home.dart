@@ -125,12 +125,30 @@ class _HomeState extends State<Home> {
             );
           } else if (pageIndex == 1) {
             await showModalBottomSheet(
-              useSafeArea: true,
               context: context,
+              isScrollControlled: true, // Allows resizing to avoid the keyboard
+              useSafeArea: true,
               builder: (context) {
-                return const Padding(
-                  padding: EdgeInsets.all(20),
-                  child: _PushAndCommitBottomSheet(),
+                return Padding(
+                  padding: EdgeInsets.only(
+                    bottom: MediaQuery.of(context)
+                        .viewInsets
+                        .bottom, // Adjust for keyboard height
+                    left: 20,
+                    right: 20,
+                  ),
+                  child: const SingleChildScrollView(
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        SizedBox(height: 20),
+                        _PushAndCommitBottomSheet(),
+                        SizedBox(
+                          height: 30,
+                        ),
+                      ],
+                    ),
+                  ),
                 );
               },
             );
