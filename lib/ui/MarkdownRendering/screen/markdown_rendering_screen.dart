@@ -78,11 +78,11 @@ class _MarkdownPreviewState extends State<MarkdownPreview> {
     processMarkdown();
   }
 
-	@override
-	  void didUpdateWidget(covariant MarkdownPreview oldWidget) {
-	    super.didUpdateWidget(oldWidget);
-			processMarkdown();
-	  }
+  @override
+  void didUpdateWidget(covariant MarkdownPreview oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    processMarkdown();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -91,13 +91,9 @@ class _MarkdownPreviewState extends State<MarkdownPreview> {
       ..setBackgroundColor(Theme.of(context).scaffoldBackgroundColor)
       ..addJavaScriptChannel("GitNotesCheckBox", onMessageReceived: (msg) {
         final parts = msg.message.split('-');
-
         final bool checked = parts[0] == 'true';
-
         final int id = int.parse(parts[1]);
-
         final index = checkboxPositions[id];
-
         mdData = mdData.substring(0, index) +
             (checked ? 'x' : ' ') +
             mdData.substring(index + 1);
@@ -106,9 +102,7 @@ class _MarkdownPreviewState extends State<MarkdownPreview> {
       ..addJavaScriptChannel(
         "GitNotesLink",
         onMessageReceived: (msg) {
-          if (msg.message.contains("://")) {
-            launchUrlString(msg.message);
-          } else {
+          if (msg.message.startsWith("./") || msg.message.startsWith("../")) {
             File file = File("${widget.mdFile.parent.path}/${msg.message}");
             Navigator.of(context).push(
               PageTransition(
@@ -120,7 +114,8 @@ class _MarkdownPreviewState extends State<MarkdownPreview> {
                 duration: Durations.long1,
               ),
             );
-            print(file.path);
+          } else {
+            launchUrlString(msg.message);
           }
         },
       );
@@ -162,9 +157,6 @@ class _MarkdownPreviewState extends State<MarkdownPreview> {
     // Making linking files work
     htmlData = htmlData.replaceAll("<a href=",
         '<a onclick=" event.preventDefault(); GitNotesLink.postMessage(this.getAttribute(\'href\'));" href=');
-    print("--------------------------------");
-    print(htmlData);
-    print("--------------------------------");
 
     const staticPreviewDir =
         'file:///android_asset/flutter_assets/assets/preview';
@@ -306,7 +298,7 @@ class _MarkdownPreviewState extends State<MarkdownPreview> {
         String alt = p0[0]!.substring(altMatch.start + 5, altMatch.end - 1);
         RegExpMatch srcMatch = RegExp(r'src="([^"]*)"').firstMatch(p0[0]!)!;
         String src = p0[0]!.substring(srcMatch.start + 5, srcMatch.end - 1);
-        if (!src.contains("://")) {
+        if (src.startsWith("./") || src.startsWith("../")) {
           src = "file://${widget.mdFile.parent.path}/$src";
         }
         String correctedTag = '<img width="100%" src="$src" alt="$alt" />';
