@@ -73,7 +73,6 @@ class _MarkdownEditingScreenState extends State<MarkdownEditingScreen> {
               );
             },
           );
-          Navigator.pop(context);
         }
       },
       child: Scaffold(
