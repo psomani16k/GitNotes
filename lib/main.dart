@@ -1,3 +1,4 @@
+import 'package:dynamic_color/dynamic_color.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:git_notes/helpers/git/git_repo_manager.dart';
@@ -9,8 +10,8 @@ import 'package:git_notes/ui/HomeScreens/HomeDirectory/bloc/home_directory_bloc.
 import 'package:git_notes/ui/HomeScreens/HomeGit/bloc/home_git_bloc.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:rinf/rinf.dart';
+
 import './messages/generated.dart';
-import 'package:dynamic_color/dynamic_color.dart';
 
 void main(List<String> args) async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -27,25 +28,28 @@ class EntryPoint extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return DynamicColorBuilder(
-      builder: (lightDynamic, darkDynamic) {
-        return MaterialApp(
-          debugShowCheckedModeBanner: false,
-          theme: ThemeData(
-            colorScheme: lightDynamic,
-            textTheme: GoogleFonts.montserratTextTheme(),
-          ),
-          darkTheme: ThemeData(
-            colorScheme: darkDynamic,
-          ),
-          home: MultiBlocProvider(providers: [
-            BlocProvider(create: (context) => HomeBloc()),
-            BlocProvider(create: (context) => HomeDirectoryBloc()),
-            BlocProvider(create: (context) => HomeGitBloc()),
-            // BlocProvider(create: (context) => GitCloneBloc()),
-          ], child: const Home()),
-        );
-      },
+    return MultiBlocProvider(
+      providers: [
+        BlocProvider(create: (context) => HomeBloc()),
+        BlocProvider(create: (context) => HomeDirectoryBloc()),
+        BlocProvider(create: (context) => HomeGitBloc()),
+        BlocProvider(create: (context) => GitCloneBloc()),
+      ],
+      child: DynamicColorBuilder(
+        builder: (lightDynamic, darkDynamic) {
+          return MaterialApp(
+            debugShowCheckedModeBanner: false,
+            theme: ThemeData(
+              colorScheme: lightDynamic,
+              textTheme: GoogleFonts.montserratTextTheme(),
+            ),
+            darkTheme: ThemeData(
+              colorScheme: darkDynamic,
+            ),
+            home: const Home(),
+          );
+        },
+      ),
     );
   }
 }

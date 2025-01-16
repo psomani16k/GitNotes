@@ -19,9 +19,9 @@ class _GitCloneScreenState extends State<GitCloneScreen> {
 
   @override
   Widget build(BuildContext context) {
-    GitCloneBloc bloc = GitCloneBloc();
+    GitCloneBloc bloc = BlocProvider.of<GitCloneBloc>(context);
     return BlocProvider(
-		create: (context) => bloc,
+      create: (context) => bloc,
       child: BlocConsumer<GitCloneBloc, GitCloneState>(
         bloc: bloc,
         builder: (context, state) {
