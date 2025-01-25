@@ -1,16 +1,25 @@
+import 'dart:math' as math;
+import 'dart:io';
+import 'package:animations/animations.dart';
 import 'package:flutter/material.dart';
+import 'package:git_notes/helpers/git/git_repo.dart';
+import 'package:git_notes/helpers/git/git_repo_manager.dart';
+import 'package:git_notes/messages/git_add.pb.dart';
+import 'package:git_notes/messages/git_restore.pb.dart';
+import 'package:git_notes/messages/git_status.pb.dart';
+import 'package:git_notes/ui/GitCloneScreen/bloc/git_clone_bloc.dart';
+import 'package:visibility_detector/visibility_detector.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_vector_icons/flutter_vector_icons.dart';
-import 'package:git_notes/helpers/git/git_repo_manager.dart';
-import 'package:git_notes/helpers/git/git_repo.dart';
 import 'package:git_notes/ui/GitCloneScreen/screen/git_clone_screen.dart';
 import 'package:git_notes/ui/HomeScreens/Home/bloc/home_bloc.dart';
-import 'package:git_notes/ui/HomeScreens/HomeDirectory/screen/home_directory.dart';
-import 'package:git_notes/ui/HomeScreens/HomeGit/screen/home_git.dart';
+import 'package:git_notes/ui/MarkdownRendering/screen/markdown_rendering_screen.dart';
 import 'package:git_notes/ui/SettingsScreen/Settings/settings.dart';
-import 'dart:math' as math;
+import 'package:open_file_plus/open_file_plus.dart';
 
 import 'package:page_transition/page_transition.dart';
+import 'package:text_scroll/text_scroll.dart';
 
 class Home extends StatefulWidget {
   const Home({super.key});
@@ -20,7 +29,7 @@ class Home extends StatefulWidget {
 }
 
 class _HomeState extends State<Home> {
-  void handleFloatingActionButton() {}
+  GitRepo? _currentRepo;
 
   final HomeDirectory _homeDirectory = HomeDirectory(
     repoDir: GitRepoManager.getInstance().repoDirectory(),
@@ -35,11 +44,14 @@ class _HomeState extends State<Home> {
 
   @override
   Widget build(BuildContext context) {
+    HomeBloc bloc = BlocProvider.of<HomeBloc>(context);
     return BlocConsumer<HomeBloc, HomeState>(
-      bloc: BlocProvider.of<HomeBloc>(context),
+      bloc: bloc,
       listener: (context, state) {},
       builder: (context, state) {
-        if (state is HomeSetRepositoryState) {}
+        if (state is HomeSetRepositoryState) {
+          _currentRepo = state.repo;
+        }
         return Scaffold(
           drawerEnableOpenDragGesture: false,
           drawer: homeDrawer(
@@ -232,6 +244,9 @@ class _HomeState extends State<Home> {
                       duration: Durations.long1,
                     ),
                   );
+                  GitCloneBloc gitCloneBloc =
+                      BlocProvider.of<GitCloneBloc>(context);
+                  gitCloneBloc.add(GitCloneInitialEvent());
                   // TODO: replace this with something that sets current repo to the new
                   // repo if it was previously empty also maybe use bloc here
                   setState(() {});
@@ -281,6 +296,602 @@ class _HomeState extends State<Home> {
         }),
       ),
     );
+  }
+}
+
+// Directory comes here
+
+class HomeDirectory extends StatefulWidget {
+  const HomeDirectory({super.key, required this.repoDir});
+  final Directory? repoDir;
+
+  @override
+  State<HomeDirectory> createState() => _HomeDirectoryState();
+}
+
+class _HomeDirectoryState extends State<HomeDirectory> {
+// Page data
+  final Map<String, IconData> fileIcons = {
+    "gitignore": MaterialCommunityIcons.git,
+    "md": MaterialCommunityIcons.language_markdown,
+    "pdf": MaterialCommunityIcons.file_pdf_box,
+    "xlss": MaterialCommunityIcons.microsoft_excel,
+    "ppt": MaterialCommunityIcons.microsoft_powerpoint,
+    "pptx": MaterialCommunityIcons.microsoft_powerpoint,
+    "jpg": MaterialCommunityIcons.file_jpg_box,
+    "png": MaterialCommunityIcons.file_png_box,
+    "rs": MaterialCommunityIcons.language_rust,
+    "js": MaterialCommunityIcons.language_javascript,
+    "ts": MaterialCommunityIcons.language_typescript,
+    "html": MaterialCommunityIcons.language_html5,
+    "lua": MaterialCommunityIcons.language_lua,
+    "go": MaterialCommunityIcons.language_go,
+    "c": MaterialCommunityIcons.language_c,
+    "cpp": MaterialCommunityIcons.language_cpp,
+    "java": MaterialCommunityIcons.language_java,
+    "py": MaterialCommunityIcons.language_python,
+  };
+
+  @override
+  void didUpdateWidget(covariant HomeDirectory oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    currentDirectory = widget.repoDir;
+    populateData();
+  }
+
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    currentDirectory = widget.repoDir;
+  }
+
+  void populateData() async {
+    if (currentDirectory == null) {
+      return;
+    }
+    currentDirectory ??= widget.repoDir;
+    if (!currentDirectory!.path.startsWith(widget.repoDir!.path)) {
+      currentDirectory = widget.repoDir;
+    }
+    List<FileSystemEntity> fileSystemEntities =
+        await currentDirectory!.list().toList();
+    fileEntities = [];
+    directoryEntities = [];
+    for (FileSystemEntity entity in fileSystemEntities) {
+      if (entity is File) {
+        fileEntities.add(entity);
+      } else if (entity is Directory) {
+        directoryEntities.add(entity);
+      }
+    }
+    setState(() {});
+  }
+
+  List<File> fileEntities = [];
+  List<Directory> directoryEntities = [];
+  bool updated = false;
+  bool shouldPop = false;
+  Directory? currentDirectory;
+  bool reverseAnimation = false;
+
+  @override
+  Widget build(BuildContext context) {
+    if (widget.repoDir == null) {
+      return const Center(
+        child: Text("Please clone a repository to continue."),
+      );
+    }
+    return PopScope(
+      canPop: false,
+      onPopInvokedWithResult: (didPop, result) {
+        if (widget.repoDir!.path == currentDirectory!.path && !shouldPop) {
+          shouldPop = true;
+          ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(content: Text("Press again to exit.")));
+          return;
+        }
+        if (widget.repoDir!.path == currentDirectory!.path && shouldPop) {
+          SystemNavigator.pop();
+          return;
+        }
+        if (currentDirectory != null) {
+          currentDirectory = currentDirectory!.parent;
+          reverseAnimation = true;
+          populateData();
+          return;
+        }
+      },
+      child: VisibilityDetector(
+        onVisibilityChanged: (info) {
+          if (info.visibleFraction > 0.1 && !updated) {
+            populateData();
+            updated = true;
+          } else {
+            updated = false;
+          }
+        },
+        key: const Key("home-directory"),
+        child: PageTransitionSwitcher(
+          reverse: reverseAnimation,
+          transitionBuilder: (child, primaryAnimation, secondaryAnimation) {
+            return SharedAxisTransition(
+              animation: primaryAnimation,
+              secondaryAnimation: secondaryAnimation,
+              transitionType: SharedAxisTransitionType.horizontal,
+              child: child,
+            );
+          },
+          duration: Durations.medium2,
+          child: KeyedSubtree(
+              key: ValueKey(currentDirectory), child: homeDirectoryDirectory()),
+        ),
+      ),
+    );
+  }
+
+  ListView homeDirectoryDirectory() {
+    return ListView.builder(
+      itemCount: fileEntities.length + directoryEntities.length + 1,
+      itemBuilder: (context, index) {
+        if (index < directoryEntities.length) {
+          return directoryBox(directoryEntities[index]);
+        }
+        index = index - directoryEntities.length;
+        if (index < fileEntities.length) {
+          return fileBox(fileEntities[index]);
+        }
+        return const SizedBox(height: 90);
+      },
+    );
+  }
+
+  Widget directoryBox(Directory dir) {
+    String name = dir.path.split("/").last;
+    return InkWell(
+      onTap: () {
+        currentDirectory = dir;
+        reverseAnimation = false;
+        populateData();
+      },
+      child: SizedBox(
+        height: 70,
+        child: Column(
+          children: [
+            const Spacer(),
+            Row(
+              children: [
+                const Padding(
+                  padding: EdgeInsets.symmetric(horizontal: 25),
+                  child: Icon(MaterialCommunityIcons.folder_outline),
+                ),
+                SizedBox(
+                  width: MediaQuery.sizeOf(context).width - 150,
+                  child: TextScroll(
+                    name,
+                    pauseBetween: const Duration(milliseconds: 1200),
+                  ),
+                ),
+              ],
+            ),
+            const Spacer(),
+            const Divider(
+              thickness: 1,
+              height: 1,
+              indent: 70,
+              endIndent: 15,
+            )
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget fileBox(File file) {
+    String name = file.path.split("/").last;
+    String extension = name.split(".").last;
+    return InkWell(
+      onTap: () async {
+        if (extension == "md") {
+          Navigator.of(context).push(
+            PageTransition(
+              child: MarkdownRenderingScreen(file: file),
+              childCurrent: widget,
+              type: PageTransitionType.rightToLeftWithFade,
+              curve: Curves.easeInOut,
+              reverseDuration: Durations.long1,
+              duration: Durations.long1,
+            ),
+          );
+        } else {
+          await OpenFile.open(file.path);
+        }
+      },
+      child: SizedBox(
+        height: 70,
+        child: Column(
+          children: [
+            const Spacer(),
+            Row(
+              children: [
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 25),
+                  child: Icon(fileIcons[extension] ??
+                      MaterialCommunityIcons.file_outline),
+                ),
+                SizedBox(
+                  width: MediaQuery.sizeOf(context).width - 120,
+                  child: TextScroll(
+                    mode: TextScrollMode.endless,
+                    "$name             ",
+                    pauseBetween: const Duration(seconds: 2),
+                  ),
+                ),
+              ],
+            ),
+            const Spacer(),
+            const Divider(
+              thickness: 1,
+              height: 1,
+              indent: 70,
+              endIndent: 15,
+            )
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class HomeGit extends StatefulWidget {
+  const HomeGit({super.key, required this.repo});
+  final GitRepo? repo;
+  @override
+  State<HomeGit> createState() => _HomeGitState();
+}
+
+class _HomeGitState extends State<HomeGit> {
+  @override
+  void didUpdateWidget(covariant HomeGit oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    updateStatus();
+  }
+
+  void updateStatus() async {
+    if (mounted) {
+      setState(() {
+        loading = true;
+      });
+    }
+    if (widget.repo == null) {
+      return;
+    }
+    GitStatusCallback callback = await widget.repo!.gitStatus();
+    staged = [];
+    changed = [];
+    for (String status in callback.status) {
+      FileStatusData data = FileStatusData(status);
+      if (data.isStaged()) {
+        staged.add(data);
+      } else {
+        changed.add(data);
+      }
+    }
+    if (mounted) {
+      setState(() {
+        loading = false;
+      });
+    }
+  }
+
+  List<FileStatusData> staged = [];
+  List<FileStatusData> changed = [];
+  bool updated = false;
+  bool loading = true;
+
+  @override
+  Widget build(BuildContext context) {
+    if (widget.repo == null) {
+      return const Center(
+        child: Text("Please clone a repository to continue."),
+      );
+    }
+    return VisibilityDetector(
+      key: const Key("home-status"),
+      onVisibilityChanged: (info) {
+        if (info.visibleFraction > 0.1 && !updated) {
+          updateStatus();
+          updated = true;
+        } else {
+          updated = false;
+        }
+      },
+      child: loading ? const LinearProgressIndicator() : homeStatusStatus(),
+    );
+  }
+
+  Widget homeStatusStatus() {
+    if (changed.length + staged.length == 0) {
+      return const Center(
+        child: Text("Nothing to see here!"),
+      );
+    }
+    return ListView.builder(
+      itemCount: changed.length + staged.length + 3,
+      itemBuilder: (context, index) {
+        if (index == 0) {
+          return Container(
+            decoration: BoxDecoration(
+                color: Theme.of(context).colorScheme.secondaryContainer),
+            height: 30,
+            child: Center(
+              child: Text(
+                "Staged",
+                style: TextStyle(
+                    fontSize: 16,
+                    color: Theme.of(context).colorScheme.onSecondaryContainer),
+              ),
+            ),
+          );
+        }
+        index -= 1;
+        if (index < staged.length) {
+          return stagedBox(staged[index]);
+        }
+        index -= staged.length;
+        if (index == 0) {
+          return Padding(
+            padding: const EdgeInsets.only(top: 5),
+            child: Container(
+              decoration: BoxDecoration(
+                  color: Theme.of(context).colorScheme.secondaryContainer),
+              height: 30,
+              child: Center(
+                child: Text(
+                  "Changed",
+                  style: TextStyle(
+                      fontSize: 16,
+                      color:
+                          Theme.of(context).colorScheme.onSecondaryContainer),
+                ),
+              ),
+            ),
+          );
+        }
+        index -= 1;
+        if (index < changed.length) {
+          return changedBox(changed[index]);
+        }
+        return const SizedBox(height: 90);
+      },
+    );
+  }
+
+  Widget stagedBox(FileStatusData statusData) {
+    return SizedBox(
+      height: 70,
+      child: Column(
+        children: [
+          const Spacer(),
+          Row(
+            children: [
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 25),
+                child: Center(
+                  child: Text(
+                    statusData._changeChar,
+                    style: TextStyle(
+                      color: statusData.getChangedCharColor(),
+                      fontSize: 18,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                ),
+              ),
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(statusData.getFileName()),
+                  Text(
+                    statusData.getFilePath(),
+                    style: const TextStyle(fontSize: 10, color: Colors.grey),
+                  )
+                ],
+              ),
+              const Spacer(),
+              GestureDetector(
+                onTap: () async {
+                  await statusData.unstage();
+                  updateStatus();
+                },
+                child: Container(
+                  height: 35,
+                  width: 35,
+                  decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(20),
+                      color: Theme.of(context).colorScheme.primaryContainer),
+                  child: Icon(
+                    Icons.remove,
+                    color: Theme.of(context).colorScheme.onPrimaryContainer,
+                  ),
+                ),
+              ),
+              const SizedBox(width: 20)
+            ],
+          ),
+          const Spacer(),
+          const Divider(
+            thickness: 1,
+            height: 1,
+            indent: 60,
+            endIndent: 10,
+          )
+        ],
+      ),
+    );
+  }
+
+  Widget changedBox(FileStatusData statusData) {
+    return SizedBox(
+      height: 70,
+      child: Column(
+        children: [
+          const Spacer(),
+          Row(
+            children: [
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 25),
+                child: Center(
+                  child: Text(
+                    statusData._changeChar,
+                    style: TextStyle(
+                      color: statusData.getChangedCharColor(),
+                      fontSize: 18,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                ),
+              ),
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(statusData.getFileName()),
+                  Text(
+                    statusData.getFilePath(),
+                    style: const TextStyle(fontSize: 10, color: Colors.grey),
+                  )
+                ],
+              ),
+              const Spacer(),
+              GestureDetector(
+                onTap: () async {
+                  await statusData.restore();
+                  updateStatus();
+                },
+                child: Container(
+                  height: 35,
+                  width: 35,
+                  decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(20),
+                      color: Theme.of(context).colorScheme.tertiaryContainer),
+                  child: Icon(
+                    Icons.undo,
+                    color: Theme.of(context).colorScheme.onTertiaryContainer,
+                  ),
+                ),
+              ),
+              const SizedBox(width: 15),
+              GestureDetector(
+                onTap: () async {
+                  await statusData.stage();
+                  updateStatus();
+                },
+                child: Container(
+                  height: 35,
+                  width: 35,
+                  decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(20),
+                      color: Theme.of(context).colorScheme.primaryContainer),
+                  child: Icon(
+                    Icons.add,
+                    color: Theme.of(context).colorScheme.onPrimaryContainer,
+                  ),
+                ),
+              ),
+              const SizedBox(width: 20),
+            ],
+          ),
+          const Spacer(),
+          const Divider(
+            thickness: 1,
+            height: 1,
+            indent: 60,
+            endIndent: 10,
+          )
+        ],
+      ),
+    );
+  }
+}
+
+class FileStatusData {
+  File _file;
+  bool _staged;
+  String _changeChar;
+
+  FileStatusData._(this._file, this._changeChar, this._staged);
+
+  factory FileStatusData(String statusString) {
+    bool staged = statusString.substring(0, 1) == "I";
+    String changeChar = statusString.substring(1, 2);
+    File file = File(statusString.substring(3));
+    return FileStatusData._(file, changeChar, staged);
+  }
+
+  String getFileName() {
+    return _file.path.split("/").last;
+  }
+
+  String getFilePath() {
+    return _file.path;
+  }
+
+  String getChangeChar() {
+    return _changeChar;
+  }
+
+  Color? getChangedCharColor() {
+    switch (_changeChar) {
+      case "N":
+        return Colors.green;
+      case "D":
+        return Colors.red;
+      case "M":
+        return Colors.yellow;
+      case "R":
+        return Colors.lightGreen;
+    }
+    return null;
+  }
+
+  bool isStaged() {
+    return _staged;
+  }
+
+  Future<bool?> stage() async {
+    if (_staged) {
+      return null;
+    }
+    GitAddCallback? result =
+        await GitRepoManager.getInstance().stage(_file.path);
+    if (result == null || result.result == GitAddResult.Fail) {
+      return false;
+    }
+    return true;
+  }
+
+  Future<bool?> unstage() async {
+    if (!_staged) {
+      return null;
+    }
+    GitRemoveCallback? result =
+        await GitRepoManager.getInstance().unstage(_file.path);
+    if (result == null || result.result == GitAddResult.Fail) {
+      return false;
+    }
+    return true;
+  }
+
+  Future<bool?> restore() async {
+    if (_staged) {
+      return null;
+    }
+    GitRestoreCallback? result =
+        await GitRepoManager.getInstance().restore(_file.path);
+    if (result == null || result.result == GitRestoreResult.Fail) {
+      return false;
+    }
+    return true;
   }
 }
 

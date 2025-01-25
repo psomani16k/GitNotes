@@ -99,6 +99,7 @@ class GitRepo {
       directoryPath: _directory,
       password: _password,
       user: _email,
+			name: _name
     ).sendSignalToRust();
 
     RustSignal<GitPullSingleCallback> callback = await rustStream.first;

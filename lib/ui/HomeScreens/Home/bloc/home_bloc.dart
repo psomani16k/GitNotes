@@ -13,7 +13,7 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
     });
     on<HomeChooseRepositoryEvent>((event, emit) {
       GitRepoManager.getInstance().setCurrentRepo(event.repo);
-			emit(HomeSetRepositoryState());
+      emit(HomeSetRepositoryState(repo: event.repo));
     });
   }
 }

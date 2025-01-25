@@ -2,6 +2,7 @@ pub mod commit_stage {
     use std::path::Path;
 
     use git2::{Repository, Signature, StatusOptions};
+    use rinf::debug_print;
 
     use crate::git_functions::errors::git_errors::GitError;
 
@@ -110,8 +111,10 @@ pub mod commit_stage {
     }
 
     pub fn can_commit(repo_dir: &str) -> bool {
-        unsafe { let _ = git2::opts::set_verify_owner_validation(false); };
-        let  repo = Repository::open(Path::new(&repo_dir)).unwrap();
+        unsafe {
+            let _ = git2::opts::set_verify_owner_validation(false);
+        };
+        let repo = Repository::open(Path::new(&repo_dir)).unwrap();
         let mut opts = StatusOptions::new();
         opts.include_ignored(false);
         opts.include_untracked(true).recurse_untracked_dirs(true);

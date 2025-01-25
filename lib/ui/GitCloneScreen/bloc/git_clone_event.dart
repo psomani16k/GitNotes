@@ -17,4 +17,4 @@ final class GitCloneAttemptCloneEvent extends GitCloneEvent {
   });
 }
 
-final class GitCloneReturnEvent extends GitCloneEvent {}
+final class GitCloneInitialEvent extends GitCloneEvent {}

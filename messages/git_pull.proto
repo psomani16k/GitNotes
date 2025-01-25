@@ -6,6 +6,7 @@ message GitPullSingle{
   string directoryPath = 1;
   string user = 3;
   string password = 4;
+  string name = 5;
 }
 
 // [RINF:RUST-SIGNAL]

@@ -55,13 +55,14 @@ pub async fn git_pull_single_handler() {
     while let Some(dart_signal) = recv.recv().await {
         let message = dart_signal.message;
         let dir_path = message.directory_path;
-        let user = message.user;
+        let email = message.user;
+        let name = message.name;
         let password = match message.password.as_str() {
             "" => None,
             pass => Some(pass.to_string()),
         };
 
-        let pull_result = git_pull(dir_path, password, user);
+        let pull_result = git_pull(dir_path, password, email, name);
 
         let callback = match pull_result {
             Ok(result) => GitPullSingleCallback {

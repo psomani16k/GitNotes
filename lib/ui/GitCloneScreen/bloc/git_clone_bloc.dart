@@ -18,6 +18,7 @@ class GitCloneBloc extends Bloc<GitCloneEvent, GitCloneState> {
       );
       if (callback.status == GitCloneResult.Success) {
         String path = callback.data;
+
         emit(GitCloneSuccessState(path: path));
       } else {
         String error = callback.data;
@@ -25,8 +26,12 @@ class GitCloneBloc extends Bloc<GitCloneEvent, GitCloneState> {
       }
     });
 
-    on<GitCloneReturnEvent>((event, emit) {
-      emit(GitCloneReturnState());
-    });
+    on<GitCloneInitialEvent>(
+      (event, emit) {
+        emit(GitCloneInitialState(
+            // TODO: get the default name, email and id
+            ));
+      },
+    );
   }
 }

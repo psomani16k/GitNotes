@@ -31,4 +31,3 @@ final class GitCloneFailState extends GitCloneState {
   GitCloneFailState({required this.error});
 }
 
-final class GitCloneReturnState extends GitCloneState {}

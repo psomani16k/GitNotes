@@ -1,12 +1,13 @@
 pub mod pull_repo {
 
     use crate::git_functions::errors::git_errors::GitError;
-    use git2::{AnnotatedCommit, CertificateCheckStatus, Cred, FetchOptions, Reference};
+    use git2::{AnnotatedCommit, CertificateCheckStatus, Cred, FetchOptions, Reference, Signature};
 
     pub fn git_pull(
         dir_path: String,
         password: Option<String>,
-        user: String,
+        email: String,
+        name: String,
     ) -> Result<String, GitError> {
         match unsafe { git2::opts::set_verify_owner_validation(false) } {
             Ok(_) => {}
@@ -27,8 +28,8 @@ pub mod pull_repo {
         callback.certificate_check(|_, _| Ok(CertificateCheckStatus::CertificateOk));
 
         callback.credentials(|_a, _b, _c| match &password {
-            Some(pass) => Cred::userpass_plaintext(user.as_str(), pass.as_str()),
-            None => Cred::username(user.as_str()),
+            Some(pass) => Cred::userpass_plaintext(email.as_str(), pass.as_str()),
+            None => Cred::username(email.as_str()),
         });
         remote
             .connect_auth(git2::Direction::Fetch, Some(callback), None)
@@ -43,16 +44,23 @@ pub mod pull_repo {
             Err(err) => return Err(GitError::new("PR_E1".to_string(), err.to_string())),
         };
         let b = branches.clone();
-        let (msg, fetch_annotated_commit) = match do_fetch(&repo, &b, &mut remote, user, password) {
-            Ok(data) => data,
-            Err(err) => return Err(err),
-        };
+        let (msg, fetch_annotated_commit) =
+            match do_fetch(&repo, &b, &mut remote, email.clone(), password) {
+                Ok(data) => data,
+                Err(err) => return Err(err),
+            };
 
         let mut return_string = format!("Fetching...\n{}\n\nMerging...\n", msg);
 
         for branch in branches {
             return_string = format!("{}Branch '{}' - ", return_string, branch);
-            let msg = match do_merge(&repo, branch, &fetch_annotated_commit) {
+            let msg = match do_merge(
+                &repo,
+                branch,
+                &fetch_annotated_commit,
+                name.clone(),
+                email.clone(),
+            ) {
                 Ok(msg) => msg,
                 Err(err) => format!("Error occured: {}", err.to_string()),
             };
@@ -110,6 +118,8 @@ pub mod pull_repo {
         repo: &git2::Repository,
         local: &git2::AnnotatedCommit,
         remote: &git2::AnnotatedCommit,
+        name: String,
+        email: String,
     ) -> Result<String, GitError> {
         let remote_tree = match repo.find_commit(remote.id()) {
             Ok(remote_tree) => remote_tree,
@@ -197,7 +207,8 @@ pub mod pull_repo {
             }
         };
         let return_msg = format!("Merge: {} into {}", remote.id(), local.id());
-        let sig = repo.signature().unwrap();
+        // let sig = repo.signature().unwrap();
+        let sig = Signature::now(&name, &email).unwrap();
         let local_commit = repo.find_commit(local.id()).unwrap();
         let remote_commit = repo.find_commit(remote.id()).unwrap();
         match repo.commit(
@@ -276,6 +287,8 @@ pub mod pull_repo {
         repo: &'a git2::Repository,
         remote_branch: &'a str,
         fetch_commit: &'a git2::AnnotatedCommit,
+        name: String,
+        email: String,
     ) -> Result<String, GitError> {
         let analysis = match repo.merge_analysis(&[&fetch_commit]) {
             Ok(analysis) => analysis,
@@ -327,7 +340,7 @@ pub mod pull_repo {
             let head_commit = repo
                 .reference_to_annotated_commit(&repo.head().unwrap())
                 .unwrap();
-            match normal_merge(&repo, &head_commit, &fetch_commit) {
+            match normal_merge(&repo, &head_commit, &fetch_commit, name, email) {
                 Ok(_) => {
                     result_string =
                         format!("Merging: {} into {}", fetch_commit.id(), head_commit.id());
