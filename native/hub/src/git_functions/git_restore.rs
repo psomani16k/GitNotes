@@ -11,7 +11,7 @@ pub mod restore_file {
             Ok(repo) => repo,
             Err(err) => {
                 return Err(GitError::new(
-                    "SF_E0".to_string(),
+                    "git_restore - 1".to_string(),
                     err.message().to_string(),
                 ))
             }
@@ -31,15 +31,24 @@ pub mod restore_file {
             let file_content = blob.content();
             match std::fs::write(Path::new(&file_absolute_path), file_content) {
                 Ok(_) => {}
-                Err(err) => return Err(GitError::new("RF_E2".to_string(), err.to_string())),
+                Err(err) => {
+                    return Err(GitError::new(
+                        "git_restore - 2".to_string(),
+                        err.to_string(),
+                    ))
+                }
             }
         } else {
             match std::fs::remove_file(Path::new(&file_absolute_path)) {
                 Ok(_) => {}
-                Err(err) => return Err(GitError::new("RF_E3".to_string(), err.to_string())),
+                Err(err) => {
+                    return Err(GitError::new(
+                        "git_restore - 3".to_string(),
+                        err.to_string(),
+                    ))
+                }
             };
         }
-
         Ok(())
     }
 }

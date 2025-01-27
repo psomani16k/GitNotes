@@ -10,7 +10,13 @@ use handlers::{
 use tokio; // Comment this line to target the web.
 
 rinf::write_interface!();
+
+#[macro_use]
+extern crate log;
+extern crate android_log;
+
 async fn main() {
+    android_log::init("GitNotes").unwrap();
     tokio::spawn(git_clone_handler());
     tokio::spawn(git_pull_single_handler());
     tokio::spawn(git_status_handler());

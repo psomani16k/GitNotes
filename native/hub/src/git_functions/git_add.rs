@@ -11,7 +11,7 @@ pub mod stage_file {
             Ok(_) => {}
             Err(err) => {
                 return Err(GitError::new(
-                    "CS_E1".to_string(),
+                    "git_add - 1".to_string(),
                     err.message().to_string(),
                 ))
             }
@@ -20,7 +20,7 @@ pub mod stage_file {
             Ok(repo) => repo,
             Err(err) => {
                 return Err(GitError::new(
-                    "SF_E0".to_string(),
+                    "git_add - 2".to_string(),
                     err.message().to_string(),
                 ))
             }
@@ -39,7 +39,7 @@ pub mod stage_file {
                 Ok(_) => {}
                 Err(err) => {
                     return Err(GitError::new(
-                        "SF_E3".to_string(),
+                        "git_add - 3".to_string(),
                         err.message().to_string(),
                     ))
                 }
@@ -50,7 +50,7 @@ pub mod stage_file {
                 Ok(_) => {}
                 Err(err) => {
                     return Err(GitError::new(
-                        "SF_E3.5".to_string(),
+                        "git_add - 4".to_string(),
                         err.message().to_string(),
                     ))
                 }
@@ -61,7 +61,7 @@ pub mod stage_file {
             Ok(_) => {}
             Err(err) => {
                 return Err(GitError::new(
-                    "SF_E4".to_string(),
+                    "git_add - 5".to_string(),
                     err.message().to_string(),
                 ))
             }
@@ -75,7 +75,7 @@ pub mod stage_file {
             Ok(_) => {}
             Err(err) => {
                 return Err(GitError::new(
-                    "CS_E1".to_string(),
+                    "git_add - 6".to_string(),
                     err.message().to_string(),
                 ))
             }
@@ -84,7 +84,7 @@ pub mod stage_file {
             Ok(repo) => repo,
             Err(err) => {
                 return Err(GitError::new(
-                    "SF_E0".to_string(),
+                    "git_add - 7".to_string(),
                     err.message().to_string(),
                 ))
             }
@@ -107,7 +107,7 @@ pub mod stage_file {
             Ok(_) => {}
             Err(err) => {
                 return Err(GitError::new(
-                    "SF_E3".to_string(),
+                    "git_add - 8".to_string(),
                     err.message().to_string(),
                 ))
             }
@@ -116,7 +116,7 @@ pub mod stage_file {
             Ok(_) => {}
             Err(err) => {
                 return Err(GitError::new(
-                    "SF_E4".to_string(),
+                    "git_add - 9".to_string(),
                     err.message().to_string(),
                 ))
             }
@@ -130,7 +130,7 @@ pub mod stage_file {
             Ok(repo) => repo,
             Err(err) => {
                 return Err(GitError::new(
-                    "SF_E5".to_string(),
+                    "git_add - 10".to_string(),
                     err.message().to_string(),
                 ))
             }

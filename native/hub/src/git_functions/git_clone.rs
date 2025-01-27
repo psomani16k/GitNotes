@@ -21,7 +21,7 @@ pub mod clone_repo {
             Ok(_) => {}
             Err(err) => {
                 return Err(GitError::new(
-                    "CR_E0".to_string(),
+                    "git_clone - 1".to_string(),
                     err.message().to_string(),
                 ))
             }
@@ -44,7 +44,7 @@ pub mod clone_repo {
         let new_dir = match get_directory_name_from_url(&url) {
             Ok(dir) => dir,
             Err(err) => {
-                return Err(GitError::new("CR_E1".to_string(), err));
+                return Err(GitError::new("git_clone - 2".to_string(), err));
             }
         };
 
@@ -54,7 +54,7 @@ pub mod clone_repo {
         match create_dir_all(dir_path) {
             Ok(_) => {}
             Err(err) => {
-                return Err(GitError::new("CR_E2".to_string(), err.to_string()));
+                return Err(GitError::new("git_clone - 3".to_string(), err.to_string()));
             }
         };
 
@@ -67,7 +67,7 @@ pub mod clone_repo {
                 let path = Path::new(&dir_path);
                 let _ = std::fs::remove_dir_all(path);
                 return Err(GitError::new(
-                    "CR_E3".to_string(),
+                    "git_clone - 4".to_string(),
                     err.message().to_string(),
                 ));
             }

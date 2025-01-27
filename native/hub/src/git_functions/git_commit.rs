@@ -2,7 +2,6 @@ pub mod commit_stage {
     use std::path::Path;
 
     use git2::{Repository, Signature, StatusOptions};
-    use rinf::debug_print;
 
     use crate::git_functions::errors::git_errors::GitError;
 
@@ -16,7 +15,7 @@ pub mod commit_stage {
             Ok(_) => {}
             Err(err) => {
                 return Err(GitError::new(
-                    "CS_E1".to_string(),
+                    "git_commit - 1".to_string(),
                     err.message().to_string(),
                 ))
             }
@@ -25,15 +24,14 @@ pub mod commit_stage {
             Ok(repo) => repo,
             Err(err) => {
                 return Err(GitError::new(
-                    "CS_E2".to_string(),
+                    "git_commit - 2".to_string(),
                     err.message().to_string(),
                 ))
             }
         };
         if !has_indexed_files(&repo) {
-            println!("{}", has_indexed_files(&repo));
             return Err(GitError::new(
-                "CS_E3".to_string(),
+                "git_commit - 3".to_string(),
                 "No files staged for commit".to_string(),
             ));
         }
@@ -42,7 +40,7 @@ pub mod commit_stage {
             Ok(tree) => tree,
             Err(err) => {
                 return Err(GitError::new(
-                    "CS_E4".to_string(),
+                    "git_commit - 4".to_string(),
                     err.message().to_string(),
                 ))
             }
@@ -51,7 +49,7 @@ pub mod commit_stage {
             Ok(tree) => tree,
             Err(err) => {
                 return Err(GitError::new(
-                    "CS_E5".to_string(),
+                    "git_commit - 5".to_string(),
                     err.message().to_string(),
                 ))
             }
@@ -69,7 +67,7 @@ pub mod commit_stage {
                 Ok(_) => {}
                 Err(err) => {
                     return Err(GitError::new(
-                        "CS_E6".to_string(),
+                        "git_commit - 6".to_string(),
                         err.message().to_string(),
                     ))
                 }
@@ -79,7 +77,7 @@ pub mod commit_stage {
                 Ok(_) => {}
                 Err(err) => {
                     return Err(GitError::new(
-                        "CS_E7".to_string(),
+                        "git_commit - 7".to_string(),
                         err.message().to_string(),
                     ))
                 }

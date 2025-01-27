@@ -2,6 +2,7 @@ pub mod push_commits {
     use std::path::Path;
 
     use git2::{CertificateCheckStatus, Cred, PushOptions, RemoteCallbacks, Repository};
+    use rinf::debug_print;
 
     use crate::git_functions::{
         errors::git_errors::GitError, git_checkout::branch_repo::current_branch,
@@ -16,7 +17,7 @@ pub mod push_commits {
             Ok(_) => {}
             Err(err) => {
                 return Err(GitError::new(
-                    "PR_E0".to_string(),
+                    "git_push - 1".to_string(),
                     err.message().to_string(),
                 ))
             }
@@ -42,17 +43,18 @@ pub mod push_commits {
             Some(pass) => Cred::userpass_plaintext(&user2, &pass),
             None => Cred::username(&user2),
         });
-        remote.connect_auth(git2::Direction::Push, Some(callbacks2), None).unwrap();
+        remote
+            .connect_auth(git2::Direction::Push, Some(callbacks2), None)
+            .unwrap();
 
         // getting refspecs
-        // this seems to be only returning "HEAD" on android... for now forcefully using "main" as the branch... need to investigate
         let branch = current_branch(&repo_dir);
         let refspec = format!("refs/heads/{}:refs/heads/{}", branch, branch);
         match remote.push::<&str>(&[&refspec], Some(&mut options)) {
             Ok(_) => {}
             Err(err) => {
                 return Err(GitError::new(
-                    "PR_E1".to_string(),
+                    "git_push - 2".to_string(),
                     err.message().to_string(),
                 ))
             }

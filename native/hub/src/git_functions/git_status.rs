@@ -8,7 +8,7 @@ pub mod status {
             Ok(_) => {}
             Err(err) => {
                 return Err(GitError::new(
-                    "SR_E0".to_string(),
+                    "git_status - 1".to_string(),
                     err.message().to_string(),
                 ))
             }
@@ -17,14 +17,14 @@ pub mod status {
             Ok(repo) => repo,
             Err(err) => {
                 return Err(GitError::new(
-                    "SR_E1".to_string(),
+                    "git_status - 2".to_string(),
                     err.message().to_string(),
                 ))
             }
         };
         if repo.is_bare() {
             return Err(GitError::new(
-                "SR_E2".to_string(),
+                "git_status - 3".to_string(),
                 "cannot report status on bare repository".to_string(),
             ));
         }

@@ -9,8 +9,9 @@ pub mod git_errors {
     }
 
     impl GitError {
-        pub fn new(error_code: String, message: String) -> GitError {
-            debug_print!("ERROR_CODE: {}, ERROR: {}", error_code, message);
+        pub fn new(error_log_info: String, message: String) -> GitError {
+            error!("ERROR_INFO: {}, ERROR: {}", error_log_info, message);
+            debug_print!("ERROR_INFO: {}, ERROR: {}", error_log_info, message);
             GitError { message }
         }
     }

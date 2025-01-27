@@ -23,14 +23,21 @@ class _MarkdownEditingScreenState extends State<MarkdownEditingScreen> {
   final TextEditingController _markdownEditingController =
       TextEditingController();
 
+  bool canPop = false;
+
   @override
   Widget build(BuildContext context) {
     return PopScope(
-      canPop: false,
+      canPop: canPop,
       onPopInvokedWithResult: (didPop, result) async {
+        if (didPop) {
+          return;
+        }
         if (fileRead == _markdownEditingController.text) {
+          print("same file, just pop");
           Navigator.pop(context);
         } else {
+          print("not same file, show dialog");
           await showDialog(
             context: context,
             builder: (context) {
@@ -76,7 +83,6 @@ class _MarkdownEditingScreenState extends State<MarkdownEditingScreen> {
         }
       },
       child: Scaffold(
-			
         appBar: AppBar(
           title: Text(widget.file.path.split("/").last),
           actions: [
@@ -104,7 +110,7 @@ class _MarkdownEditingScreenState extends State<MarkdownEditingScreen> {
             enabledBorder: InputBorder.none, // No border when not focused
             focusedBorder: InputBorder.none, // No border when focused
             contentPadding: EdgeInsets.symmetric(
-                vertical: 12, horizontal: 6), // Adjust padding as needed
+                vertical: 0, horizontal: 6), // Adjust padding as needed
           ),
           style: TextStyle(
             fontFamily: GoogleFonts.jetBrainsMono().fontFamily,

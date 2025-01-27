@@ -3,7 +3,7 @@ use crate::{
         git_add::stage_file::{git_add, remove_from_stage},
         git_clone::clone_repo::git_clone_https,
         git_commit::commit_stage::{can_commit, git_commit},
-        git_pull::pull_repo::git_pull,
+        git_pull::git_pull,
         git_push::push_commits::{can_push, git_push},
         git_restore::restore_file::restore_file,
         git_status::status::git_status,
