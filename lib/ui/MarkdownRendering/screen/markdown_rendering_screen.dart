@@ -260,6 +260,7 @@ class _MarkdownPreviewState extends State<MarkdownPreview> {
 </head>
 <body>
 		$htmlData
+<div class="spacer" style="height: 150px;"></div>
 </body>
 
 <script src="$staticPreviewDir/mermaid.min.js"></script>

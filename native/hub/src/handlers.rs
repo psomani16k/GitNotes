@@ -16,7 +16,7 @@ use crate::{
         git_pull::{GitPullResult, GitPullSingle, GitPullSingleCallback},
         git_push::{GitPushCallback, GitPushRequest, GitPushResult},
         git_restore::{GitRestore, GitRestoreCallback, GitRestoreResult},
-        git_status::{GitStatus, GitStatusCallback},
+        git_status::{GitStatus, GitStatusCallback, GitStatusResult},
     },
 };
 
@@ -87,9 +87,15 @@ pub async fn git_status_handler() {
         let status_result = git_status(dir_path);
 
         let callback = match status_result {
-            Ok(result) => GitStatusCallback { status: result },
+            Ok(statuses) => GitStatusCallback {
+                result: GitStatusResult::Success.into(),
+                failure_message: "".to_owned(),
+                file_statuses: statuses,
+            },
             Err(err) => GitStatusCallback {
-                status: vec![format!("ERROR: {}", err.to_string())],
+                result: GitStatusResult::Fail.into(),
+                file_statuses: vec![],
+                failure_message: err.to_string(),
             },
         };
         callback.send_signal_to_dart();

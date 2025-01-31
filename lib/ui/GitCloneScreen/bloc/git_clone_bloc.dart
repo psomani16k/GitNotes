@@ -18,8 +18,8 @@ class GitCloneBloc extends Bloc<GitCloneEvent, GitCloneState> {
       );
       if (callback.status == GitCloneResult.Success) {
         String path = callback.data;
-
         emit(GitCloneSuccessState(path: path));
+
       } else {
         String error = callback.data;
         emit(GitCloneFailState(error: error));

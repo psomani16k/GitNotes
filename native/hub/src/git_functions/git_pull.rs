@@ -49,7 +49,12 @@ pub fn git_pull(
     let mut return_string = format!("Fetching...\n{}\n\nMerging...\n", msg);
 
     for branch in branches {
+        if branch == "HEAD".to_string() {
+            info!("git_pull - skipping HEAD branch in merging");
+            continue;
+        }
         return_string = format!("{}Branch '{}' - ", return_string, branch);
+
         let msg = match do_merge(
             &repo,
             branch,
@@ -281,10 +286,12 @@ fn normal_merge(
     }
     match repo.checkout_head(None) {
         Ok(_) => {}
-        Err(err) => return Err(GitError::new(
-            "git_pull - 21".to_string(),
-            err.message().to_string(),
-        )),
+        Err(err) => {
+            return Err(GitError::new(
+                "git_pull - 21".to_string(),
+                err.message().to_string(),
+            ))
+        }
     };
     return Ok(return_msg);
 }
@@ -307,6 +314,7 @@ fn do_merge<'a>(
     };
     let mut result_string = String::new();
     if analysis.0.is_fast_forward() {
+        info!("do_merge - remote_branch {}", remote_branch);
         let refname = format!("refs/heads/{}", remote_branch);
         let mut referance = match repo.find_reference(&refname) {
             Ok(referance) => referance,

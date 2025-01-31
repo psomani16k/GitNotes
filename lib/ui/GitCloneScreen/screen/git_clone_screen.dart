@@ -5,7 +5,10 @@ import 'package:git_notes/helpers/git/git_repo.dart';
 import 'package:git_notes/helpers/git/git_repo_manager.dart';
 import 'package:git_notes/helpers/ui_helper.dart';
 import 'package:git_notes/ui/GitCloneScreen/bloc/git_clone_bloc.dart';
+import 'package:git_notes/ui/GitPushPull/bloc/git_push_pull_bloc.dart';
 import 'package:git_notes/ui/HomeScreens/Home/bloc/home_bloc.dart';
+import 'package:git_notes/ui/HomeScreens/HomeDirectory/bloc/home_directory_bloc.dart';
+import 'package:git_notes/ui/HomeScreens/HomeGit/bloc/home_git_bloc.dart';
 
 class GitCloneScreen extends StatefulWidget {
   const GitCloneScreen({super.key});
@@ -82,6 +85,11 @@ class _GitCloneScreenState extends State<GitCloneScreen> {
         }
         // Clone successful
         if (state is GitCloneSuccessState) {
+          BlocProvider.of<HomeDirectoryBloc>(context)
+              .add(HomeDirectoryRepoUpdateEvent());
+          BlocProvider.of<HomeGitBloc>(context).add(HomeGitRepoUpdateEvent());
+          BlocProvider.of<GitPushPullBloc>(context)
+              .add(GitPushPullUpdateEvent());
           return Scaffold(
             body: Center(
               // TODO: make this look good

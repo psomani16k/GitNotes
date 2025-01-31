@@ -39,7 +39,6 @@ class GitRepo {
   }
 
 // setters
-
   void setPassword(String? password) {
     _password = password;
   }
@@ -96,11 +95,11 @@ class GitRepo {
     Stream<RustSignal<GitPullSingleCallback>> rustStream =
         GitPullSingleCallback.rustSignalStream;
     GitPullSingle(
-      directoryPath: _directory,
-      password: _password,
-      user: _email,
-			name: _name
-    ).sendSignalToRust();
+            directoryPath: _directory,
+            password: _password,
+            user: _email,
+            name: _name)
+        .sendSignalToRust();
 
     RustSignal<GitPullSingleCallback> callback = await rustStream.first;
     return callback.message;

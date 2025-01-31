@@ -8,5 +8,30 @@ message GitStatus{
 
 // [RINF:RUST-SIGNAL]
 message GitStatusCallback{
-    repeated string status = 1;
+    repeated GitFileStatus fileStatuses = 1;
+    GitStatusResult result = 2;
+    string failureMessage = 3;
+}
+
+message GitFileStatus{
+  string file = 1;
+  Status status = 2;
+}
+
+enum GitStatusResult{
+  Success = 0;
+  Fail = 1;
+}
+
+enum Status {
+  WorkTreeNew = 0;
+  WorkTreeModified = 1;
+  WorkTreeDeleted = 2;
+  WorkTreeRenamed = 3;
+  WorkTreeTypechange = 4;
+  IndexNew = 5; 
+  IndexModified = 6;
+  IndexDeleted = 7;
+  IndexRenamed =8;
+  IndexTypechange = 9;
 }

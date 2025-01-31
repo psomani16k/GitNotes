@@ -7,6 +7,7 @@ use handlers::{
     git_pull_single_handler, git_push_handler, git_remove_handler, git_restore_handler,
     git_status_handler,
 };
+use rinf::debug_print;
 use tokio; // Comment this line to target the web.
 
 rinf::write_interface!();
@@ -16,7 +17,12 @@ extern crate log;
 extern crate android_log;
 
 async fn main() {
-    android_log::init("GitNotes").unwrap();
+    match android_log::init("GitNotes") {
+        Ok(_) => {}
+        Err(err) => {
+            debug_print!("Error starting logger: {}", err.to_string());
+        }
+    };
     tokio::spawn(git_clone_handler());
     tokio::spawn(git_pull_single_handler());
     tokio::spawn(git_status_handler());
