@@ -17,6 +17,7 @@ class HomeGitBloc extends Bloc<HomeGitEvent, HomeGitState> {
 
     on<HomeGitInitialEvent>(
       (event, emit) async {
+        emit(HomeGitRepoChangeProcessingState());
         // get the status of the new repo
         GitStatusCallback? statusCallback =
             await GitRepoManager.getInstance().status();

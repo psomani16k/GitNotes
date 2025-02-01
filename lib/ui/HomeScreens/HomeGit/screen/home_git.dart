@@ -94,13 +94,23 @@ class _HomeGitState extends State<HomeGit> {
               ? const Center(
                   child: CircularProgressIndicator(),
                 )
-              : SingleChildScrollView(
-                  child: Column(
-                    children: [
-                      _HomeGitStagedFiles(statusData: staged!),
-                      _HomeGitChangedFiles(statusData: changed!),
-                    ],
-                  ),
+              : Column(
+                  children: [
+                    stageLoading
+                        ? const SizedBox(
+                            height: 4,
+                            child: LinearProgressIndicator(),
+                          )
+                        : const SizedBox(height: 4),
+                    SingleChildScrollView(
+                      child: Column(
+                        children: [
+                          _HomeGitStagedFiles(statusData: staged!),
+                          _HomeGitChangedFiles(statusData: changed!),
+                        ],
+                      ),
+                    ),
+                  ],
                 ),
         );
       },
