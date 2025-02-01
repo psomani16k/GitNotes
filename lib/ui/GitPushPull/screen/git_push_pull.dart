@@ -20,8 +20,8 @@ class _GitPushPullState extends State<GitPushPull> {
   bool canPush = false;
   bool processing = true;
 
-  _GitPushPullMessageRecievingBox pullMessageRecievingBox =
-      _GitPushPullMessageRecievingBox();
+  // _GitPushPullMessageRecievingBox pullMessageRecievingBox =
+  //     _GitPushPullMessageRecievingBox();
 
   @override
   Widget build(BuildContext context) {
@@ -80,10 +80,12 @@ class _GitPushPullState extends State<GitPushPull> {
                         child: LinearProgressIndicator(),
                       )
                     : const SizedBox(height: 5),
-                Flexible(child: pullMessageRecievingBox),
-                _GitPushPullButtonBox(
-                  canPush: canPush,
-                  canCommit: canCommit,
+                // Flexible(child: pullMessageRecievingBox),
+                Center(
+                  child: _GitPushPullButtonBox(
+                    canPush: canPush,
+                    canCommit: canCommit,
+                  ),
                 ),
               ],
             ),
