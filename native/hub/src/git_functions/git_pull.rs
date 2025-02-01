@@ -1,12 +1,25 @@
-use crate::git_functions::errors::git_errors::GitError;
-use git2::{AnnotatedCommit, CertificateCheckStatus, Cred, FetchOptions, Reference, Signature};
+use crate::{
+    git_functions::{errors::git_errors::GitError, git_checkout::branch_repo::current_branch},
+    messages::git_push_pull_messages::{GitPushPullMessage, PredefinedMsg},
+};
 
-pub fn git_pull(
+use git2::{AnnotatedCommit, CertificateCheckStatus, Cred, FetchOptions, Signature};
+use rinf::debug_print;
+
+pub async fn git_pull(
     dir_path: String,
     password: Option<String>,
     email: String,
     name: String,
 ) -> Result<String, GitError> {
+    // start git pull
+    GitPushPullMessage {
+        msg: "".to_string(),
+        msg_index: 0,
+        predefined_message: PredefinedMsg::Pull.into(),
+    }
+    .send_signal_to_dart();
+
     match unsafe { git2::opts::set_verify_owner_validation(false) } {
         Ok(_) => {}
         Err(err) => {
@@ -17,7 +30,7 @@ pub fn git_pull(
         }
     };
 
-    let repo = git2::Repository::open(dir_path).unwrap();
+    let repo = git2::Repository::open(dir_path.clone()).unwrap();
     let mut remote = match repo.find_remote("origin") {
         Ok(remote) => remote,
         Err(err) => return Err(GitError::new("git_pull - 1".to_string(), err.to_string())),
@@ -34,40 +47,32 @@ pub fn git_pull(
         .connect_auth(git2::Direction::Fetch, Some(callback), None)
         .unwrap();
 
-    let branches = match get_refs(&remote) {
-        Ok(branches) => branches,
+    let branch = current_branch(&dir_path);
+    let b = vec![branch.clone()];
+    let fetch_annotated_commit = match do_fetch(&repo, &b, &mut remote, email.clone(), password) {
+        Ok(data) => data,
         Err(err) => return Err(err),
     };
-    info!("git_pull - branches: {:?}", branches);
-    let b = branches.clone();
-    let (msg, fetch_annotated_commit) =
-        match do_fetch(&repo, &b, &mut remote, email.clone(), password) {
-            Ok(data) => data,
-            Err(err) => return Err(err),
-        };
 
-    let mut return_string = format!("Fetching...\n{}\n\nMerging...\n", msg);
+    match do_merge(
+        &repo,
+        branch,
+        &fetch_annotated_commit,
+        name.clone(),
+        email.clone(),
+    ) {
+        Ok(_) => {}
+        Err(err) => return Err(err),
+    };
 
-    for branch in branches {
-        if branch == "HEAD".to_string() {
-            info!("git_pull - skipping HEAD branch in merging");
-            continue;
-        }
-        return_string = format!("{}Branch '{}' - ", return_string, branch);
-
-        let msg = match do_merge(
-            &repo,
-            branch,
-            &fetch_annotated_commit,
-            name.clone(),
-            email.clone(),
-        ) {
-            Ok(msg) => msg,
-            Err(err) => format!("Error occured: {}", err.to_string()),
-        };
-        return_string = format!("{}{}\n", return_string, msg);
+    // end git pull
+    GitPushPullMessage {
+        msg_index: 10000,
+        predefined_message: PredefinedMsg::End.into(),
+        msg: "".to_string(),
     }
-    Ok(return_string)
+    .send_signal_to_dart();
+    Ok("".to_string())
 }
 
 fn do_fetch<'a>(
@@ -76,7 +81,7 @@ fn do_fetch<'a>(
     remote: &'a mut git2::Remote,
     user: String,
     pass: Option<String>,
-) -> Result<(String, AnnotatedCommit<'a>), GitError> {
+) -> Result<AnnotatedCommit<'a>, GitError> {
     let mut callback = git2::RemoteCallbacks::new();
     callback.certificate_check(|_, _| Ok(CertificateCheckStatus::CertificateOk));
 
@@ -84,9 +89,54 @@ fn do_fetch<'a>(
         Some(pass) => Cred::userpass_plaintext(user.as_str(), pass.as_str()),
         None => Cred::username(user.as_str()),
     });
+
+    callback.sideband_progress(|stats| {
+        let msg = format!("remote: {}", String::from_utf8_lossy(stats));
+        debug_print!("{}", msg);
+        GitPushPullMessage {
+            predefined_message: PredefinedMsg::None.into(),
+            msg_index: 1,
+            msg,
+        }
+        .send_signal_to_dart();
+        true
+    });
+
+    callback.transfer_progress(|stats| {
+        if stats.received_objects() == stats.total_objects() {
+            let msg = format!(
+                "Resolving deltas {}/{}",
+                stats.indexed_deltas(),
+                stats.total_deltas()
+            );
+            debug_print!("{}", msg);
+            GitPushPullMessage {
+                predefined_message: PredefinedMsg::None.into(),
+                msg_index: 2,
+                msg,
+            }
+            .send_signal_to_dart();
+        } else if stats.total_objects() > 0 {
+            let msg = format!(
+                "Received {}/{} objects ({}) in {} bytes",
+                stats.received_objects(),
+                stats.total_objects(),
+                stats.indexed_objects(),
+                stats.received_bytes()
+            );
+            debug_print!("{}", msg);
+            GitPushPullMessage {
+                predefined_message: PredefinedMsg::None.into(),
+                msg_index: 3,
+                msg,
+            }
+            .send_signal_to_dart();
+        }
+        true
+    });
     let mut fetch_options = FetchOptions::new();
     fetch_options.remote_callbacks(callback);
-    fetch_options.download_tags(git2::AutotagOption::Auto);
+    fetch_options.download_tags(git2::AutotagOption::All);
     match remote.fetch(refs, Some(&mut fetch_options), None) {
         Ok(_) => {}
         Err(err) => {
@@ -97,11 +147,44 @@ fn do_fetch<'a>(
         }
     };
     let stats = remote.stats();
-    let return_string = format!(
-        "Recieved {} objects in {} bytes",
-        stats.total_objects() - stats.local_objects(),
-        stats.received_bytes()
-    );
+    if stats.total_objects() == 0 {
+        debug_print!("Already up tp date.");
+        GitPushPullMessage {
+            predefined_message: PredefinedMsg::None.into(),
+            msg_index: 30,
+            msg: "Already up to date.".to_string(),
+        }
+        .send_signal_to_dart();
+    } else if stats.local_objects() > 0 {
+        let msg = format!(
+            "Received {}/{} objects in {} bytes (used {} local objects)",
+            stats.indexed_objects(),
+            stats.total_objects(),
+            stats.received_bytes(),
+            stats.local_objects()
+        );
+        debug_print!("{}", msg);
+        GitPushPullMessage {
+            predefined_message: PredefinedMsg::None.into(),
+            msg_index: 4,
+            msg,
+        }
+        .send_signal_to_dart();
+    } else {
+        let msg = format!(
+            "Received {}/{} objects in {} bytes",
+            stats.indexed_objects(),
+            stats.total_objects(),
+            stats.received_bytes()
+        );
+        debug_print!("{}", msg);
+        GitPushPullMessage {
+            predefined_message: PredefinedMsg::None.into(),
+            msg_index: 5,
+            msg,
+        }
+        .send_signal_to_dart();
+    }
     let fetch_head = match repo.find_reference("FETCH_HEAD") {
         Ok(fetch_head) => fetch_head,
         Err(err) => {
@@ -120,7 +203,7 @@ fn do_fetch<'a>(
             ))
         }
     };
-    return Ok((return_string, annotated_commit));
+    return Ok(annotated_commit);
 }
 
 fn fast_forward(
@@ -138,7 +221,13 @@ fn fast_forward(
         name,
         fetch_commit.id()
     );
-    info!("git_pull - fast_forward: {}", msg);
+    debug_print!("{}", msg);
+    GitPushPullMessage {
+        predefined_message: PredefinedMsg::None.into(),
+        msg_index: 15,
+        msg: msg.clone(),
+    }
+    .send_signal_to_dart();
     match referance.set_target(fetch_commit.id(), &msg) {
         Ok(_) => {}
         Err(err) => {
@@ -176,7 +265,7 @@ fn normal_merge(
     remote: &git2::AnnotatedCommit,
     name: String,
     email: String,
-) -> Result<String, GitError> {
+) -> Result<(), GitError> {
     let remote_tree = match repo.find_commit(remote.id()) {
         Ok(remote_tree) => remote_tree,
         Err(err) => {
@@ -241,9 +330,16 @@ fn normal_merge(
         }
     };
     if idx.has_conflicts() {
+        debug_print!("{}", "Merge conflicts detected...");
+        GitPushPullMessage {
+            predefined_message: PredefinedMsg::None.into(),
+            msg_index: 20,
+            msg: "Merge conflicts detected...".to_string(),
+        }
+        .send_signal_to_dart();
         warn!("git_pull - normal_merge: Merge Conflicts Detected.");
         repo.checkout_index(Some(&mut idx), None).unwrap();
-        return Ok("Merge Conflicts Detected".to_string());
+        return Ok(());
     }
 
     let oid = match idx.write_tree_to(repo) {
@@ -293,7 +389,7 @@ fn normal_merge(
             ))
         }
     };
-    return Ok(return_msg);
+    return Ok(());
 }
 
 fn do_merge<'a>(
@@ -302,7 +398,7 @@ fn do_merge<'a>(
     fetch_commit: &'a git2::AnnotatedCommit,
     name: String,
     email: String,
-) -> Result<String, GitError> {
+) -> Result<(), GitError> {
     let analysis = match repo.merge_analysis(&[&fetch_commit]) {
         Ok(analysis) => analysis,
         Err(err) => {
@@ -312,7 +408,6 @@ fn do_merge<'a>(
             ))
         }
     };
-    let mut result_string = String::new();
     if analysis.0.is_fast_forward() {
         info!("do_merge - remote_branch {}", remote_branch);
         let refname = format!("refs/heads/{}", remote_branch);
@@ -337,17 +432,11 @@ fn do_merge<'a>(
                         .force(),
                 ))
                 .unwrap();
-                return Ok("".to_string());
+                return Ok(());
             }
         };
         match fast_forward(repo, &mut referance, &fetch_commit) {
-            Ok(_) => {
-                result_string = format!(
-                    "Fast-Forward: Setting {} to id {}",
-                    String::from_utf8_lossy(referance.name_bytes()),
-                    fetch_commit.id()
-                );
-            }
+            Ok(_) => {}
             Err(err) => return Err(err),
         };
     } else if analysis.0.is_normal() {
@@ -355,32 +444,10 @@ fn do_merge<'a>(
             .reference_to_annotated_commit(&repo.head().unwrap())
             .unwrap();
         match normal_merge(&repo, &head_commit, &fetch_commit, name, email) {
-            Ok(_) => {
-                result_string = format!("Merging: {} into {}", fetch_commit.id(), head_commit.id());
-            }
+            Ok(_) => {}
             Err(err) => return Err(err),
         };
     } else if analysis.0.is_up_to_date() {
-        result_string = "Already up to date".to_string();
     }
-    return Ok(result_string);
-}
-
-fn get_refs(remote: &git2::Remote) -> Result<Vec<String>, GitError> {
-    let refs = match remote.list() {
-        Ok(refs) => refs,
-        Err(err) => {
-            return Err(GitError::new(
-                "git_pull - 20".to_string(),
-                err.message().to_string(),
-            ))
-        }
-    };
-    let mut branches: Vec<String> = Vec::new();
-    for reference in refs {
-        let name = reference.name();
-        let name = name.split("/").last().unwrap();
-        branches.push(String::from(name));
-    }
-    return Ok(branches);
+    return Ok(());
 }

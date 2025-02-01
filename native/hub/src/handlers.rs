@@ -62,7 +62,7 @@ pub async fn git_pull_single_handler() {
             pass => Some(pass.to_string()),
         };
 
-        let pull_result = git_pull(dir_path, password, email, name);
+        let pull_result = git_pull(dir_path, password, email, name).await;
 
         let callback = match pull_result {
             Ok(result) => GitPullSingleCallback {

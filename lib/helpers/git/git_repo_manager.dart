@@ -44,6 +44,13 @@ class GitRepoManager {
     return _repos;
   }
 
+  String? getRepoId() {
+    if (_currentRepo == null) {
+      return null;
+    }
+    return _currentRepo!.repoId;
+  }
+
   void setCurrentRepo(GitRepo repo) {
     _currentRepo = repo;
   }

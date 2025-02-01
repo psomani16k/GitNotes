@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:git_notes/helpers/git/git_repo_manager.dart';
+import 'package:git_notes/messages/git_push_pull_messages.pbserver.dart';
 import 'package:git_notes/ui/GitPushPull/bloc/git_push_pull_bloc.dart';
 import 'package:git_notes/ui/HomeScreens/HomeGit/model/home_git_model.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:visibility_detector/visibility_detector.dart';
 
 class GitPushPull extends StatefulWidget {
@@ -16,6 +19,9 @@ class _GitPushPullState extends State<GitPushPull> {
   bool canCommit = false;
   bool canPush = false;
   bool processing = true;
+
+  _GitPushPullMessageRecievingBox pullMessageRecievingBox =
+      _GitPushPullMessageRecievingBox();
 
   @override
   Widget build(BuildContext context) {
@@ -74,7 +80,7 @@ class _GitPushPullState extends State<GitPushPull> {
                         child: LinearProgressIndicator(),
                       )
                     : const SizedBox(height: 5),
-                const Flexible(child: _GitPushPullMessageRecievingBox()),
+                Flexible(child: pullMessageRecievingBox),
                 _GitPushPullButtonBox(
                   canPush: canPush,
                   canCommit: canCommit,
@@ -89,36 +95,205 @@ class _GitPushPullState extends State<GitPushPull> {
 }
 
 class _GitPushPullMessageRecievingBox extends StatelessWidget {
-  const _GitPushPullMessageRecievingBox();
+  _GitPushPullMessageRecievingBox();
+
+  String repoId = GitRepoManager.getInstance().getRepoId()!;
+  List<Widget> displayTextCache = [];
+  Map<int, Widget> displayText = {};
 
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.fromLTRB(32, 32, 32, 32),
+      padding: const EdgeInsets.fromLTRB(28, 32, 28, 32),
       child: Container(
         decoration: BoxDecoration(
           border: Border.all(
               color: Theme.of(context).colorScheme.secondary, width: 3),
           boxShadow: [
             BoxShadow(
-              color:
-                  Theme.of(context).colorScheme.primaryContainer, // Glow color
-              spreadRadius: 4, // Increases the size of the glow
-              blurRadius: 20, // Softens the glow
-              offset: const Offset(0, 0), // No shadow offset, centered glow
+              color: Theme.of(context).colorScheme.primaryContainer,
+              spreadRadius: 2,
+              blurRadius: 15,
+              offset: const Offset(0, 0),
             ),
           ],
           borderRadius: BorderRadius.circular(36),
           color: Colors.black,
         ),
-        child: Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            SizedBox(width: 36),
-          ],
+        child: StreamBuilder(
+          stream: GitPushPullMessage.rustSignalStream,
+          builder: (context, snapshot) {
+            if (snapshot.hasData) {
+              GitPushPullMessage message = snapshot.data!.message;
+              print("------> ${message.msg}");
+              if (message.predefinedMessage case PredefinedMsg.Commit) {
+                displayText[0] = RichText(
+                  text: TextSpan(children: [
+                    TextSpan(
+                        text: "gitnotes:",
+                        style: GoogleFonts.jetBrainsMonoTextTheme()
+                            .labelSmall!
+                            .copyWith(
+                              fontSize: 10,
+                              color: Theme.of(context).colorScheme.tertiary,
+                            )),
+                    TextSpan(
+                        text: "~/$repoId",
+                        style: GoogleFonts.jetBrainsMonoTextTheme()
+                            .labelSmall!
+                            .copyWith(
+                              fontSize: 10,
+                              color: Theme.of(context).colorScheme.primary,
+                            )),
+                    TextSpan(
+                        text: "\$ git commit -m \"${message.msg}\"",
+                        style: GoogleFonts.jetBrainsMonoTextTheme()
+                            .labelSmall!
+                            .copyWith(
+                              fontSize: 10,
+                              color: Colors.grey.shade50,
+                            )),
+                  ]),
+                );
+              } else if (message.predefinedMessage case PredefinedMsg.Pull) {
+                displayText[0] = RichText(
+                  text: TextSpan(children: [
+                    TextSpan(
+                        text: "gitnotes:",
+                        style: GoogleFonts.jetBrainsMonoTextTheme()
+                            .labelSmall!
+                            .copyWith(
+                              fontSize: 10,
+                              color: Theme.of(context).colorScheme.tertiary,
+                            )),
+                    TextSpan(
+                        text: "~/$repoId",
+                        style: GoogleFonts.jetBrainsMonoTextTheme()
+                            .labelSmall!
+                            .copyWith(
+                              fontSize: 10,
+                              color: Theme.of(context).colorScheme.primary,
+                            )),
+                    TextSpan(
+                        text: "\$ git pull",
+                        style: GoogleFonts.jetBrainsMonoTextTheme()
+                            .labelSmall!
+                            .copyWith(
+                              fontSize: 10,
+                              color: Colors.grey.shade50,
+                            )),
+                  ]),
+                );
+              } else if (message.predefinedMessage case PredefinedMsg.Push) {
+                displayText[0] = RichText(
+                  text: TextSpan(children: [
+                    TextSpan(
+                        text: "gitnotes:",
+                        style: GoogleFonts.jetBrainsMonoTextTheme()
+                            .labelSmall!
+                            .copyWith(
+                              fontSize: 10,
+                              color: Theme.of(context).colorScheme.tertiary,
+                            )),
+                    TextSpan(
+                        text: "~/$repoId",
+                        style: GoogleFonts.jetBrainsMonoTextTheme()
+                            .labelSmall!
+                            .copyWith(
+                              fontSize: 10,
+                              color: Theme.of(context).colorScheme.primary,
+                            )),
+                    TextSpan(
+                        text: "\$ git push",
+                        style: GoogleFonts.jetBrainsMonoTextTheme()
+                            .labelSmall!
+                            .copyWith(
+                              fontSize: 10,
+                              color: Colors.grey.shade50,
+                            )),
+                  ]),
+                );
+              } else if (message.predefinedMessage case PredefinedMsg.None) {
+                displayText[message.msgIndex] = Text(
+                  message.msg,
+                  style:
+                      GoogleFonts.jetBrainsMonoTextTheme().labelSmall!.copyWith(
+                            fontSize: 10,
+                            color: Colors.grey.shade50,
+                          ),
+                );
+              } else if (message.predefinedMessage case PredefinedMsg.End) {
+                displayTextCache = processDisplayTextCache();
+                displayText = {
+                  0: RichText(
+                    text: TextSpan(children: [
+                      TextSpan(
+                          text: "gitnotes:",
+                          style: GoogleFonts.jetBrainsMonoTextTheme()
+                              .labelSmall!
+                              .copyWith(
+                                fontSize: 10,
+                                color: Theme.of(context).colorScheme.tertiary,
+                              )),
+                      TextSpan(
+                          text: "~/$repoId",
+                          style: GoogleFonts.jetBrainsMonoTextTheme()
+                              .labelSmall!
+                              .copyWith(
+                                fontSize: 10,
+                                color: Theme.of(context).colorScheme.primary,
+                              )),
+                      TextSpan(
+                          text: "\$",
+                          style: GoogleFonts.jetBrainsMonoTextTheme()
+                              .labelSmall!
+                              .copyWith(
+                                fontSize: 10,
+                                color: Colors.grey.shade50,
+                              )),
+                    ]),
+                  )
+                };
+              }
+            }
+            return Center(
+              child: SingleChildScrollView(
+                child: Padding(
+                  padding: const EdgeInsets.fromLTRB(20, 24, 20, 24),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    // TODO: optimise this
+                    children: processDisplayTextView(),
+                  ),
+                ),
+              ),
+            );
+          },
         ),
       ),
     );
+  }
+
+  List<Widget> processDisplayTextCache() {
+    List<Widget> output = [];
+    List<int> keys = displayText.keys.toList();
+    keys.sort();
+    for (int i in keys) {
+      output.add(displayText[i]!);
+    }
+    displayTextCache.addAll(output);
+    return displayTextCache;
+  }
+
+  List<Widget> processDisplayTextView() {
+    List<Widget> output = [];
+    List<int> keys = displayText.keys.toList();
+    keys.sort();
+    for (int i in keys) {
+      output.add(displayText[i]!);
+    }
+    output = [...displayTextCache, ...output];
+    return output;
   }
 }
 

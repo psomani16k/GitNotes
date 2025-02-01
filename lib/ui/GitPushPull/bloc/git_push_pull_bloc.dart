@@ -71,9 +71,6 @@ class GitPushPullBloc extends Bloc<GitPushPullEvent, GitPushPullState> {
         if (callback!.status == GitPullResult.Fail) {
           emit(GitPushPullErrorState(message: "Failed to perform pull"));
         } else {
-          // TODO: remove this and let the terminal like interface give live updates
-          emit(GitPushPullErrorState(message: "Pulled Successfully"));
-
           // if no errors then update the page
           CommitAndPushCheckCallback? checkCallback =
               await GitRepoManager.getInstance().checkCommitAndPush();
