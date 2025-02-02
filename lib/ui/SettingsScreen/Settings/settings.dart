@@ -1,3 +1,4 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_vector_icons/flutter_vector_icons.dart';
 import 'package:git_notes/ui/SettingsScreen/SettingsInterface/settings_interface.dart';
@@ -21,16 +22,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
         children: [
           ListTile(
             onTap: () async {
-              await Navigator.of(context).push(
-                PageTransition(
-                  child: const SettingsInterface(),
-                  type: PageTransitionType.rightToLeftJoined,
-                  childCurrent: widget,
-                  curve: Easing.emphasizedDecelerate,
-                  reverseDuration: Durations.medium2,
-                  duration: Durations.long1,
-                ),
-              );
+              await Navigator.of(context).push(CupertinoPageRoute(
+                builder: (context) => const SettingsInterface(),
+              ));
               setState(() {});
             },
             minVerticalPadding: 25,

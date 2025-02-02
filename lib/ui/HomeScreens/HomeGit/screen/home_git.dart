@@ -155,7 +155,7 @@ class _HomeGitStagedFiles extends StatelessWidget {
             ),
             child: Center(
               child: Text(
-                "Status",
+                "Staged",
                 style: TextTheme.of(context).titleMedium,
               ),
             ),
