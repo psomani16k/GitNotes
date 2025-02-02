@@ -18,6 +18,8 @@ class _HomeState extends State<Home> {
 
   final HomeGit _homeGit = const HomeGit();
 
+  final GitPushPull _gitPushPull = const GitPushPull();
+
   // State variables
   int pageIndex = 0;
 
@@ -25,11 +27,13 @@ class _HomeState extends State<Home> {
   Widget build(BuildContext context) {
     return Scaffold(
       floatingActionButton: FloatingActionButton(
-			child: const Icon(Icons.swap_vert),
+        child: const Icon(Icons.swap_vert),
         onPressed: () {
           Navigator.push(
             context,
-            CupertinoPageRoute(builder: (context) => const GitPushPull()),
+            CupertinoPageRoute(
+              builder: (context) => _gitPushPull,
+            ),
           );
         },
       ),

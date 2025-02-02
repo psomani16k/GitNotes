@@ -2,8 +2,6 @@ mod git_functions;
 mod handlers;
 mod messages;
 
-use std::{thread::sleep, time::Duration};
-
 use handlers::{
     commit_push_check_handler, git_add_handler, git_clone_handler, git_commit_handler,
     git_pull_single_handler, git_push_handler, git_remove_handler, git_restore_handler,

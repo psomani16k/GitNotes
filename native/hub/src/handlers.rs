@@ -67,7 +67,7 @@ pub async fn git_pull_single_handler() {
         let callback = match pull_result {
             Ok(result) => GitPullSingleCallback {
                 status: GitPullResult::Success.into(),
-                data: result,
+                data: "".to_string(),
             },
             Err(err) => GitPullSingleCallback {
                 status: GitPullResult::Fail.into(),
