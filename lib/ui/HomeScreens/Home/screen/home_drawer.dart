@@ -200,7 +200,8 @@ class _HomeDrawerState extends State<HomeDrawer> {
                         ),
                         Text(
                           repo.getRepoId(),
-                          style: TextTheme.of(context).bodySmall!.copyWith(
+													overflow: TextOverflow.ellipsis,
+                          style: TextTheme.of(context).labelSmall!.copyWith(
                                 color: Theme.of(context)
                                     .colorScheme
                                     .onSecondaryContainer
