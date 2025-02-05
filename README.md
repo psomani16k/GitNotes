@@ -46,12 +46,12 @@ Please note: The app is still in its initial stages and the UI is *surely* going
 - Ability to clone and manipulate repositories in the external (or shared) storage.
 - Git functions like clone, pull, add, commit, push.
 - Managing and traversing multiple repositories.
+- State management using BloC. (not user facing)
 
 **Actively worked upon** - *These goals are actively recieving most of my time and efforts (parts may already be completed and implemented in the app).*
 
 - A better UI with subtle animations and customizations.
 - A Settings Page :)
-- State management using BloC. (not user facing) 
 
 **Research phase** - *These goals are still being examined and researched upon (It is possible they stay here for a while)*
 
