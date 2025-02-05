@@ -6,7 +6,6 @@ message GitPushPullMessage{
   string msg = 1;
   int32 msgIndex = 2;
   PredefinedMsg predefinedMessage = 3;
-  bool isError = 4;
 }
 
 enum PredefinedMsg{

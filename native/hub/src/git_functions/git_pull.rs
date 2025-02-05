@@ -19,7 +19,7 @@ pub async fn git_pull(
     password: Option<String>,
     email: String,
     name: String,
-) -> Result<(), GitError> {
+) -> Result<(), Error> {
     // start git pull
     GitPushPullMessage {
         msg: "".to_string(),
@@ -28,22 +28,10 @@ pub async fn git_pull(
     }
     .send_signal_to_dart();
 
-    match unsafe { git2::opts::set_verify_owner_validation(false) } {
-        Ok(_) => {}
-        Err(err) => {
-            return Err(GitError::new(
-                "git_pull - 0".to_string(),
-                err.message().to_string(),
-            ))
-        }
-    };
+    unsafe { git2::opts::set_verify_owner_validation(false) }?;
 
     let repo = git2::Repository::open(dir_path.clone()).unwrap();
-    let mut remote = match repo.find_remote("origin") {
-        Ok(remote) => remote,
-        Err(err) => return Err(GitError::new("git_pull - 1".to_string(), err.to_string())),
-    };
-
+    let mut remote = repo.find_remote("origin")?;
     let mut callback = git2::RemoteCallbacks::new();
     callback.certificate_check(|_, _| Ok(CertificateCheckStatus::CertificateOk));
 
@@ -58,15 +46,7 @@ pub async fn git_pull(
     let branch = current_branch(&dir_path);
     let b = vec![branch.clone()];
     let (fetch_annotated_commit, up_to_date) =
-        match do_fetch(&repo, &b, &mut remote, email.clone(), password) {
-            Ok(data) => data,
-            Err(err) => {
-                return Err(GitError::new(
-                    "error during fetch in git pull".to_string(),
-                    err.message().to_string(),
-                ))
-            }
-        };
+        do_fetch(&repo, &b, &mut remote, email.clone(), password)?;
 
     if up_to_date {
         GitPushPullMessage {
@@ -78,22 +58,13 @@ pub async fn git_pull(
         return Ok(());
     }
 
-    match do_merge(
+    do_merge(
         &repo,
         branch,
-        &fetch_annotated_commit,
+        &fetch_annotated_commit.unwrap(),
         name.clone(),
         email.clone(),
-    ) {
-        Ok(_) => {}
-        Err(err) => {
-            return Err(GitError::new(
-                "error during merging in git pull".to_string(),
-                err.message().to_string(),
-            ))
-        }
-    };
-
+    )?;
     // end git pull
     GitPushPullMessage {
         msg_index: 10000,
@@ -111,7 +82,7 @@ fn do_fetch<'a>(
     remote: &'a mut git2::Remote,
     user: String,
     pass: Option<String>,
-) -> Result<(AnnotatedCommit<'a>, bool), Error> {
+) -> Result<(Option<AnnotatedCommit<'a>>, bool), Error> {
     let mut remote_cache = String::from("  ");
     let mut remote_msg_count = 50;
 
@@ -167,6 +138,7 @@ fn do_fetch<'a>(
         }
         .send_signal_to_dart();
         already_up_to_date = true;
+        return Ok((None, already_up_to_date));
     }
     let fetch_head = repo.find_reference("FETCH_HEAD")?;
     let annotated_commit = repo.reference_to_annotated_commit(&fetch_head)?;
@@ -203,7 +175,7 @@ fn do_fetch<'a>(
         .send_signal_to_dart();
     }
 
-    return Ok((annotated_commit, already_up_to_date));
+    return Ok((Some(annotated_commit), already_up_to_date));
 }
 
 // 100 - 150

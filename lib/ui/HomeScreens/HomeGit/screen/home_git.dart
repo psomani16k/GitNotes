@@ -195,28 +195,29 @@ class _HomeGitStagedFiles extends StatelessWidget {
                         ),
                       ),
                     ),
-                    Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        TextScroll(
-                          status.getFileName(),
-                          pauseBetween: const Duration(seconds: 2),
-                          mode: TextScrollMode.bouncing,
-                          style: TextTheme.of(context).titleSmall,
-                        ),
-                        TextScroll(
-                          status.relativeFilePath,
-                          pauseBetween: const Duration(seconds: 2),
-                          mode: TextScrollMode.bouncing,
-                          style: TextTheme.of(context).labelSmall!.copyWith(
-                                color: Theme.of(context)
-                                    .colorScheme
-                                    .onSurface
-                                    .withAlpha(120),
-                              ),
-                        ),
-                      ],
+                    SizedBox(
+                      width: MediaQuery.sizeOf(context).width - 132,
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            status.getFileName(),
+                            overflow: TextOverflow.ellipsis,
+                            style: TextTheme.of(context).titleSmall,
+                          ),
+                          Text(
+                            status.relativeFilePath,
+                            overflow: TextOverflow.visible,
+                            style: TextTheme.of(context).labelSmall!.copyWith(
+                                  color: Theme.of(context)
+                                      .colorScheme
+                                      .onSurface
+                                      .withAlpha(120),
+                                ),
+                          ),
+                        ],
+                      ),
                     ),
                     const Spacer(),
                     Padding(
@@ -325,28 +326,28 @@ class _HomeGitChangedFiles extends StatelessWidget {
                         ),
                       ),
                     ),
-                    Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        TextScroll(
-                          status.getFileName(),
-                          pauseBetween: const Duration(seconds: 2),
-                          mode: TextScrollMode.bouncing,
-                          style: TextTheme.of(context).titleSmall,
-                        ),
-                        TextScroll(
-                          status.relativeFilePath,
-                          pauseBetween: const Duration(seconds: 2),
-                          mode: TextScrollMode.bouncing,
-                          style: TextTheme.of(context).labelSmall!.copyWith(
-                                color: Theme.of(context)
-                                    .colorScheme
-                                    .onSurface
-                                    .withAlpha(120),
-                              ),
-                        ),
-                      ],
+                    SizedBox(
+                      width: MediaQuery.sizeOf(context).width - 180,
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            status.getFileName(),
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                          Text(
+                            overflow: TextOverflow.visible,
+                            status.relativeFilePath,
+                            style: TextTheme.of(context).labelSmall!.copyWith(
+                                  color: Theme.of(context)
+                                      .colorScheme
+                                      .onSurface
+                                      .withAlpha(120),
+                                ),
+                          ),
+                        ],
+                      ),
                     ),
                     const Spacer(),
                     IconButton.filled(

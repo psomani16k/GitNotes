@@ -35,6 +35,7 @@ class _GitPushPullState extends State<_GitPushPull> {
   bool canCommit = false;
   bool canPush = false;
   bool processing = true;
+  TextEditingController commitMessageController = TextEditingController();
 
   @override
   Widget build(BuildContext context) {
@@ -93,6 +94,7 @@ class _GitPushPullState extends State<_GitPushPull> {
               Expanded(child: _GitPushPullMessageRecievingBox(context)),
               Center(
                 child: _GitPushPullButtonBox(
+                  commitMessageController: commitMessageController,
                   canPush: canPush,
                   canCommit: canCommit,
                 ),
@@ -364,15 +366,14 @@ class _GitPushPullMessageRecievingBoxState
 }
 
 class _GitPushPullButtonBox extends StatelessWidget {
-  _GitPushPullButtonBox({
-    required this.canPush,
-    required this.canCommit,
-  });
+  const _GitPushPullButtonBox(
+      {required this.canPush,
+      required this.canCommit,
+      required this.commitMessageController});
 
   final bool canPush;
   final bool canCommit;
-  final TextEditingController _commitMessageController =
-      TextEditingController();
+  final TextEditingController commitMessageController;
 
   @override
   Widget build(BuildContext context) {
@@ -385,7 +386,7 @@ class _GitPushPullButtonBox extends StatelessWidget {
             padding: const EdgeInsets.symmetric(horizontal: 32),
             child: TextFormField(
               enabled: canCommit,
-              controller: _commitMessageController,
+              controller: commitMessageController,
               decoration: InputDecoration(
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(18),
@@ -399,7 +400,7 @@ class _GitPushPullButtonBox extends StatelessWidget {
             onPressed: canCommit
                 ? () {
                     bloc.add(GitPushPullPerformCommitEvent(
-                      message: _commitMessageController.text,
+                      message: commitMessageController.text,
                     ));
                   }
                 : null,
@@ -409,7 +410,10 @@ class _GitPushPullButtonBox extends StatelessWidget {
               child: Center(
                 child: Text(
                   "Commit",
-                  style: TextTheme.of(context).titleMedium,
+                  style: canCommit
+                      ? TextTheme.of(context).titleMedium!.copyWith(
+                          color: Theme.of(context).colorScheme.onPrimary)
+                      : TextTheme.of(context).titleMedium,
                 ),
               ),
             ),
@@ -427,7 +431,10 @@ class _GitPushPullButtonBox extends StatelessWidget {
               child: Center(
                 child: Text(
                   "Push",
-                  style: TextTheme.of(context).titleMedium,
+                  style: canPush
+                      ? TextTheme.of(context).titleMedium!.copyWith(
+                          color: Theme.of(context).colorScheme.onPrimary)
+                      : TextTheme.of(context).titleMedium,
                 ),
               ),
             ),
