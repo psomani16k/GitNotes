@@ -5,14 +5,16 @@ A Markdown first notes app with git based syncing and version control.
 ## Screenshots
 
 <p float="left">
-  <img src="https://raw.githubusercontent.com/psomani16k/GitNotes/refs/heads/main/screenshots/homescreen_files.png" width="200" />
-  <img src="https://raw.githubusercontent.com/psomani16k/GitNotes/refs/heads/main/screenshots/homescreen_git.png" width="200" />
-  <img src="https://raw.githubusercontent.com/psomani16k/GitNotes/refs/heads/main/screenshots/push_commit_sheet.png" width="200" />
+  <img src="./screenshots/pull.jpg" width="150" />
+  <img src="./screenshots/repos.jpg" width="150" />
+  <img src="./screenshots/staging.jpg" width="150" />
+  <img src="./screenshots/directory.jpg" width="150" />
 </p>
 <p float="left">
-  <img src="https://raw.githubusercontent.com/psomani16k/GitNotes/refs/heads/main/screenshots/markdown_rendering_screen.png" width="200" />
-  <img src="https://raw.githubusercontent.com/psomani16k/GitNotes/refs/heads/main/screenshots/git_clone_screen.png" width="200" />
-  <img src="https://raw.githubusercontent.com/psomani16k/GitNotes/refs/heads/main/screenshots/git_clone_successful_screen.png" width="200" />
+  <img src="./screenshots/md_render.jpg" width="150" />
+  <img src="./screenshots/commit.jpg" width="150" />
+  <img src="./screenshots/clone_success.jpg" width="150" />
+  <img src="./screenshots/clone_entry.jpg" width="150" />
 </p>
 
 Please note: The app is still in its initial stages and the UI is *surely* going to change for the better. 
