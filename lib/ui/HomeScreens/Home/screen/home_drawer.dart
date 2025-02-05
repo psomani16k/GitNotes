@@ -5,6 +5,7 @@ import 'package:flutter_vector_icons/flutter_vector_icons.dart';
 import 'package:git_notes/helpers/git/git_repo.dart';
 
 import 'package:git_notes/helpers/git/git_repo_manager.dart';
+import 'package:git_notes/ui/GitCloneScreen/bloc/git_clone_bloc.dart';
 import 'package:git_notes/ui/GitCloneScreen/screen/git_clone_screen.dart';
 import 'package:git_notes/ui/GitPushPull/bloc/git_push_pull_bloc.dart';
 import 'package:git_notes/ui/HomeScreens/HomeDirectory/bloc/home_directory_bloc.dart';
@@ -106,6 +107,7 @@ class _HomeDrawerState extends State<HomeDrawer> {
               ),
               InkWell(
                 onTap: () {
+									GitCloneBloc cloneBloc = BlocProvider.of<GitCloneBloc>(context).add(GitCloneInitialEvent());
                   Navigator.pop(context);
                   Navigator.push(
                     context,
