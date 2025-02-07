@@ -7,7 +7,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_vector_icons/flutter_vector_icons.dart';
 import 'package:git_notes/ui/HomeScreens/HomeDirectory/bloc/home_directory_bloc.dart';
-import 'package:git_notes/ui/MarkdownRendering/screen/markdown_rendering_screen.dart';
+import 'package:git_notes/ui/MarkdownRendering/MarkdownRenderingScreen/screen/markdown_rendering_screen.dart';
 import 'package:open_file_plus/open_file_plus.dart';
 import 'package:text_scroll/text_scroll.dart';
 import 'package:visibility_detector/visibility_detector.dart';

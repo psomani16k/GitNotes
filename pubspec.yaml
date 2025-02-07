@@ -46,6 +46,3 @@ flutter:
   generate: true
   uses-material-design: true
   
-  assets:
-    - assets/preview/
-    - assets/preview/fonts/

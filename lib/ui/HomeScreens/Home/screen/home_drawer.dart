@@ -107,7 +107,9 @@ class _HomeDrawerState extends State<HomeDrawer> {
               ),
               InkWell(
                 onTap: () {
-									GitCloneBloc cloneBloc = BlocProvider.of<GitCloneBloc>(context).add(GitCloneInitialEvent());
+                  GitCloneBloc cloneBloc =
+                      BlocProvider.of<GitCloneBloc>(context);
+                  cloneBloc.add(GitCloneInitialEvent());
                   Navigator.pop(context);
                   Navigator.push(
                     context,
@@ -202,7 +204,7 @@ class _HomeDrawerState extends State<HomeDrawer> {
                         ),
                         Text(
                           repo.getRepoId(),
-													overflow: TextOverflow.ellipsis,
+                          overflow: TextOverflow.ellipsis,
                           style: TextTheme.of(context).labelSmall!.copyWith(
                                 color: Theme.of(context)
                                     .colorScheme
