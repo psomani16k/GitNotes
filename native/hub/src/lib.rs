@@ -8,7 +8,7 @@ use handlers::{
     git_pull_single_handler, git_push_handler, git_remove_handler, git_restore_handler,
     git_status_handler,
 };
-use markdown::handle_markdown;
+use markdown::markdown_handler::handle_markdown;
 use rinf::debug_print;
 use tokio::{self, time}; // Comment this line to target the web.
 

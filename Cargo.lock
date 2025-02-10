@@ -382,9 +382,11 @@ dependencies = [
  "git2",
  "log 0.4.25",
  "markdown-it",
- "markdown-it-tasklist",
+ "once_cell",
  "prost",
+ "regex",
  "rinf",
+ "stacker",
  "tokio",
 ]
 
@@ -690,18 +692,6 @@ dependencies = [
  "stacker",
  "syntect",
  "unicode-general-category",
-]
-
-[[package]]
-name = "markdown-it-tasklist"
-version = "0.2.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "c401c2e7cd96552a6da0eefc8024f9d9ec5afde9b2d6d3fee70f14a7ebafd496"
-dependencies = [
- "markdown-it",
- "once_cell",
- "regex",
- "stacker",
 ]
 
 [[package]]

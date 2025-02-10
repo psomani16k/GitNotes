@@ -89,13 +89,27 @@ class _MarkdownPreviewState extends State<MarkdownPreview> {
       ..setJavaScriptMode(JavaScriptMode.unrestricted)
       ..setBackgroundColor(Theme.of(context).scaffoldBackgroundColor)
       ..addJavaScriptChannel("GitNotesCheckBox", onMessageReceived: (msg) {
-        final parts = msg.message.split('-');
-        final bool checked = parts[0] == 'true';
-        final int id = int.parse(parts[1]);
-        final index = checkboxPositions[id];
-        mdData = mdData.substring(0, index) +
-            (checked ? 'x' : ' ') +
-            mdData.substring(index + 1);
+        // final parts = msg.message.split('-');
+        // final bool checked = parts[0] == 'true';
+        // final int id = int.parse(parts[1]);
+        // final index = checkboxPositions[id];
+        // mdData = mdData.substring(0, index) +
+        //     (checked ? 'x' : ' ') +
+        //     mdData.substring(index + 1);
+        int column = int.parse(msg.message.split(":").first);
+        List<String> mdDataLineWise = mdData.split("\n");
+        String taskString = mdDataLineWise[column - 1];
+        int checkboxIndex = taskString.indexOf("[") + 1;
+        print("old line: $taskString");
+        if (taskString[checkboxIndex] == " ") {
+          taskString =
+              taskString.replaceRange(checkboxIndex, checkboxIndex + 1, "x");
+        } else {
+          taskString =
+              taskString.replaceRange(checkboxIndex, checkboxIndex + 1, " ");
+        }
+        mdDataLineWise[column - 1] = taskString;
+        mdData = mdDataLineWise.join("\n");
         widget.mdFile.writeAsStringSync(mdData);
       })
       ..addJavaScriptChannel(
@@ -137,11 +151,6 @@ class _MarkdownPreviewState extends State<MarkdownPreview> {
   void processMarkdown() async {
     mdData = await widget.mdFile.readAsString();
 
-    // Indexing all the checkboxes
-    for (final match in RegExp(r'- \[(x| )\]').allMatches(mdData)) {
-      checkboxPositions.add(match.start + 3);
-    }
-
     // Creating a temperory cache directory for generated html
     Directory cache = await getApplicationDocumentsDirectory();
     htmlFile = File("${cache.path}/temp.html");
@@ -149,10 +158,14 @@ class _MarkdownPreviewState extends State<MarkdownPreview> {
 
     // Generating HTML preview
     // TODO: replace this with rust implementation
-    // String htmlData = md.markdownToHtml(
+    // String htmlDataDart = md.markdownToHtml(
     //   mdData,
     //   extensionSet: md.ExtensionSet.gitHubFlavored,
     // );
+    //
+    // for (String i in htmlDataDart.split("\n")) {
+    //   print("dart --->$i");
+    // }
 
     ProcessMarkdown(markdownData: mdData).sendSignalToRust();
 
@@ -164,13 +177,6 @@ class _MarkdownPreviewState extends State<MarkdownPreview> {
     // Making linking files work
     htmlData = htmlData.replaceAll("<a href=",
         '<a onclick=" event.preventDefault(); GitNotesLink.postMessage(this.getAttribute(\'href\'));" href=');
-
-    // Setting checkbox callbacks
-    int checkboxIndex = -1;
-    htmlData = htmlData.replaceAllMapped('input type="checkbox"', (match) {
-      checkboxIndex++;
-      return 'input type="checkbox" onclick="GitNotesCheckBox.postMessage( this.checked + \'-$checkboxIndex\');"';
-    });
 
     // Making images work
     htmlData = htmlData.replaceAll("<img ", '<img width="100%" ');
@@ -196,10 +202,6 @@ class _MarkdownPreviewState extends State<MarkdownPreview> {
       },
     );
     htmlData = imgCorrectedHtml;
-
-    // cleaning this to enable math blocks
-    // htmlData = htmlData.replaceAll(r"<p>$$", "<div>\n%\$");
-    // htmlData = htmlData.replaceAll(r"$$</p>", "\$%\n</div>");
 
     // cleaning mermaid tag
     htmlData = htmlData.replaceAllMapped(

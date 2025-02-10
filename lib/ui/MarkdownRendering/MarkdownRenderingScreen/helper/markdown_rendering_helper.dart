@@ -216,6 +216,9 @@ tr:nth-child(even) {
 }
 
 
+/* CHECKBOXES */
+
+
 """;
 
     // html
