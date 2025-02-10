@@ -1,5 +1,6 @@
 mod git_functions;
 mod handlers;
+mod markdown;
 mod messages;
 
 use handlers::{
@@ -7,6 +8,7 @@ use handlers::{
     git_pull_single_handler, git_push_handler, git_remove_handler, git_restore_handler,
     git_status_handler,
 };
+use markdown::handle_markdown;
 use rinf::debug_print;
 use tokio::{self, time}; // Comment this line to target the web.
 
@@ -23,6 +25,7 @@ async fn main() {
             debug_print!("Error starting logger: {}", err.to_string());
         }
     };
+    tokio::spawn(handle_markdown());
     tokio::spawn(git_clone_handler());
     tokio::spawn(git_pull_single_handler());
     tokio::spawn(git_status_handler());

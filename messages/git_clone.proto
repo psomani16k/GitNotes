@@ -16,7 +16,7 @@ message GitCloneCallback {
   string branch = 3;
 }
 
-enum GitCloneResult{
-    Success = 0;
-    Fail = 1;
+enum GitCloneResult {
+  Success = 0;
+  Fail = 1;
 }

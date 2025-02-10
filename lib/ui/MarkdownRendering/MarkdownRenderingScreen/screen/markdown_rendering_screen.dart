@@ -1,11 +1,13 @@
 import 'dart:io';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:git_notes/messages/markdown.pbserver.dart';
 import 'package:git_notes/ui/MarkdownRendering/MarkdownEditingScreen/screen/markdown_editing_screen.dart';
 import 'package:git_notes/ui/MarkdownRendering/MarkdownRenderingScreen/helper/markdown_rendering_helper.dart';
 import 'package:markdown/markdown.dart' as md;
 import 'package:page_transition/page_transition.dart';
 import 'package:path_provider/path_provider.dart';
+import 'package:rinf/rinf.dart';
 import 'package:url_launcher/url_launcher_string.dart';
 import 'package:webview_flutter/webview_flutter.dart';
 
@@ -29,20 +31,17 @@ class _MarkdownRenderingScreenState extends State<MarkdownRenderingScreen> {
     return Scaffold(
       appBar: AppBar(
         title: Text(widget.file.path.split("/").last),
-        actions: [
-          IconButton(
-            onPressed: () async {
-              await Navigator.of(context).push(
-                CupertinoPageRoute(
-                  builder: (context) =>
-                      MarkdownEditingScreen(file: widget.file),
-                ),
-              );
-              setState(() {});
-            },
-            icon: const Icon(Icons.edit_note),
-          )
-        ],
+      ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () async {
+          await Navigator.of(context).push(
+            CupertinoPageRoute(
+              builder: (context) => MarkdownEditingScreen(file: widget.file),
+            ),
+          );
+          setState(() {});
+        },
+        child: const Icon(Icons.edit_note),
       ),
       body: MarkdownPreview(
         theme: Theme.of(context),
@@ -150,10 +149,17 @@ class _MarkdownPreviewState extends State<MarkdownPreview> {
 
     // Generating HTML preview
     // TODO: replace this with rust implementation
-    String htmlData = md.markdownToHtml(
-      mdData,
-      extensionSet: md.ExtensionSet.gitHubFlavored,
-    );
+    // String htmlData = md.markdownToHtml(
+    //   mdData,
+    //   extensionSet: md.ExtensionSet.gitHubFlavored,
+    // );
+
+    ProcessMarkdown(markdownData: mdData).sendSignalToRust();
+
+    Stream<RustSignal<ProcessMarkdownCallback>> rustSignal =
+        ProcessMarkdownCallback.rustSignalStream;
+    RustSignal<ProcessMarkdownCallback> callback = await rustSignal.first;
+    String htmlData = callback.message.htmlData;
 
     // Making linking files work
     htmlData = htmlData.replaceAll("<a href=",
@@ -192,8 +198,8 @@ class _MarkdownPreviewState extends State<MarkdownPreview> {
     htmlData = imgCorrectedHtml;
 
     // cleaning this to enable math blocks
-    htmlData = htmlData.replaceAll(r"<p>$$", "<div>\n%\$");
-    htmlData = htmlData.replaceAll(r"$$</p>", "\$%\n</div>");
+    // htmlData = htmlData.replaceAll(r"<p>$$", "<div>\n%\$");
+    // htmlData = htmlData.replaceAll(r"$$</p>", "\$%\n</div>");
 
     // cleaning mermaid tag
     htmlData = htmlData.replaceAllMapped(

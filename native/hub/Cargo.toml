@@ -20,6 +20,10 @@ prost = "0.12.6"
 tokio = { version = "1", features = ["sync", "rt", "time"] }
 log = "0.4.25"
 
+## markdown crates
+markdown-it = "0.6.1"
+markdown-it-tasklist = "0.2.0"
+
 # Uncomment below to target the web.
 # tokio_with_wasm = { version = "0.6.0", features = ["sync", "rt"] }
 # wasm-bindgen = "0.2.92"

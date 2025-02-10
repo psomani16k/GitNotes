@@ -85,35 +85,45 @@ class _MarkdownEditingScreenState extends State<MarkdownEditingScreen> {
       child: Scaffold(
         appBar: AppBar(
           title: Text(widget.file.path.split("/").last),
-          actions: [
-            IconButton(
-              onPressed: () {
-                String currentFileState = _markdownEditingController.text;
-                if (fileRead != currentFileState) {
-                  fileRead = currentFileState;
-                  widget.file.writeAsStringSync(fileRead, mode: FileMode.write);
-                }
-              },
-              icon: const Icon(Icons.save),
-            )
-          ],
+          // actions: [
+          //   IconButton(
+          //     onPressed: () {},
+          //   )
+          // ],
         ),
-        body: MarkdownField(
-          controller: _markdownEditingController,
-          decoration: const InputDecoration(
-            // labelText: 'Enter your text',
-            floatingLabelBehavior: FloatingLabelBehavior.auto,
-            // labelStyle: TextStyle(
-            //   color: Colors.grey, // Color for the label text
-            //   fontSize: 16, // Size for the label text
-            // ),
-            enabledBorder: InputBorder.none, // No border when not focused
-            focusedBorder: InputBorder.none, // No border when focused
-            contentPadding: EdgeInsets.symmetric(
-                vertical: 0, horizontal: 6), // Adjust padding as needed
-          ),
-          style: TextStyle(
-            fontFamily: GoogleFonts.jetBrainsMono().fontFamily,
+        floatingActionButton: FloatingActionButton(
+          onPressed: () {
+            String currentFileState = _markdownEditingController.text;
+            if (fileRead != currentFileState) {
+              fileRead = currentFileState;
+              widget.file.writeAsStringSync(fileRead, mode: FileMode.write);
+            }
+          },
+          child: const Icon(Icons.save),
+        ),
+        body: SingleChildScrollView(
+          child: Column(
+            children: [
+              MarkdownField(
+                controller: _markdownEditingController,
+                decoration: const InputDecoration(
+                  // labelText: 'Enter your text',
+                  floatingLabelBehavior: FloatingLabelBehavior.auto,
+                  // labelStyle: TextStyle(
+                  //   color: Colors.grey, // Color for the label text
+                  //   fontSize: 16, // Size for the label text
+                  // ),
+                  enabledBorder: InputBorder.none, // No border when not focused
+                  focusedBorder: InputBorder.none, // No border when focused
+                  contentPadding: EdgeInsets.symmetric(
+                      horizontal: 8), // Adjust padding as needed
+                ),
+                style: TextStyle(
+                  fontFamily: GoogleFonts.jetBrainsMono().fontFamily,
+                ),
+              ),
+              const SizedBox(height: 120)
+            ],
           ),
         ),
       ),

@@ -2,12 +2,10 @@ syntax = "proto3";
 package commit_push_check;
 
 // [RINF:DART-SIGNAL]
-message CommitAndPushCheck{
-    string repoDir = 1;
-}
+message CommitAndPushCheck { string repoDir = 1; }
 
 // [RINF:RUST-SIGNAL]
-message CommitAndPushCheckCallback{
-    bool commitAllowed = 1;
-    bool pushAllowed = 2;
+message CommitAndPushCheckCallback {
+  bool commitAllowed = 1;
+  bool pushAllowed = 2;
 }

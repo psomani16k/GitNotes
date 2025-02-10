@@ -2,13 +2,13 @@ syntax = "proto3";
 package git_push_pull_messages;
 
 // [RINF:RUST-SIGNAL]
-message GitPushPullMessage{
+message GitPushPullMessage {
   string msg = 1;
   int32 msgIndex = 2;
   PredefinedMsg predefinedMessage = 3;
 }
 
-enum PredefinedMsg{
+enum PredefinedMsg {
   None = 0;
   Pull = 1;
   Push = 2;

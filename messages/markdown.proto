@@ -1,0 +1,8 @@
+syntax = "proto3";
+package markdown;
+
+// [RINF:DART-SIGNAL]
+message ProcessMarkdown { string markdownData = 1; }
+
+// [RINF:RUST-SIGNAL]
+message ProcessMarkdownCallback { string htmlData = 1; }

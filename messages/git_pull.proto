@@ -2,7 +2,7 @@ syntax = "proto3";
 package git_pull;
 
 // [RINF:DART-SIGNAL]
-message GitPullSingle{
+message GitPullSingle {
   string directoryPath = 1;
   string user = 3;
   string password = 4;
@@ -15,8 +15,7 @@ message GitPullSingleCallback {
   string data = 2;
 }
 
-enum GitPullResult{
-    Success = 0;
-    Fail = 1;
+enum GitPullResult {
+  Success = 0;
+  Fail = 1;
 }
-
