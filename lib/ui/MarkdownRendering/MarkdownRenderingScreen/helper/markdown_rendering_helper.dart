@@ -215,10 +215,6 @@ tr:nth-child(even) {
 		color: var(--on-tertiary-container)
 }
 
-
-/* CHECKBOXES */
-
-
 """;
 
     // html

@@ -302,6 +302,7 @@ class _GitPushPullMessageRecievingBoxState
 
   @override
   Widget build(BuildContext context) {
+    print(displayText);
     return Padding(
       padding: const EdgeInsets.fromLTRB(28, 32, 28, 32),
       child: Container(

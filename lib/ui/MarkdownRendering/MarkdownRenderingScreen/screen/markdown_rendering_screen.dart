@@ -1,6 +1,7 @@
 import 'dart:io';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:git_notes/helpers/git/git_repo_manager.dart';
 import 'package:git_notes/messages/markdown.pbserver.dart';
 import 'package:git_notes/ui/MarkdownRendering/MarkdownEditingScreen/screen/markdown_editing_screen.dart';
 import 'package:git_notes/ui/MarkdownRendering/MarkdownRenderingScreen/helper/markdown_rendering_helper.dart';
@@ -88,19 +89,12 @@ class _MarkdownPreviewState extends State<MarkdownPreview> {
     WebViewController viewController = WebViewController()
       ..setJavaScriptMode(JavaScriptMode.unrestricted)
       ..setBackgroundColor(Theme.of(context).scaffoldBackgroundColor)
+      // javascript channel to manipulate checkboxes
       ..addJavaScriptChannel("GitNotesCheckBox", onMessageReceived: (msg) {
-        // final parts = msg.message.split('-');
-        // final bool checked = parts[0] == 'true';
-        // final int id = int.parse(parts[1]);
-        // final index = checkboxPositions[id];
-        // mdData = mdData.substring(0, index) +
-        //     (checked ? 'x' : ' ') +
-        //     mdData.substring(index + 1);
         int column = int.parse(msg.message.split(":").first);
         List<String> mdDataLineWise = mdData.split("\n");
         String taskString = mdDataLineWise[column - 1];
         int checkboxIndex = taskString.indexOf("[") + 1;
-        print("old line: $taskString");
         if (taskString[checkboxIndex] == " ") {
           taskString =
               taskString.replaceRange(checkboxIndex, checkboxIndex + 1, "x");
@@ -112,21 +106,30 @@ class _MarkdownPreviewState extends State<MarkdownPreview> {
         mdData = mdDataLineWise.join("\n");
         widget.mdFile.writeAsStringSync(mdData);
       })
+      // javascript channel to open links
       ..addJavaScriptChannel(
         "GitNotesLink",
         onMessageReceived: (msg) {
-          if (msg.message.startsWith("./") || msg.message.startsWith("../")) {
-            File file = File("${widget.mdFile.parent.path}/${msg.message}");
+          String message = msg.message;
+          // for relative links
+          File file = File("${widget.mdFile.parent.path}/${message}");
+          if (file.existsSync()) {
             Navigator.of(context).push(
-              PageTransition(
-                child: MarkdownRenderingScreen(file: file),
-                childCurrent: widget,
-                type: PageTransitionType.rightToLeftWithFade,
-                curve: Curves.easeInOut,
-                reverseDuration: Durations.long1,
-                duration: Durations.long1,
+              CupertinoPageRoute(
+                builder: (context) => MarkdownRenderingScreen(file: file),
               ),
             );
+            return;
+          }
+          file = File(
+              "${GitRepoManager.getInstance().repoDirectory()!.path}/$message");
+          if (file.existsSync()) {
+            Navigator.of(context).push(
+              CupertinoPageRoute(
+                builder: (context) => MarkdownRenderingScreen(file: file),
+              ),
+            );
+            return;
           } else {
             launchUrlString(msg.message);
           }
@@ -175,8 +178,8 @@ class _MarkdownPreviewState extends State<MarkdownPreview> {
     String htmlData = callback.message.htmlData;
 
     // Making linking files work
-    htmlData = htmlData.replaceAll("<a href=",
-        '<a onclick=" event.preventDefault(); GitNotesLink.postMessage(this.getAttribute(\'href\'));" href=');
+    htmlData = htmlData.replaceAll("href=",
+        'onclick= "event.preventDefault(); GitNotesLink.postMessage(this.getAttribute(\'href\'));" href=');
 
     // Making images work
     htmlData = htmlData.replaceAll("<img ", '<img width="100%" ');
