@@ -1,2 +1,4 @@
-mod markdown_custom_task_list;
+mod custom;
 pub mod markdown_handler;
+mod plugins_management;
+

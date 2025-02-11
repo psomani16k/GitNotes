@@ -3,40 +3,24 @@ use rinf::debug_print;
 
 use crate::messages::markdown::{ProcessMarkdown, ProcessMarkdownCallback};
 
-use super::markdown_custom_task_list;
+use super::plugins_management;
 
 pub async fn handle_markdown() {
     let mut recv = ProcessMarkdown::get_dart_signal_receiver().unwrap();
     while let Some(message) = recv.recv().await {
         let md = message.message.markdown_data;
         let html = process_markdown(md);
-        // let html_split = html.split("\n");
-        // for i in html_split {
-        //     debug_print!("rust ---> {}", i);
-        // }
+        let html_split = html.split("\n");
+        for i in html_split {
+            debug_print!("rust ---> {}", i);
+        }
         ProcessMarkdownCallback { html_data: html }.send_signal_to_dart();
     }
 }
 
 fn process_markdown(md: String) -> String {
     let mut parser = markdown_it::MarkdownIt::new();
-    markdown_it::plugins::cmark::add(&mut parser);
-
-    // extra plugins without the syntect to allow the mermaid code to work
-    markdown_it::plugins::extra::strikethrough::add(&mut parser);
-    markdown_it::plugins::extra::beautify_links::add(&mut parser);
-    markdown_it::plugins::extra::linkify::add(&mut parser);
-    markdown_it::plugins::extra::tables::add(&mut parser);
-    // markdown_it::plugins::extra::syntect::add(&mut parser);
-    markdown_it::plugins::extra::typographer::add(&mut parser);
-    markdown_it::plugins::extra::smartquotes::add(&mut parser);
-    markdown_it::plugins::html::add(&mut parser);
-
-    // task list plugin for checkboxes
-    markdown_custom_task_list::add(&mut parser);
-
-    // source pos for tasklist manipulation
-    markdown_it::plugins::sourcepos::add(&mut parser);
+    plugins_management::add_plugins(&mut parser);
 
     parser.block.add_rule::<KatexBlockRule>();
     let ast = parser.parse(&md);

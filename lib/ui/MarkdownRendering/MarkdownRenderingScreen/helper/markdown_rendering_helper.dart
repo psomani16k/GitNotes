@@ -215,6 +215,23 @@ tr:nth-child(even) {
 		color: var(--on-tertiary-container)
 }
 
+
+/* CODE BLOCKS */
+
+pre {
+    background-color: #f6f8fa;
+    border-radius: 6px;
+    padding: 12px;
+    overflow-x: auto;
+    font-size: 14px;
+    line-height: 1.45;
+}
+
+code {
+    font-family: Consolas, Monaco, 'Courier New', Courier, monospace;
+}
+
+
 """;
 
     // html

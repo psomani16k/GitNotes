@@ -6,7 +6,6 @@ import 'package:git_notes/messages/markdown.pbserver.dart';
 import 'package:git_notes/ui/MarkdownRendering/MarkdownEditingScreen/screen/markdown_editing_screen.dart';
 import 'package:git_notes/ui/MarkdownRendering/MarkdownRenderingScreen/helper/markdown_rendering_helper.dart';
 import 'package:markdown/markdown.dart' as md;
-import 'package:page_transition/page_transition.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:rinf/rinf.dart';
 import 'package:url_launcher/url_launcher_string.dart';
@@ -112,7 +111,7 @@ class _MarkdownPreviewState extends State<MarkdownPreview> {
         onMessageReceived: (msg) {
           String message = msg.message;
           // for relative links
-          File file = File("${widget.mdFile.parent.path}/${message}");
+          File file = File("${widget.mdFile.parent.path}/$message");
           if (file.existsSync()) {
             Navigator.of(context).push(
               CupertinoPageRoute(
@@ -177,16 +176,10 @@ class _MarkdownPreviewState extends State<MarkdownPreview> {
     RustSignal<ProcessMarkdownCallback> callback = await rustSignal.first;
     String htmlData = callback.message.htmlData;
 
-    // Making linking files work
-    htmlData = htmlData.replaceAll("href=",
-        'onclick= "event.preventDefault(); GitNotesLink.postMessage(this.getAttribute(\'href\'));" href=');
-
     // Making images work
-    htmlData = htmlData.replaceAll("<img ", '<img width="100%" ');
-
     String imgCorrectedHtml = "";
     htmlData.splitMapJoin(
-      RegExp(r'<img width="100%" src="([^"]*)"(.*)/>'),
+      RegExp(r'<img[^>]*>'),
       onNonMatch: (p0) {
         imgCorrectedHtml = "$imgCorrectedHtml\n$p0";
         return "";
@@ -196,8 +189,18 @@ class _MarkdownPreviewState extends State<MarkdownPreview> {
         String alt = p0[0]!.substring(altMatch.start + 5, altMatch.end - 1);
         RegExpMatch srcMatch = RegExp(r'src="([^"]*)"').firstMatch(p0[0]!)!;
         String src = p0[0]!.substring(srcMatch.start + 5, srcMatch.end - 1);
-        if (src.startsWith("./") || src.startsWith("../")) {
-          src = "file://${widget.mdFile.parent.path}/$src";
+
+        String fileRelativePath = "${widget.mdFile.parent.path}/$src";
+        File fileRelative = File(fileRelativePath);
+
+        String fileAbsolutePath =
+            "${GitRepoManager.getInstance().repoDirectory()!.path}/$src";
+        File fileAbsolute = File(fileAbsolutePath);
+
+        if (fileRelative.existsSync()) {
+          src = "file://$fileRelativePath";
+        } else if (fileAbsolute.existsSync()) {
+          src = "file://$fileAbsolutePath";
         }
         String correctedTag = '<img width="100%" src="$src" alt="$alt" />';
         imgCorrectedHtml = imgCorrectedHtml + correctedTag;
