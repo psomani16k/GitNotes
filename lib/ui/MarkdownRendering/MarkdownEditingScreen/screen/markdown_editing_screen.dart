@@ -34,10 +34,8 @@ class _MarkdownEditingScreenState extends State<MarkdownEditingScreen> {
           return;
         }
         if (fileRead == _markdownEditingController.text) {
-          print("same file, just pop");
           Navigator.pop(context);
         } else {
-          print("not same file, show dialog");
           await showDialog(
             context: context,
             builder: (context) {

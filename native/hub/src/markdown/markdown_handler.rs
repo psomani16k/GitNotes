@@ -10,10 +10,10 @@ pub async fn handle_markdown() {
     while let Some(message) = recv.recv().await {
         let md = message.message.markdown_data;
         let html = process_markdown(md);
-        let html_split = html.split("\n");
-        for i in html_split {
-            debug_print!("rust ---> {}", i);
-        }
+        // let html_split = html.split("\n");
+        // for i in html_split {
+        //     debug_print!("rust ---> {}", i);
+        // }
         ProcessMarkdownCallback { html_data: html }.send_signal_to_dart();
     }
 }

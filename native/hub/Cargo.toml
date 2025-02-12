@@ -19,6 +19,7 @@ rinf = "6.15.0"
 prost = "0.12.6"
 tokio = { version = "1", features = ["sync", "rt", "time"] }
 log = "0.4.25"
+syntect = "5.2.0"
 
 # markdown crates
 markdown-it = "0.6.1"

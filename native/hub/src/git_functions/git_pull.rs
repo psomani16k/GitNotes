@@ -12,6 +12,7 @@ use git2::{
     AnnotatedCommit, CertificateCheckStatus, Cred, DiffFormat, DiffOptions, Error, FetchOptions,
     Signature,
 };
+use rinf::debug_print;
 
 // 0 - 50
 pub async fn git_pull(
@@ -104,6 +105,7 @@ fn do_fetch<'a>(
         }
         let msg = format!("remote: {}", stats);
         let msg = msg.trim().to_string();
+        // debug_print!("{remote_msg_count}: {msg}");
         GitPushPullMessage {
             predefined_message: PredefinedMsg::None.into(),
             msg_index: remote_msg_count,

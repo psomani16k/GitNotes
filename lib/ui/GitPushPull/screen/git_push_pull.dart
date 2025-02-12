@@ -245,6 +245,7 @@ class _GitPushPullMessageRecievingBoxState
             ]),
           );
         } else if (message.predefinedMessage case PredefinedMsg.None) {
+          // print("dart--->${message.msg}");
           displayText[message.msgIndex] = Text(
             message.msg,
             style: GoogleFonts.jetBrainsMonoTextTheme().labelSmall!.copyWith(
@@ -302,7 +303,6 @@ class _GitPushPullMessageRecievingBoxState
 
   @override
   Widget build(BuildContext context) {
-    print(displayText);
     return Padding(
       padding: const EdgeInsets.fromLTRB(28, 32, 28, 32),
       child: Container(

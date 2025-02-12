@@ -109,7 +109,6 @@ class InterfaceSettings {
   }
 
   TextStyle getFont(TextStyle style) {
-    print(GoogleFonts.asMap().keys.toList());
     return GoogleFonts.getFont(_fontFamily, textStyle: style);
   }
 

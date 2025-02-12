@@ -212,16 +212,18 @@ class _MarkdownPreviewState extends State<MarkdownPreview> {
     // cleaning mermaid tag
     htmlData = htmlData.replaceAllMapped(
       RegExp(
-        r'<pre><code class="language-mermaid">(?:(?!<pre>)[\s\S])*?</code></pre>',
+        r'<pre><code[^>]*class="language-mermaid">(?:(?!<pre>)[\s\S])*?</code></pre>',
       ),
       (match) {
         String matchString = htmlData.substring(match.start, match.end);
-        matchString = matchString.substring(36, matchString.length - 13);
-        return '''
+        int index = matchString.indexOf("language-mermaid");
+        matchString = matchString.substring(index + 18, matchString.length - 13);
+        String ret = """
 <pre class="mermaid">
 $matchString
 </pre>
-				''';
+				""";
+        return ret;
       },
     );
 

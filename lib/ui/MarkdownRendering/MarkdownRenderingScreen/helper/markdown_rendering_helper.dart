@@ -5,10 +5,6 @@ class MarkdownRenderingHelper {
     String html,
     BuildContext context,
   ) {
-    // List<String> split = html.split("\n");
-    // split.forEach((element) {
-    //   print(element);
-    // });
     // theme colors
     String surface = Theme.of(context).colorScheme.surface.toHexString();
     String onSurface = Theme.of(context).colorScheme.onSurface.toHexString();
@@ -44,6 +40,9 @@ class MarkdownRenderingHelper {
 
     String textColor = TextTheme.of(context).bodySmall!.color!.toHexString();
 
+    String error = Theme.of(context).colorScheme.error.toHexString();
+    String onError = Theme.of(context).colorScheme.onError.toHexString();
+
     // css
     String css = """
 :root {
@@ -57,7 +56,9 @@ class MarkdownRenderingHelper {
   --on-primary: $onPrimary;
 
   --secondary: $secondary;
+  --secondary-container-transparency: ${secondaryContainer}44;
   --on-secondary: $onSecondary;
+  --on-secondary-container-transparency: ${onSecondaryContainer}bb;
 
   --tertiary: $tertiary;
   --on-tertiary: $onTertiary;
@@ -72,6 +73,9 @@ class MarkdownRenderingHelper {
   --on-tertiary-container: $onTertiaryContainer;
 
   --text-color: $textColor;
+
+	--error: $error;
+	--on-error: $onError;
 }
 
 /*  HEADINGS  */
@@ -134,17 +138,6 @@ body {
     padding: 20px;
 }
 
-/* Centered container like GitHub */
-.container {
-    max-width: 900px;
-    margin: 0 auto;
-    background: white;
-    padding: 20px;
-    border: 1px solid #d0d7de;
-    border-radius: 6px;
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-}
-
 
 /* LINKS */
 
@@ -158,14 +151,6 @@ a:hover {
 }
 
 
-/* CODE BLOCKS */
-
-code {
-    font-family: monospace;
-    background-color: #000000;
-    padding: 2px 4px;
-    border-radius: 4px;
-}
 
 
 /* LISTS */
@@ -219,16 +204,41 @@ tr:nth-child(even) {
 /* CODE BLOCKS */
 
 pre {
-    background-color: #f6f8fa;
-    border-radius: 6px;
-    padding: 12px;
-    overflow-x: auto;
-    font-size: 14px;
-    line-height: 1.45;
+  background-color: var(--secondary-container-transparency);
+  border-radius: 6px;
+  padding: 12px;
+  overflow-x: auto;
+  font-size: 14px;
+  line-height: 1.45;
 }
 
 code {
-    font-family: Consolas, Monaco, 'Courier New', Courier, monospace;
+	padding: 10px; 
+	font-family: monospace;
+}
+
+
+/* HIGHLIGHT.js */
+
+.hljs {
+  background: #00000000; 
+  color: var(--on-secondary-container-transparency);      
+}
+
+.hljs-string {
+	color: var(--tertiary);
+}
+
+.hljs-comment{
+	color: var(--secondary-container);
+}
+
+.hljs-function{
+	color: var(--error);
+}
+
+.hljs-variable{
+	color: var(--error);
 }
 
 
@@ -293,6 +303,15 @@ code {
     mermaid.init();
   });
 
+</script>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', (event) => {
+        document.querySelectorAll('code').forEach((el) => {
+            hljs.highlightElement(el);
+        });
+    });
 </script>
 
 </body>

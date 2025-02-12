@@ -9,7 +9,6 @@ import 'package:git_notes/ui/HomeScreens/Home/bloc/home_bloc.dart';
 import 'package:git_notes/ui/HomeScreens/Home/screen/home.dart';
 import 'package:git_notes/ui/HomeScreens/HomeDirectory/bloc/home_directory_bloc.dart';
 import 'package:git_notes/ui/HomeScreens/HomeGit/bloc/home_git_bloc.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:rinf/rinf.dart';
 
 import './messages/generated.dart';
@@ -43,7 +42,6 @@ class EntryPoint extends StatelessWidget {
             debugShowCheckedModeBanner: false,
             theme: ThemeData(
               colorScheme: lightDynamic,
-              textTheme: GoogleFonts.montserratTextTheme(),
             ),
             darkTheme: ThemeData(
               colorScheme: darkDynamic,

@@ -37,6 +37,8 @@ pub(crate) fn add_plugins(parser: &mut markdown_it::MarkdownIt) {
 
     // CUSTOM PLUGINS
 
+    // syntax highlighting
+    // block::syntect::add(parser);
     // task list plugin for checkboxes with callback to GitNotes
     block::task_list::add(parser);
     // link plugins for links with callback to GitNotes
