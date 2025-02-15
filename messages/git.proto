@@ -1,0 +1,33 @@
+syntax = "proto3";
+package git;
+
+
+// [RINF:DART-SIGNAL]
+message GitActionPerformer{
+  GitRepoInformation repo = 1;
+  GitActionHelper action = 2;
+}
+
+
+message GitRepoInformation {
+  string path = 1;
+  string email = 2;
+  string name = 3;
+  string authCode = 4;
+}
+
+message GitActionHelper {
+  GitActions action = 1;
+  string associatedData = 2;
+}
+
+enum GitActions {
+  Clone = 0;
+  Pull = 1;
+  Push = 2;
+  Commit = 3;
+  Add = 4;
+  RestoreStaged = 5;
+  Restore = 6;
+  Checkout = 7;
+}
