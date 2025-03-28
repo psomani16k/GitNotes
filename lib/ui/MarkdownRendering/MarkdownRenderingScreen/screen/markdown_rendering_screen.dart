@@ -35,7 +35,7 @@ class _MarkdownRenderingScreenState extends State<MarkdownRenderingScreen> {
       floatingActionButton: FloatingActionButton(
         onPressed: () async {
           await Navigator.of(context).push(
-            CupertinoPageRoute(
+            MaterialPageRoute(
               builder: (context) => MarkdownEditingScreen(file: widget.file),
             ),
           );
@@ -217,7 +217,8 @@ class _MarkdownPreviewState extends State<MarkdownPreview> {
       (match) {
         String matchString = htmlData.substring(match.start, match.end);
         int index = matchString.indexOf("language-mermaid");
-        matchString = matchString.substring(index + 18, matchString.length - 13);
+        matchString =
+            matchString.substring(index + 18, matchString.length - 13);
         String ret = """
 <pre class="mermaid">
 $matchString

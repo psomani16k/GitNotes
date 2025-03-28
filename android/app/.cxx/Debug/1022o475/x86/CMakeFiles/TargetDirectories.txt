@@ -1,0 +1,2 @@
+/home/parth/projects/GitNotes/android/app/.cxx/Debug/1022o475/x86/CMakeFiles/edit_cache.dir
+/home/parth/projects/GitNotes/android/app/.cxx/Debug/1022o475/x86/CMakeFiles/rebuild_cache.dir

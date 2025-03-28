@@ -1,5 +1,4 @@
 import 'dart:io';
-
 import 'package:animations/animations.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -7,8 +6,9 @@ import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_vector_icons/flutter_vector_icons.dart';
 import 'package:git_notes/ui/HomeScreens/HomeDirectory/bloc/home_directory_bloc.dart';
+import 'package:git_notes/ui/HtmlViewing/html_view.dart';
 import 'package:git_notes/ui/MarkdownRendering/MarkdownRenderingScreen/screen/markdown_rendering_screen.dart';
-import 'package:open_file_plus/open_file_plus.dart';
+import 'package:open_filex/open_filex.dart';
 import 'package:text_scroll/text_scroll.dart';
 import 'package:visibility_detector/visibility_detector.dart';
 
@@ -203,8 +203,12 @@ class _HomeDirectoryFileWidget extends StatelessWidget {
           Navigator.of(context).push(CupertinoPageRoute(
             builder: (context) => MarkdownRenderingScreen(file: file),
           ));
+        } else if (extension == "html") {
+          Navigator.of(context).push(CupertinoPageRoute(
+            builder: (context) => HtmlRenderingScreen(file: file),
+          ));
         } else {
-          await OpenFile.open(file.path);
+          await OpenFilex.open(file.path);
         }
       },
       child: SizedBox(

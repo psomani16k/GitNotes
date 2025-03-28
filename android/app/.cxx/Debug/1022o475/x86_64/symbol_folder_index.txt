@@ -1,0 +1,1 @@
+/home/parth/projects/GitNotes/build/app/intermediates/cxx/Debug/1022o475/obj/x86_64

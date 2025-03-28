@@ -27,10 +27,16 @@ Please note: The app is still in its initial stages and the UI is *surely* going
 4. Clone the repository.
 5. Install rinf on your machine in the cloned directory using cargo
 
-    `cargo install rinf@6.15.0`
+```
+cargo install rinf@6.15.0
+```
 
 6. Run `rinf message` to generate messages between Dart and Rust.
-7. Run `flutter build apk` to build the app.
+7. Install relevant rust targets.
+```
+rustup target list | grep android | xargs rustup target install
+```
+8. Run `flutter build apk` to build the app.
 
 ## FAQs
 
