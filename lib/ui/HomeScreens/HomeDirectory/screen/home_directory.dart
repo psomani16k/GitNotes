@@ -146,9 +146,8 @@ class _HomeDirectoryDirectoryWidget extends StatelessWidget {
                     name,
                     style: TextTheme.of(context).titleSmall,
                     pauseBetween: const Duration(seconds: 4),
-                    fadedBorder: true,
-                    velocity:
-                        const Velocity(pixelsPerSecond: const Offset(40, 0)),
+                    fadedBorder: false,
+                    velocity: const Velocity(pixelsPerSecond: Offset(40, 0)),
                     mode: TextScrollMode.bouncing,
                   ),
                 ),

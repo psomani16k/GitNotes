@@ -24,7 +24,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
               await Navigator.of(context).push(CupertinoPageRoute(
                 builder: (context) => const SettingsInterface(),
               ));
-              setState(() {});
             },
             minVerticalPadding: 25,
             leading: const Padding(
@@ -35,7 +34,11 @@ class _SettingsScreenState extends State<SettingsScreen> {
             subtitle: const Text("Theming and Customization"),
           ),
           ListTile(
-            onTap: () {},
+            onTap: () async {
+              await Navigator.of(context).push(CupertinoPageRoute(
+                builder: (context) => const SettingsInterface(),
+              ));
+            },
             minVerticalPadding: 25,
             leading: const Padding(
               padding: EdgeInsets.symmetric(horizontal: 10),

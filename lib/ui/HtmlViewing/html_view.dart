@@ -83,6 +83,7 @@ class _HtmlRenderingScreenState extends State<HtmlRenderingScreen> {
               ..loadFile(widget.file.path)
               ..runJavaScript('document.body.style.zoom = "1.0";'),
           ),
+
         ));
   }
 }

@@ -4,7 +4,7 @@ description: "A Git based notes app... Currently is just a Git client for androi
 # pub.dev using `flutter pub publish`. This is preferred for private packages.
 publish_to: 'none' # Remove this line if you wish to publish to pub.dev
 
-version: 0.2.1-alpha
+version: 0.2.2-alpha
 
 environment:
   sdk: ^3.5.3
